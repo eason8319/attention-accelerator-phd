@@ -1,0 +1,179 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+\title{Energy-Efficient Attention Accelerators for Transformer Inference: \\
+A Survey of Software-Hardware Co-Design}
+
+\author{\IEEEauthorblockN{Author Name}
+\IEEEauthorblockA{\textit{Department, Institution} \\
+City, Country \\
+email@institution.edu}
+}
+
+\maketitle
+
+\section{Introduction and Background}
+\label{sec:intro}
+
+Transformer-based large language models (LLMs)~\cite{vaswani2017attention} now dominate large-scale natural-language inference.
+Deployers increasingly optimize end-to-end latency, throughput, and energy per generated token rather than peak floating-point throughput alone.
+In each Transformer layer, multi-head self-attention (MHA) together with the key-value (KV) cache forms the critical path for both \emph{prefill}, which processes the prompt in parallel, and \emph{decode}, which emits one token at a time.
+Attention acceleration is therefore a distinct software--hardware co-design problem---not reducible to accelerating generic general matrix multiply (GEMM) on systolic or tensor engines~\cite{chen2016eyeriss,ma2024tpuv4i}.
+
+\subsection{Motivation and the Attention Bottleneck}
+\label{sec:intro-motivation}
+
+The dominant bottleneck in LLM inference has shifted from arithmetic throughput to data movement.
+For head $h$ with dimension $d_h$, MHA computes
+\begin{align}
+Q_h &= X W^Q_h,\quad K_h = X W^K_h,\quad V_h = X W^V_h, \nonumber\\
+S_h &= \frac{Q_h K_h^\top}{\sqrt{d_h}},\quad
+O_h = \mathrm{softmax}(S_h)\,V_h,
+\label{eq:mha}
+\end{align}
+where $X \in \mathbb{R}^{N \times d_{\mathrm{model}}}$ is the layer input and $W^Q_h, W^K_h, W^V_h$ are learned projections~\cite{vaswani2017attention}.
+During decode, only the final row of $Q_h$ is active while $K_h$ and $V_h$ are read from a growing KV cache of length $N$; during prefill, $Q_h$, $K_h$, and $V_h$ share prompt length $N_p$ and the cache is populated once.
+Prefill is more sensitive to $\mathcal{O}(N_p^2 d_h)$ attention work, whereas decode becomes increasingly \emph{memory-bound} as $\mathcal{O}(N d_h)$ cached data must be streamed from high-bandwidth memory (HBM) each step~\cite{dao2022flashattention,dao2023flashdecoding,bitdecoding2026}.
+
+Naively materializing $S_h \in \mathbb{R}^{N \times N}$ in HBM incurs prohibitive traffic at long context lengths.
+FlashAttention and follow-on GPU kernels mitigate this cost through IO-aware tiling and online softmax, preserving numerical equivalence to~\eqref{eq:mha} while reducing off-chip accesses~\cite{dao2022flashattention,dao2023flashattention2,shah2024flashattention3}.
+Dedicated accelerators must still realize the same dataflow under fixed on-chip static random-access memory (SRAM) and processing-element (PE) budgets, fuse non-GEMM stages that otherwise stall systolic pipelines~\cite{wang2023cosa,desa2025}, and compress KV cache traffic through mixed-precision datapaths~\cite{liu2024kivi,sawint42026,bitdecoding2026}.
+
+\subsection{FlashAttention and Quantization Baselines}
+\label{sec:intro-baselines}
+
+\paragraph{IO-aware attention dataflow.}
+FlashAttention~\cite{dao2022flashattention} processes $K_h$ and $V_h$ in tiles while maintaining per-row statistics for \emph{online softmax}.
+For query row $i$, with running maximum $m_i$ and exponential sum $\ell_i$ after blocks $1,\ldots,j{-}1$,
+\begin{align}
+m_i' &= \max(m_i, \max_k S_{ij,k}), \label{eq:online-max}\\
+\ell_i' &= e^{m_i - m_i'} \ell_i + \textstyle\sum_k e^{S_{ij,k} - m_i'}, \label{eq:online-sum}\\
+O_i' &= e^{m_i - m_i'} O_i + \textstyle\sum_k e^{S_{ij,k} - m_i'} V_{j,k}, \label{eq:online-o}
+\end{align}
+where $O_i$ is the partial output accumulator.
+Subtracting the row maximum before exponentiation keeps all exponent inputs $\leq 0$, stabilizing softmax and easing hardware $\exp(\cdot)$ approximation~\cite{lin2025systolicattention,koca2023exp}.
+FlashAttention-2 improves GPU parallelism~\cite{dao2023flashattention2}; FlashAttention-3 adds asynchrony and FP8 on Hopper-class GPUs~\cite{shah2024flashattention3,micikevicius2022fp8}.
+FlashDecoding~\cite{dao2023flashdecoding} applies the same IO-aware principle to decode via KV splitting.
+These kernels serve as \emph{algorithmic gold references} for correctness, traffic complexity, and GPU throughput.
+
+\paragraph{Non-GEMM operators.}
+Attention blocks also require row-wise softmax (max, $\exp$, reciprocal), root-mean-square normalization (RMSNorm)~\cite{zhang2019root}, and rotary position embedding (RoPE)~\cite{su2024roformer} on $Q$ and $K$.
+Although individually smaller than GEMM, they frequently break PE utilization when mapped to external vector units~\cite{wang2023cosa,mive2026,sole2025}.
+
+\paragraph{Mixed-precision and KV compression.}
+Low-bit formats reduce KV-cache footprint but can distort $QK^\top$ products and softmax accumulation; examples include FP8~\cite{micikevicius2022fp8}, INT4, and microscaling MXFP4.
+Widely used post-training quantization (PTQ) baselines are SmoothQuant~\cite{xiao2023smoothquant}, GPTQ~\cite{frantar2023gptq}, QuaRot~\cite{ashkboos2024quarot}, and SpinQuant~\cite{liu2024spinquant}.
+KV-oriented schemes include KIVI~\cite{liu2024kivi}, SAW-INT4~\cite{sawint42026}, and BitDecoding~\cite{bitdecoding2026}.
+Section~\ref{sec:l2} develops the recurring rule of storing $K/V$ at low width while keeping matmul and softmax at higher precision and fusing dequantization with MAC.
+
+Table~\ref{tab:baselines} summarizes representative baselines referenced throughout the survey~\cite{dao2022flashattention,dao2023flashattention2,shah2024flashattention3,dao2023flashdecoding,lin2025systolicattention,plena2025,bitdecoding2026,sawint42026,wang2023cosa}.
+Architectural details and cross-design comparisons appear in Sections~\ref{sec:l1}--\ref{sec:l4}; absolute performance numbers are not directly comparable across GPU and ASIC platforms.
+
+\begin{table}[t]
+\caption{Representative attention acceleration baselines.
+L1--L4 map to Sections~\ref{sec:l1}--\ref{sec:l4}.}
+\label{tab:baselines}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\columnwidth}{@{}l c >{\raggedright\arraybackslash}X c@{}}
+\hline
+\textbf{Work} & \textbf{Plat.} & \textbf{Role} & \textbf{Thm.} \\
+\hline
+FA v1--v3 & GPU & IO-aware dataflow reference & L1 \\
+FlashDecoding & GPU & Decode-phase throughput baseline & L1 \\
+SystolicAttention & ASIC & Native FlashAttention in one array & L1 \\
+PLENA & ASIC & Flat array with mixed precision and compiler & L1--L4 \\
+BitDecoding & GPU & Low-bit KV cache for decode & L2 \\
+SAW-INT4 & GPU & Block rotation with INT4 KV cache & L2 \\
+COSA & ASIC & Dual systolic arrays with softmax unit & L1 \\
+\hline
+\end{tabularx}
+\end{table}
+
+\subsection{Survey Scope, Taxonomy, and Gap}
+\label{sec:intro-scope}
+
+This survey covers Transformer \emph{inference} on single-chip or monolithic accelerators, including both prefill and decode, and includes works with explicit hardware organizations or algorithm--hardware co-design for the attention datapath.
+We do not treat distributed training, multi-chiplet scale-out, processing-in-memory (PIM) or compute-in-memory (CIM) centric designs, or sparse mixture-of-experts (MoE) scheduling as primary topics; Section~\ref{sec:adjacent} cites representative adjacent works only to clarify boundaries~\cite{salca2026,liu2021sanger,amma2026,lolpim2024,heo2024nuepim}.
+
+We organize the literature around four complementary themes:
+\emph{(L1) FlashAttention-native dataflows and array architectures} map online softmax and tiled $QK^\top$/softmax/$AV$ pipelines onto systolic or flattened arrays~\cite{lin2025systolicattention,plena2025,flatattention2026,wang2023cosa,streamattention2025,desa2025};
+\emph{(L2) mixed-precision attention datapaths and KV cache quantization} combine FP8, INT4, or MXFP4 with rotation-based outlier suppression and fused dequantization~\cite{xiao2023smoothquant,ashkboos2024quarot,liu2024kivi,sawint42026,bitdecoding2026,batquant2026,ultraquant2026};
+\emph{(L3) non-GEMM specialized units} implement softmax, RMSNorm, and RoPE with dedicated or approximate hardware~\cite{mive2026,sole2025,sun2022softmax,koca2023exp};
+\emph{(L4) compilation, mapping, and evaluation toolchains} automate tiling, direct memory access (DMA) overlap, and PPA or register-transfer-level (RTL) assessment~\cite{parashar2019timeloop,wu2019accelergy,scalesimv3_2025,klhufek2025transinfersim,tilelang2025,plena2025}.
+
+Although each theme has advanced quickly, synthesis remains difficult.
+GPU kernels, single-array FlashAttention engines, KV quantization schemes, and standalone non-GEMM accelerators often optimize one or two concerns in isolation~\cite{lin2025systolicattention,liu2024kivi,mive2026,plena2025}.
+Cross-study comparison is further complicated by mismatched benchmarks and ambiguous separation of prefill versus decode results.
+Less frequently addressed is unified co-optimization of dataflow mapping, mixed precision, non-GEMM fusion, and compile-time scheduling on one monolithic accelerator; Section~\ref{sec:gaps} examines this gap.
+
+\subsection{Comparison Framework and Paper Organization}
+\label{sec:intro-metrics}
+
+Across Sections~\ref{sec:l1}--\ref{sec:l4}, we characterize designs along shared dimensions: problem entry point, dataflow and precision scheme, hardware structure, evaluation level (algorithmic, architectural, or RTL), reported latency, PE utilization, HBM traffic, energy per token, accuracy, open-source availability, and relevance to integrated co-design.
+Table~\ref{tab:metrics} lists unified metrics; we separate prefill and decode whenever source data permit~\cite{dao2023flashdecoding,bitdecoding2026}.
+Energy and throughput gains are interpreted as \emph{relative} improvements at iso-accuracy unless authors report absolute silicon data.
+Accuracy--efficiency trade-offs for low-bit KV schemes are best read as Pareto fronts~\cite{sawint42026,batquant2026}.
+
+\begin{table}[t]
+\caption{Unified metrics for cross-study comparison.}
+\label{tab:metrics}
+\centering
+\small
+\begin{tabular}{@{}l l@{}}
+\hline
+\textbf{Category} & \textbf{Representative metrics} \\
+\hline
+Performance & Latency; throughput (tokens/s) \\
+Utilization & PE utilization (effective / peak MAC) \\
+Memory & SRAM traffic; HBM traffic (bytes) \\
+Energy \& area & Energy/token; TOPS/W; area (mm$^2$) \\
+Accuracy & Task accuracy; PPL; cosine sim.\ vs.\ FP32 \\
+\hline
+\end{tabular}
+\end{table}
+
+The remainder of this paper is organized as follows.
+Sections~\ref{sec:l1}--\ref{sec:l4} review the four themes above.
+Section~\ref{sec:adjacent} discusses sparse and memory-centric adjacent directions.
+Section~\ref{sec:gaps} synthesizes research gaps and outlook.
+Section~\ref{sec:conclusion} concludes.
+
+\section{FlashAttention-Native Dataflow and Array Architectures}
+\label{sec:l1}
+
+\section{Mixed-Precision Attention Datapath and KV Cache Quantization}
+\label{sec:l2}
+
+\section{Non-GEMM Specialized Hardware Units}
+\label{sec:l3}
+
+\section{Compilation, Mapping, and Software-Hardware Co-Design}
+\label{sec:l4}
+
+\section{Adjacent Directions and Outlook}
+\label{sec:adjacent}
+
+\section{Research Gaps and Positioning}
+\label{sec:gaps}
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+\section*{Acknowledgment}
+
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}

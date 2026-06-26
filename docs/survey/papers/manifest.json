@@ -1,0 +1,407 @@
+﻿[
+    {
+        "key":  "vaswani2017attention",
+        "dir":  "00_baseline",
+        "file":  "2017_Vaswani_Attention_Is_All_You_Need.pdf",
+        "path":  "00_baseline\\2017_Vaswani_Attention_Is_All_You_Need.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/1706.03762.pdf",
+        "size_kb":  2163.3
+    },
+    {
+        "key":  "dao2022flashattention",
+        "dir":  "00_baseline",
+        "file":  "2022_Dao_FlashAttention.pdf",
+        "path":  "00_baseline\\2022_Dao_FlashAttention.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2205.14135.pdf",
+        "size_kb":  2569.2
+    },
+    {
+        "key":  "dao2023flashattention2",
+        "dir":  "00_baseline",
+        "file":  "2023_Dao_FlashAttention-2.pdf",
+        "path":  "00_baseline\\2023_Dao_FlashAttention-2.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2307.08691.pdf",
+        "size_kb":  1621.7
+    },
+    {
+        "key":  "shah2024flashattention3",
+        "dir":  "00_baseline",
+        "file":  "2024_Shah_FlashAttention-3.pdf",
+        "path":  "00_baseline\\2024_Shah_FlashAttention-3.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2407.08608.pdf",
+        "size_kb":  1071
+    },
+    {
+        "key":  "dao2023flashdecoding",
+        "dir":  "00_baseline",
+        "file":  "2023_Dao_Flash-Decoding.pdf",
+        "path":  "00_baseline\\2023_Dao_Flash-Decoding.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2309.17453.pdf",
+        "size_kb":  16555.5
+    },
+    {
+        "key":  "zhang2019root",
+        "dir":  "00_baseline",
+        "file":  "2019_Zhang_RMSNorm.pdf",
+        "path":  "00_baseline\\2019_Zhang_RMSNorm.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/1910.07467.pdf",
+        "size_kb":  542
+    },
+    {
+        "key":  "su2024roformer",
+        "dir":  "00_baseline",
+        "file":  "2024_Su_RoFormer_RoPE.pdf",
+        "path":  "00_baseline\\2024_Su_RoFormer_RoPE.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2104.09864.pdf",
+        "size_kb":  585.2
+    },
+    {
+        "key":  "lin2025systolicattention",
+        "dir":  "L1_flashattention",
+        "file":  "2025_Lin_SystolicAttention_FSA.pdf",
+        "path":  "L1_flashattention\\2025_Lin_SystolicAttention_FSA.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2507.11331.pdf",
+        "size_kb":  966.7
+    },
+    {
+        "key":  "plena2025",
+        "dir":  "L1_flashattention",
+        "file":  "2025_PLENA_Long_Context_LLM_Inference.pdf",
+        "path":  "L1_flashattention\\2025_PLENA_Long_Context_LLM_Inference.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2509.09505.pdf",
+        "size_kb":  1950.3
+    },
+    {
+        "key":  "flatattention2026",
+        "dir":  "L1_flashattention",
+        "file":  "2026_FlatAttention_Tile_Accelerator.pdf",
+        "path":  "L1_flashattention\\2026_FlatAttention_Tile_Accelerator.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2604.02110.pdf",
+        "size_kb":  8364.8
+    },
+    {
+        "key":  "streamattention2025",
+        "dir":  "L1_flashattention",
+        "file":  "2025_StreamAttention_Systolic.pdf",
+        "path":  "L1_flashattention\\2025_StreamAttention_Systolic.pdf",
+        "status":  "downloaded",
+        "source":  "https://openreview.net/pdf/a39a0010a18ace89b15cdc1c381334c93d7a4955.pdf",
+        "size_kb":  1494.9
+    },
+    {
+        "key":  "wang2023cosa",
+        "dir":  "L1_flashattention",
+        "file":  "2023_Wang_COSA_Systolic_Attention.pdf",
+        "path":  "L1_flashattention\\2023_Wang_COSA_Systolic_Attention.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2305.10725.pdf",
+        "size_kb":  469.8
+    },
+    {
+        "key":  "desa2025",
+        "dir":  "L1_flashattention",
+        "file":  "2025_DESA_Transformer_Systolic.pdf",
+        "path":  "L1_flashattention\\2025_DESA_Transformer_Systolic.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2403.16564.pdf",
+        "size_kb":  1735.5
+    },
+    {
+        "key":  "ham2021a3",
+        "dir":  "L1_flashattention",
+        "file":  "2021_Ham_A3_Attention_Approximation.pdf",
+        "path":  "L1_flashattention\\2021_Ham_A3_Attention_Approximation.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2102.03977.pdf",
+        "size_kb":  711.6
+    },
+    {
+        "key":  "wang2021spatten",
+        "dir":  "L1_flashattention",
+        "file":  "2021_Wang_SpAtten_Sparse_Attention.pdf",
+        "path":  "L1_flashattention\\2021_Wang_SpAtten_Sparse_Attention.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2012.09850.pdf",
+        "size_kb":  2683.1
+    },
+    {
+        "key":  "kao2023flat",
+        "dir":  "L1_flashattention",
+        "file":  "2023_Kao_FLAT_Attention_Dataflow.pdf",
+        "path":  "L1_flashattention\\2023_Kao_FLAT_Attention_Dataflow.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2306.06536.pdf",
+        "size_kb":  1515
+    },
+    {
+        "key":  "sawint42026",
+        "dir":  "L2_mixed_precision",
+        "file":  "2026_SAW-INT4_KV_Cache_Quantization.pdf",
+        "path":  "L2_mixed_precision\\2026_SAW-INT4_KV_Cache_Quantization.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2604.19157.pdf",
+        "size_kb":  16024.4
+    },
+    {
+        "key":  "bitdecoding2026",
+        "dir":  "L2_mixed_precision",
+        "file":  "2026_BitDecoding_Low-Bit_KV_Cache.pdf",
+        "path":  "L2_mixed_precision\\2026_BitDecoding_Low-Bit_KV_Cache.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2503.18773.pdf",
+        "size_kb":  1465.7
+    },
+    {
+        "key":  "batquant2026",
+        "dir":  "L2_mixed_precision",
+        "file":  "2026_BATQuant_MXFP4.pdf",
+        "path":  "L2_mixed_precision\\2026_BATQuant_MXFP4.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2603.16590.pdf",
+        "size_kb":  6027.5
+    },
+    {
+        "key":  "liu2024kivi",
+        "dir":  "L2_mixed_precision",
+        "file":  "2024_Liu_KIVI_2bit_KV_Cache.pdf",
+        "path":  "L2_mixed_precision\\2024_Liu_KIVI_2bit_KV_Cache.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2402.02750.pdf",
+        "size_kb":  2143
+    },
+    {
+        "key":  "ashkboos2024quarot",
+        "dir":  "L2_mixed_precision",
+        "file":  "2024_Ashkboos_QuaRot_INT4_Inference.pdf",
+        "path":  "L2_mixed_precision\\2024_Ashkboos_QuaRot_INT4_Inference.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2404.00456.pdf",
+        "size_kb":  610.3
+    },
+    {
+        "key":  "liu2024spinquant",
+        "dir":  "L2_mixed_precision",
+        "file":  "2024_Liu_SpinQuant_Learned_Rotations.pdf",
+        "path":  "L2_mixed_precision\\2024_Liu_SpinQuant_Learned_Rotations.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2405.16406.pdf",
+        "size_kb":  9968.7
+    },
+    {
+        "key":  "ultraquant2026",
+        "dir":  "L2_mixed_precision",
+        "file":  "2026_UltraQuant_4bit_KV_Caching.pdf",
+        "path":  "L2_mixed_precision\\2026_UltraQuant_4bit_KV_Caching.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2606.20474.pdf",
+        "size_kb":  960.9
+    },
+    {
+        "key":  "xiao2023smoothquant",
+        "dir":  "L2_mixed_precision",
+        "file":  "2023_Xiao_SmoothQuant.pdf",
+        "path":  "L2_mixed_precision\\2023_Xiao_SmoothQuant.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2211.10438.pdf",
+        "size_kb":  5252.9
+    },
+    {
+        "key":  "frantar2023gptq",
+        "dir":  "L2_mixed_precision",
+        "file":  "2023_Frantar_GPTQ.pdf",
+        "path":  "L2_mixed_precision\\2023_Frantar_GPTQ.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2210.17323.pdf",
+        "size_kb":  509.6
+    },
+    {
+        "key":  "micikevicius2022fp8",
+        "dir":  "L2_mixed_precision",
+        "file":  "2022_Micikevicius_FP8_Formats.pdf",
+        "path":  "L2_mixed_precision\\2022_Micikevicius_FP8_Formats.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2209.05433.pdf",
+        "size_kb":  274.6
+    },
+    {
+        "key":  "mive2026",
+        "dir":  "L3_non_gemm",
+        "file":  "2026_MIVE_Softmax_LayerNorm_RMSNorm.pdf",
+        "path":  "L3_non_gemm\\2026_MIVE_Softmax_LayerNorm_RMSNorm.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2606.17781.pdf",
+        "size_kb":  4363.4
+    },
+    {
+        "key":  "sole2025",
+        "dir":  "L3_non_gemm",
+        "file":  "2025_SOLE_Softmax_LayerNorm_Codesign.pdf",
+        "path":  "L3_non_gemm\\2025_SOLE_Softmax_LayerNorm_Codesign.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2510.17189.pdf",
+        "size_kb":  1018.7
+    },
+    {
+        "key":  "softmaxrmsnorm2026",
+        "dir":  "L3_non_gemm",
+        "file":  "2026_Hardware_Softmax_RMSNorm_Approx.pdf",
+        "path":  "L3_non_gemm\\2026_Hardware_Softmax_RMSNorm_Approx.pdf",
+        "status":  "downloaded",
+        "source":  "https://europepmc.org/articles/PMC12843610?pdf=render",
+        "size_kb":  1630.2
+    },
+    {
+        "key":  "guaranteednorm2026",
+        "dir":  "L3_non_gemm",
+        "file":  "2026_Guaranteed_Normalization_Softmax_LayerNorm.pdf",
+        "path":  "L3_non_gemm\\2026_Guaranteed_Normalization_Softmax_LayerNorm.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2604.23647.pdf",
+        "size_kb":  518
+    },
+    {
+        "key":  "koca2023exp",
+        "dir":  "L3_non_gemm",
+        "file":  "2023_Koca_Exp_Approximation.pdf",
+        "path":  "L3_non_gemm\\2023_Koca_Exp_Approximation.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2303.04545.pdf",
+        "size_kb":  1666.5
+    },
+    {
+        "key":  "sun2022softmax",
+        "dir":  "L3_non_gemm",
+        "file":  "2022_Sun_Softermax.pdf",
+        "path":  "L3_non_gemm\\2022_Sun_Softermax.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2203.05924.pdf",
+        "size_kb":  544.6
+    },
+    {
+        "key":  "parashar2019timeloop",
+        "dir":  "L4_compiler",
+        "file":  "2019_Parashar_Timeloop.pdf",
+        "path":  "L4_compiler\\2019_Parashar_Timeloop.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/1901.04677.pdf",
+        "size_kb":  304.7
+    },
+    {
+        "key":  "wu2019accelergy",
+        "dir":  "L4_compiler",
+        "file":  "2019_Wu_Accelergy.pdf",
+        "path":  "L4_compiler\\2019_Wu_Accelergy.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/1910.10509.pdf",
+        "size_kb":  1633.6
+    },
+    {
+        "key":  "scalesimv3_2025",
+        "dir":  "L4_compiler",
+        "file":  "2025_SCALE-Sim_v3.pdf",
+        "path":  "L4_compiler\\2025_SCALE-Sim_v3.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2504.15377.pdf",
+        "size_kb":  1777.5
+    },
+    {
+        "key":  "klhufek2025transinfersim",
+        "dir":  "L4_compiler",
+        "file":  "2025_Klhufek_TransInferSim.pdf",
+        "path":  "L4_compiler\\2025_Klhufek_TransInferSim.pdf",
+        "status":  "downloaded",
+        "source":  "https://dspace.vut.cz/bitstreams/108c95b8-c42b-4f18-9210-9996037b3ae3/download",
+        "size_kb":  1407.5
+    },
+    {
+        "key":  "tilelang2025",
+        "dir":  "L4_compiler",
+        "file":  "2025_TileLang_AI_Kernel_DSL.pdf",
+        "path":  "L4_compiler\\2025_TileLang_AI_Kernel_DSL.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2504.17577.pdf",
+        "size_kb":  8512.9
+    },
+    {
+        "key":  "chen2016eyeriss",
+        "dir":  "L4_compiler",
+        "file":  "2016_Chen_Eyeriss.pdf",
+        "path":  "L4_compiler\\2016_Chen_Eyeriss.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/1606.06140.pdf",
+        "size_kb":  985.6
+    },
+    {
+        "key":  "ma2024tpuv4i",
+        "dir":  "L4_compiler",
+        "file":  "2024_Google_TPU_v4.pdf",
+        "path":  "L4_compiler\\2024_Google_TPU_v4.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2304.01433.pdf",
+        "size_kb":  2940.8
+    },
+    {
+        "key":  "salca2026",
+        "dir":  "adjacent_sparse",
+        "file":  "2026_Salca_Sparse_Long_Context_Decoding.pdf",
+        "path":  "adjacent_sparse\\2026_Salca_Sparse_Long_Context_Decoding.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2604.24820.pdf",
+        "size_kb":  2662.3
+    },
+    {
+        "key":  "liu2021sanger",
+        "dir":  "adjacent_sparse",
+        "file":  "2021_Liu_Sanger_Sparse_Attention.pdf",
+        "path":  "adjacent_sparse\\2021_Liu_Sanger_Sparse_Attention.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2107.03610.pdf",
+        "size_kb":  6092.2
+    },
+    {
+        "key":  "dao2022flashattention_sparse",
+        "dir":  "adjacent_sparse",
+        "file":  "2022_Dao_FlashAttention_Block-Sparse.pdf",
+        "path":  "adjacent_sparse\\2022_Dao_FlashAttention_Block-Sparse.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2307.02491.pdf",
+        "size_kb":  773.9
+    },
+    {
+        "key":  "amma2026",
+        "dir":  "adjacent_memory",
+        "file":  "2026_AMMA_Memory_Centric_Attention.pdf",
+        "path":  "adjacent_memory\\2026_AMMA_Memory_Centric_Attention.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2604.26103.pdf",
+        "size_kb":  4246.3
+    },
+    {
+        "key":  "lolpim2024",
+        "dir":  "adjacent_memory",
+        "file":  "2024_LoL-PIM_Long_Context_Decoding.pdf",
+        "path":  "adjacent_memory\\2024_LoL-PIM_Long_Context_Decoding.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2412.20166.pdf",
+        "size_kb":  14028
+    },
+    {
+        "key":  "heo2024nuepim",
+        "dir":  "adjacent_memory",
+        "file":  "2024_Heo_NeuPIM_NPU-PIM.pdf",
+        "path":  "adjacent_memory\\2024_Heo_NeuPIM_NPU-PIM.pdf",
+        "status":  "downloaded",
+        "source":  "https://arxiv.org/pdf/2311.01120.pdf",
+        "size_kb":  1866.4
+    }
+]
