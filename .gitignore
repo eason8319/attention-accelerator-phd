@@ -1,6 +1,5 @@
 # 论文 PDF 与 LaTeX 编译产物（仅本地保留）
 *.pdf
-docs/survey/papers/**/*.pdf
 *.aux
 *.bbl
 *.blg

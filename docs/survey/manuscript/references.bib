@@ -47,7 +47,7 @@
 @article{zhang2019root,
   title   = {Root Mean Square Layer Normalization},
   author  = {Zhang, Biao and Sennrich, Rico},
-  journal = {NeurIPS},
+  journal = {arXiv preprint arXiv:1910.07467},
   year    = {2019}
 }
 
@@ -62,24 +62,24 @@
 
 @article{plena2025,
   title   = {Combating the Memory Walls: Optimization Pathways for Long-Context Agentic {LLM} Inference},
-  author  = {PLENA Authors},
+  author  = {Wu, Haoran and Xiao, Can and Nie, Jiayi and others},
   journal = {arXiv preprint arXiv:2509.09505},
-  year    = {2025},
-  note    = {PLENA}
+  year    = {2025}
 }
 
 @article{flatattention2026,
-  title   = {FlatAttention: Dataflow and Fabric Collectives Co-Optimization for Large Attention-Based Model Inference on Tile-Based Accelerators},
-  author  = {FlatAttention Authors},
+  title   = {{FlatAttention}: Dataflow and Fabric Collectives Co-Optimization for Large Attention-Based Model Inference on Tile-Based Accelerators},
+  author  = {Zhang, Chi and Colagrande, Luca and Andri, Renzo and Benini, Luca},
   journal = {arXiv preprint arXiv:2604.02110},
   year    = {2026}
 }
 
 @article{streamattention2025,
   title   = {StreamAttention: Energy-Efficient and High-Utilization Attention on Systolic Hardware},
-  author  = {StreamAttention Authors},
-  journal = {OpenReview},
-  year    = {2025}
+  author  = {{Anonymous authors}},
+  journal = {OpenReview preprint},
+  year    = {2025},
+  note    = {Author identities withheld on OpenReview as of 2026-06}
 }
 
 @inproceedings{wang2023cosa,
@@ -91,12 +91,13 @@
 
 @article{desa2025,
   title   = {{DESA}: Dataflow Efficient Systolic Array for Acceleration of Transformers},
-  author  = {DESA Authors},
+  author  = {Wang, Zhican and Fan, Hongxiang and He, Guanghui},
   journal = {IEEE Transactions on Computers},
   volume  = {74},
   number  = {6},
   pages   = {2058--2072},
-  year    = {2025}
+  year    = {2025},
+  doi     = {10.1109/TC.2025.3549621}
 }
 
 @inproceedings{ham2021a3,
@@ -107,7 +108,7 @@
 }
 
 @inproceedings{wang2021spatten,
-  title     = {{SpAtten}: Efficient Sparse Attention Architecture with Cascade Token and Head Pruning},
+  title     = {{SpAtten}: Efficient Sparse Attention with Cascade Token and Head Pruning},
   author    = {Wang, Han and others},
   booktitle = {HPCA},
   year      = {2021}
@@ -124,22 +125,22 @@
 
 @article{sawint42026,
   title   = {{SAW-INT4}: System-AWare 4-Bit {KV}-Cache Quantization for Real-World {LLM} Serving},
-  author  = {SAW-INT4 Authors},
+  author  = {Jia, Jinda and Li, Jisen and Zhou, Zhongzhu and others},
   journal = {arXiv preprint arXiv:2604.19157},
   year    = {2026}
 }
 
 @inproceedings{bitdecoding2026,
-  title     = {BitDecoding: Low-Bit {KV} Cache Co-Design for {LLM} Decoding},
-  author    = {BitDecoding Authors},
+  title     = {BitDecoding: Unlocking Tensor Cores for Long-Context {LLMs} with Low-Bit {KV} Cache},
+  author    = {Du, Dayou and Cao, Shijie and Cheng, Jianyi and others},
   booktitle = {HPCA},
   year      = {2026},
-  note      = {HPCA'26}
+  note      = {arXiv:2503.18773; HPCA'26}
 }
 
 @article{batquant2026,
-  title   = {{BATQuant}: Block-wise Affine Transformation for {MXFP4} Quantization},
-  author  = {BATQuant Authors},
+  title   = {{BATQuant}: Outlier-Resilient {MXFP4} Quantization via Learnable Block-Wise Optimization},
+  author  = {Li, Ji-Fu and Zhang, Manyi and Xia, Xiaobo and others},
   journal = {arXiv preprint arXiv:2603.16590},
   year    = {2026}
 }
@@ -167,23 +168,23 @@
 
 @article{ultraquant2026,
   title   = {{UltraQuant}: 4-bit {KV} Caching for Context-Heavy Agents},
-  author  = {UltraQuant Authors},
+  author  = {Chakrabarti, Inesh and Limpus, David and Rana, Aditi Ghai and others},
   journal = {arXiv preprint arXiv:2606.20474},
   year    = {2026}
 }
 
 @inproceedings{xiao2023smoothquant,
-  title     = {SmoothQuant: Accurate and Efficient Post-Training Quantization for Large Language Models},
+  title     = {SmoothQuant: Accurate and Efficient Post-Training Quantization for {LLMs}},
   author    = {Xiao, Guangxuan and others},
   booktitle = {ICML},
   year      = {2023}
 }
 
-@article{frantar2023gptq,
-  title   = {{GPTQ}: Accurate Post-Training Quantization for Generative Pre-trained Transformers},
-  author  = {Frantar, Elias and others},
-  journal = {ICLR},
-  year    = {2023}
+@inproceedings{frantar2023gptq,
+  title     = {{GPTQ}: Accurate Post-Training Quantization for Generative Pre-trained Transformers},
+  author    = {Frantar, Elias and others},
+  booktitle = {ICLR},
+  year      = {2023}
 }
 
 @article{micikevicius2022fp8,
@@ -197,31 +198,32 @@
 
 @article{mive2026,
   title   = {{MIVE}: A Minimalist Integer Vector Engine for Softmax LayerNorm and {RMSNorm} Acceleration},
-  author  = {MIVE Authors},
+  author  = {Alexandridis, Kosmas and Dimitrakopoulos, Giorgos},
   journal = {arXiv preprint arXiv:2606.17781},
   year    = {2026}
 }
 
 @article{sole2025,
   title   = {{SOLE}: Hardware-Software Co-design of Softmax and LayerNorm for Efficient Transformer Inference},
-  author  = {SOLE Authors},
+  author  = {Wang, Wenxun and Zhou, Shuchang and Sun, Wenyu and others},
   journal = {arXiv preprint arXiv:2510.17189},
   year    = {2025}
 }
 
 @article{softmaxrmsnorm2026,
   title   = {Hardware-Oriented Approximations of Softmax and {RMSNorm} for Efficient Transformer Inference},
-  author  = {Hardware Approx Authors},
-  journal = {Electronics},
+  author  = {Kang, Yiwen and Wang, Dong},
+  journal = {Micromachines},
   volume  = {17},
   number  = {1},
   pages   = {84},
-  year    = {2026}
+  year    = {2026},
+  doi     = {10.3390/mi17010084}
 }
 
 @article{guaranteednorm2026,
   title   = {Hardware-Efficient Softmax and Layer Normalization with Guaranteed Normalization for Edge Devices},
-  author  = {Guaranteed Norm Authors},
+  author  = {Choi, Dawon and Kim, Hana and Kim, Ji-Hoon},
   journal = {arXiv preprint arXiv:2604.23647},
   year    = {2026}
 }
@@ -258,7 +260,7 @@
 
 @article{scalesimv3_2025,
   title   = {{SCALE-Sim} v3: A Modular Cycle-Accurate Systolic Accelerator Simulator for End-to-End System Analysis},
-  author  = {SCALE-Sim Authors},
+  author  = {Raj, Ritik and Banerjee, Sarbartha and Chandra, Nikhil and others},
   journal = {arXiv preprint arXiv:2504.15377},
   year    = {2025}
 }
@@ -273,8 +275,8 @@
 }
 
 @article{tilelang2025,
-  title   = {TileLang: A Tiled Programming Language for Efficient {AI} Kernel Development},
-  author  = {TileLang Authors},
+  title   = {TileLang: A Composable Tiled Programming Model for {AI} Systems},
+  author  = {Wang, Lei and Cheng, Yu and Shi, Yining and others},
   journal = {arXiv preprint arXiv:2504.17577},
   year    = {2025}
 }
@@ -288,16 +290,17 @@
 
 @inproceedings{ma2024tpuv4i,
   title     = {{TPU} v4: An Optically Reconfigurable Supercomputer for Machine Learning with Hardware Support for Embeddings},
-  author    = {Google TPU Team},
+  author    = {Jouppi, Norman P. and Kurian, George and Li, Sheng and others},
   booktitle = {ISCA},
-  year      = {2024}
+  year      = {2023},
+  note      = {arXiv:2304.01433}
 }
 
 % ===== 对照A：稀疏/动态 attention =====
 
 @article{salca2026,
   title   = {{Salca}: A Sparsity-Aware Hardware Accelerator for Efficient Long-Context Attention Decoding},
-  author  = {Salca Authors},
+  author  = {Fan, Wang and Cao, Wei and Zha, Xi and others},
   journal = {arXiv preprint arXiv:2604.24820},
   year    = {2026}
 }
@@ -320,16 +323,17 @@
 
 @article{amma2026,
   title   = {{AMMA}: A Multi-Chiplet Memory-Centric Architecture for Low-Latency 1M Context Attention Serving},
-  author  = {AMMA Authors},
+  author  = {Yu, Zhongkai and Ye, Haotian and Zhou, Chenyang and others},
   journal = {arXiv preprint arXiv:2604.26103},
   year    = {2026}
 }
 
 @article{lolpim2024,
-  title   = {{LoL-PIM}: Long-Context {LLM} Decoding with Scalable {DRAM-PIM} System},
-  author  = {LoL-PIM Authors},
+  title   = {{PIMphony}: Overcoming Bandwidth and Capacity Inefficiency in {PIM}-Based Long-Context {LLM} Inference System},
+  author  = {Kwon, Hyucksung and Koo, Kyungmo and Kim, Janghyeon and others},
   journal = {arXiv preprint arXiv:2412.20166},
-  year    = {2024}
+  year    = {2024},
+  note      = {Also referred to as LoL-PIM}
 }
 
 @inproceedings{heo2024nuepim,

@@ -5,7 +5,7 @@
 
 面向大语言模型推理的高能效 Attention 加速器及软硬件协同优化。
 
-本仓库用于：**研究计划、文献索引、综述计划、进展日志** 的 Git 同步；**论文 PDF 在本机用脚本下载**，不进 Git。
+本仓库用于：**研究计划、文献综述 LaTeX 稿、进展日志** 的 Git 同步；**综述 PDF 在本机编译**，不进 Git。
 
 ## 快速开始（两台电脑通用）
 
@@ -22,14 +22,17 @@ https://github.com/eason8319/attention-accelerator-phd
 
 建议本地路径：`C:\Users\21753\博士课题\attention-accelerator-phd`
 
-### 2. 下载论文 PDF（本机一次）
+### 2. 编译综述 PDF（本机）
 
 ```powershell
-cd docs\survey\papers
-python download_papers.py
+cd docs\survey\manuscript
+pdflatex attention_accelerator_survey
+bibtex attention_accelerator_survey
+pdflatex attention_accelerator_survey
+pdflatex attention_accelerator_survey
 ```
 
-约 45 篇、142 MB，按主线分子文件夹。
+需安装 MiKTeX 或 TeX Live。内容索引见 [docs/survey/survey_overview.md](docs/survey/survey_overview.md)。
 
 ### 3. 日常同步
 
@@ -59,10 +62,8 @@ git push
 ### 文献与综述
 | 文档 | 说明 |
 |------|------|
-| [docs/survey/survey_plan.md](docs/survey/survey_plan.md) | 综述写作计划 |
-| [docs/survey/manuscript/](docs/survey/manuscript/) | **英文综述 LaTeX 稿** + BibTeX 文献库 |
-| [docs/survey/paper_matrix.md](docs/survey/paper_matrix.md) | 文献对标矩阵 |
-| [docs/survey/papers/download_papers.py](docs/survey/papers/download_papers.py) | **论文 PDF 下载脚本** |
+| [docs/survey/survey_overview.md](docs/survey/survey_overview.md) | **综述内容整理**（章节、分类法、结论） |
+| [docs/survey/manuscript/](docs/survey/manuscript/) | **英文综述 LaTeX 稿** + BibTeX 文献库（编译 PDF） |
 
 ### 研究进展（请在此更新）
 | 文档 | 说明 |
@@ -76,4 +77,4 @@ git push
 
 ## 云端 Cursor Agent
 
-有进展时可让 Agent 更新 `docs/progress/` 并 push 到 GitHub；PDF 仍在本机用脚本维护。
+有进展时可让 Agent 更新 `docs/progress/` 并 push 到 GitHub；综述 PDF 在本机 `docs/survey/manuscript/` 编译。

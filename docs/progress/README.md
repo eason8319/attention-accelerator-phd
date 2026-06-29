@@ -24,8 +24,9 @@
 
 ## 当前阶段
 
-- **阶段 0**：文献与基线调研（进行中）
-  - [x] 文献库 manuscript/references.bib + paper_matrix
-  - [x] 综述写作计划 survey_plan.md
-  - [ ] 综述分章撰写（00–06）
+- **阶段 0**：文献与基线调研（综述初稿已完成）
+  - [x] 文献库 manuscript/references.bib
+  - [x] 英文综述 LaTeX 稿 attention_accelerator_survey.tex
+  - [x] 综述内容整理 survey_overview.md
+  - [ ] 编译 PDF、校准量化目标与作者信息
   - [ ] 选题报告

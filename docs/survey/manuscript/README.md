@@ -1,24 +1,18 @@
 # 英文综述 LaTeX 稿
 
-本目录为 **IEEE 综述论文** 的自包含写作环境：LaTeX 模板、正文与 BibTeX 文献库在同一文件夹，便于编译与版本管理。
+本目录为 **IEEE 综述论文** 的自包含编译环境：正文、BibTeX 文献库与 `IEEEtran.cls` 模板在同一文件夹。
+
+综述内容索引见上级目录 [survey_overview.md](../survey_overview.md)。
 
 ## 目录结构
 
 ```
 docs/survey/manuscript/
 ├── attention_accelerator_survey.tex   # 综述正文
-├── references.bib                     # BibTeX 文献库（与 paper_matrix 对齐）
-├── IEEEtran.cls                       # IEEE 会议模板（自 letax模板 复制）
+├── references.bib                     # BibTeX 文献库
+├── IEEEtran.cls                       # IEEE 会议模板
 └── README.md                          # 本说明
 ```
-
-配套资料（仍在 `docs/survey/` 上级目录）：
-
-- [survey_plan.md](../survey_plan.md) — 写作计划与分类法
-- [paper_matrix.md](../paper_matrix.md) — 文献对标矩阵
-- [papers/](../papers/) — 本地 PDF 库
-
-原始 IEEE 空白模板见 [letax模板/](../letax模板/conference_101719.tex)。
 
 ## 编译
 
@@ -37,4 +31,4 @@ pdflatex attention_accelerator_survey
 ## 引用约定
 
 - 仅使用 `references.bib` 中已有的 cite key
-- 新增文献时同步更新 [paper_matrix.md](../paper_matrix.md)
+- 新增文献时同步更新 `references.bib` 并在正文中按 IEEE 格式引用
