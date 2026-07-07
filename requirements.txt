@@ -1,0 +1,10 @@
+# 学习项目 P1–P5 的 Python 依赖（P3 的 SCALE-Sim/Timeloop 建议在 WSL2 中另行安装，见 sim/arch_eval/README.md）
+torch>=2.4
+numpy>=1.26
+matplotlib>=3.8
+pytest>=8.0
+# P2 小模型量化实验
+transformers>=4.44
+datasets>=2.20
+# P3 SCALE-Sim（WSL2 内安装亦可）
+# scalesim

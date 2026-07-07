@@ -22,3 +22,15 @@
 - [ ] `05` 对照与展望
 - [ ] `06` gap 分析与定位
 - [ ] 选题报告定稿
+
+## 学习阶段里程碑（P1–P5）
+
+对照 [learning_plan.md](../learning_plan.md)，与阶段 0 → 阶段 1 过渡期并行推进。
+
+| 项目 | 内容 | 验收点 | 状态 |
+|------|------|--------|------|
+| P1 | Attention 数值内核复现 | 三种实现对拍通过 + rescale 推导笔记 | 已完成（待本地 pytest 确认） |
+| P2 | 低精度量化实验 | 旋转降误差复现 + KV INT4 困惑度报告 | 未开始 |
+| P3 | 架构评估工具链 | SCALE-Sim/Timeloop 跑通 + `analysis.md` 瓶颈短文 | 未开始 |
+| P4 | RTL 关键模块 | exp/softmax/systolic array 与 golden model 对拍通过 | 未开始 |
+| P5 | tile-level 模拟器 | Pareto 前沿 + 与 SCALE-Sim 趋势校验 | 未开始 |

@@ -14,6 +14,18 @@
 | [docs/research_plan.md](docs/research_plan.md) | 完整研究计划 |
 | [docs/00_background_and_baselines.md](docs/00_background_and_baselines.md) | 背景与对标基线 |
 | [docs/metrics.md](docs/metrics.md) | 评估指标体系 |
+| [docs/learning_plan.md](docs/learning_plan.md) | **项目式学习方案（P1–P5）** |
+
+### 学习项目（P1–P5，配套 learning_plan.md）
+| 目录 | 说明 |
+|------|------|
+| [experiments/p1_attention_numerics/](experiments/p1_attention_numerics/) | P1：attention / online softmax 数值内核复现 |
+| [experiments/p2_quantization/](experiments/p2_quantization/) | P2：INT4/FP8/MXFP4 量化与旋转实验 |
+| [sim/arch_eval/](sim/arch_eval/) | P3：SCALE-Sim / Timeloop 架构评估 |
+| [rtl/](rtl/) | P4：exp / softmax / systolic array RTL 模块 |
+| [sim/tile_sim/](sim/tile_sim/) | P5：tile-level 性能模拟器 |
+
+Python 依赖见 [requirements.txt](requirements.txt)。
 
 ### 文献与综述
 | 文档 | 说明 |
