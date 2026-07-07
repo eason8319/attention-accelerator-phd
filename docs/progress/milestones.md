@@ -29,7 +29,7 @@
 
 | 项目 | 内容 | 验收点 | 状态 |
 |------|------|--------|------|
-| P1 | Attention 数值内核复现 | 三种实现对拍通过 + rescale 推导笔记 | 已完成（待本地 pytest 确认） |
+| P1 | Attention 数值内核复现 | 三种实现对拍通过 + rescale 推导笔记 | 已完成（pytest 22/22 通过，见 [验收报告](p1_attention_numerics_report.md)） |
 | P2 | 低精度量化实验 | 旋转降误差复现 + KV INT4 困惑度报告 | 未开始 |
 | P3 | 架构评估工具链 | SCALE-Sim/Timeloop 跑通 + `analysis.md` 瓶颈短文 | 未开始 |
 | P4 | RTL 关键模块 | exp/softmax/systolic array 与 golden model 对拍通过 | 未开始 |

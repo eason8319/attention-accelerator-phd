@@ -23,6 +23,7 @@ __pycache__/
 .Python
 .venv/
 venv/
+.pytest_cache/
 
 # OS / editor
 .DS_Store
@@ -34,3 +35,4 @@ Thumbs.db
 # 临时文件
 *.tmp
 *.log
+condaenv.*.requirements.txt

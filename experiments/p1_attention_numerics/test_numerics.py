@@ -91,28 +91,21 @@ def test_rope_matches_transformers() -> None:
     x = torch.randn(batch, heads, seq, head_dim)
     position_ids = torch.arange(seq).unsqueeze(0).expand(batch, -1)
 
-    try:
-        from transformers.models.llama.modeling_llama import LlamaRotaryEmbedding
+    from transformers import LlamaConfig
+    from transformers.models.llama.modeling_llama import LlamaRotaryEmbedding
 
-        ref_module = LlamaRotaryEmbedding(head_dim)
-    except TypeError:
-        from transformers import LlamaConfig
-
-        config = LlamaConfig(
-            hidden_size=head_dim * heads,
-            num_attention_heads=heads,
-            head_dim=head_dim,
-        )
-        from transformers.models.llama.modeling_llama import LlamaRotaryEmbedding
-
-        ref_module = LlamaRotaryEmbedding(config=config)
+    config = LlamaConfig(
+        hidden_size=head_dim * heads,
+        num_attention_heads=heads,
+        head_dim=head_dim,
+    )
+    ref_module = LlamaRotaryEmbedding(config=config)
 
     cos_ref, sin_ref = ref_module(x, position_ids)
-    x_bshd = x.transpose(1, 2)
-    ref_bshd = apply_rotary_pos_emb(x_bshd, cos_ref, sin_ref)
-    ref = ref_bshd.transpose(1, 2)
+    q_ref, _ = apply_rotary_pos_emb(x, x, cos_ref, sin_ref)
+    ref = q_ref
 
-    cos, sin = build_rope_cache(seq, head_dim)
+    cos, sin = build_rope_cache(seq, head_dim, device=x.device, dtype=x.dtype)
     out = apply_rope(x, cos, sin)
     assert _max_abs(out, ref) < 1e-4
 

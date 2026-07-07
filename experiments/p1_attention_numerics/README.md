@@ -34,8 +34,10 @@ def attention(q, k, v, causal: bool = False) -> torch.Tensor:
 
 ## 验收 checklist
 
-- [ ] 标准 / 分块 / online 三种实现对拍通过（fp32 误差 < 1e-5）
-- [ ] online softmax 结果与块大小无关
-- [ ] RoPE、RMSNorm 与 transformers 参考实现一致
-- [ ] decode-step 与 prefill 全量结果一致
-- [ ] 一页 online softmax rescale 推导笔记
+- [x] 标准 / 分块 / online 三种实现对拍通过（fp32 误差 < 1e-5）
+- [x] online softmax 结果与块大小无关
+- [x] RoPE、RMSNorm 与 transformers 参考实现一致
+- [x] decode-step 与 prefill 全量结果一致
+- [x] 一页 online softmax rescale 推导笔记
+
+验收记录见 [P1 Attention 数值内核复现验收报告](../../docs/progress/p1_attention_numerics_report.md)。
