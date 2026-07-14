@@ -6,5 +6,7 @@ pytest>=8.0
 # P2 小模型量化实验
 transformers>=4.44
 datasets>=2.20
+scipy>=1.11
+tokenizers>=0.22
 # P3 SCALE-Sim（WSL2 内安装亦可）
 # scalesim
