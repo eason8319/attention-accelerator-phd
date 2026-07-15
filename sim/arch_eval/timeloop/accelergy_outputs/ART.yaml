@@ -1,0 +1,11 @@
+ART:
+    version: '0.4'
+    tables:
+      - name: System.PE[0..1023].Register
+        area: 83.168
+      - name: System.PE[0..1023].mac
+        area: 466.375
+      - name: System.DRAM
+        area: 0.0
+      - name: System.GlobalBuffer
+        area: 99958100.0

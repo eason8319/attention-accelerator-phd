@@ -1,0 +1,21 @@
+mapspace:
+  constraints:
+    - target: Registers
+      type: datatype
+      keep:
+        - Outputs
+      bypass:
+        - Weights
+        - Inputs
+
+    - target: GlobalBuffer
+      type: datatype
+      keep:
+        - Weights
+        - Inputs
+        - Outputs
+
+    - target: GlobalBuffer
+      type: spatial
+      factors: R1 S1 P1 Q1 C32 K32 N1
+      permutation: CKPQRSN

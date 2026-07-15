@@ -19,6 +19,7 @@ pip install -r ../../requirements.txt scipy tokenizers
 
 ```
 p2_quantization/
+├── reading_notes.md        # 阅读材料精读笔记
 ├── fakequant.py            # INT4/INT8/FP8/MXFP4 quantize-dequantize
 ├── rotation.py             # 随机 Hadamard / 块对角 Hadamard（BDR, QuaRot/SAW 风格）
 ├── error_analysis.py       # 激活分布与量化误差统计（自动出图）
@@ -27,6 +28,10 @@ p2_quantization/
 ├── test_fakequant.py       # 与 torch.float8_* 及手算样例对拍
 └── outputs/                # 自动生成的报告与图表
 ```
+
+## 从这里开始
+
+0. 阅读 [reading_notes.md](reading_notes.md)（QuaRot / SAW-INT4 BDR / BitDecoding / MXFP4）。
 
 ## 运行
 

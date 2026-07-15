@@ -6,7 +6,7 @@
 
 大语言模型（LLM）推理已从"计算受限"转向"访存受限"。瓶颈集中在 attention 子系统：
 
-- **长上下文复杂度**：标准 attention 计算量为 \(O(n^2 d)\)，KV cache 容量随生成 token 线性增长。
+- **长上下文复杂度**：标准 attention 计算量为 $O(n^2 d)$，KV cache 容量随生成 token 线性增长。
 - **decode 强 memory-bound**：自回归 decode 阶段 batch 小、矩阵"瘦"，受 HBM 带宽限制。
 - **FlashAttention 映射难**：分块 + online softmax 数据流难以原生映射到传统 systolic array。
 - **非 GEMM 算子打断流水**：softmax / RMSNorm / RoPE 造成 PE 利用率下降。

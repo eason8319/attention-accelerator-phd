@@ -1,0 +1,36 @@
+architecture:
+  version: 0.3
+  subtree:
+    - name: System
+      attributes:
+        technology: "45nm"
+      local:
+        - name: DRAM
+          class: DRAM
+          attributes:
+            width: 64
+            datawidth: 8
+        - name: GlobalBuffer
+          class: SRAM
+          attributes:
+            depth: 524288
+            width: 256
+            n_banks: 32
+            n_rw_ports: 2
+            n_rd_ports: 0
+            n_wr_ports: 0
+      subtree:
+        - name: PE[0..1023]
+          local:
+            - name: Register
+              class: aladdin_register
+              attributes:
+                depth: 1
+                width: 8
+                datawidth: 8
+            - name: mac
+              class: intmac
+              attributes:
+                width: 8
+                multiplier_width: 8
+                adder_width: 16

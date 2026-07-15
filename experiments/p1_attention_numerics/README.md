@@ -12,17 +12,20 @@
 
 ```
 p1_attention_numerics/
-├── attention_naive.py      # 标准 attention
-├── attention_tiled.py      # 两遍分块 attention
-├── attention_online.py     # online softmax 单遍实现
-├── ops.py                  # RoPE / RMSNorm
-├── decode_step.py          # 单 token decode attention
-└── test_numerics.py        # 对拍测试（pytest）
+├── reading_notes.md              # 阅读材料精读笔记
+├── online_softmax_rescale_notes.md  # rescale 推导（验收产出）
+├── attention_naive.py            # 标准 attention
+├── attention_tiled.py            # 两遍分块 attention
+├── attention_online.py           # online softmax 单遍实现
+├── ops.py                        # RoPE / RMSNorm
+├── decode_step.py                # 单 token decode attention
+└── test_numerics.py              # 对拍测试（pytest）
 ```
 
 ## 从这里开始
 
-第一步：写 `attention_naive.py`，实现
+0. 阅读 [reading_notes.md](reading_notes.md)（FlashAttention / online softmax / RoPE）；rescale 公式见 [online_softmax_rescale_notes.md](online_softmax_rescale_notes.md)。
+1. 写 `attention_naive.py`，实现
 
 ```python
 def attention(q, k, v, causal: bool = False) -> torch.Tensor:

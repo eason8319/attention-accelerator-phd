@@ -6,7 +6,7 @@
 
 大语言模型推理已从"计算受限"转向"访存受限"。核心矛盾集中在 attention 子系统：
 
-- 长上下文下 attention 复杂度 \(O(n^2 d)\)，且 KV cache 随 token 线性增长，decode 阶段呈强 memory-bound（BitDecoding HPCA'26、SAW-INT4 均印证此趋势）。
+- 长上下文下 attention 复杂度 $O(n^2 d)$，且 KV cache 随 token 线性增长，decode 阶段呈强 memory-bound（BitDecoding HPCA'26、SAW-INT4 均印证此趋势）。
 - FlashAttention 的分块 + online softmax 数据流难以原生映射到传统 systolic array（FSA/SystolicAttention 2025、PLENA 2025 是早期硬件尝试）。
 - softmax / RMSNorm / RoPE 等非 GEMM 算子频繁打断主流水，造成 PE 利用率下降。
 - 低精度（INT4/FP8/MXFP4）能显著降低带宽与功耗，但 attention score、softmax 累加存在数值稳定性风险。

@@ -1,0 +1,27 @@
+arch:
+  arithmetic:
+    instances: 1024
+    meshX: 32
+    word_bits: 8
+
+  storage:
+    - name: Registers
+      entries: 1
+      instances: 1024
+      meshX: 32
+      word_bits: 8
+      cluster_size: 1
+
+    - name: GlobalBuffer
+      sizeKB: 16384
+      instances: 1
+      word_bits: 8
+      block_size: 32
+      network_word_bits: 8
+
+    - name: DRAM
+      technology: DRAM
+      instances: 1
+      word_bits: 8
+      block_size: 64
+      bandwidth: 1000.0

@@ -1,0 +1,39 @@
+---
+description: Markdown 数学公式必须用 $ / $$，以便 Cursor 侧边预览正确渲染
+alwaysApply: true
+---
+
+# Markdown 数学公式定界符（Cursor 预览兼容）
+
+撰写或修改任何 `.md` / `.mdx` 时，数学公式必须使用美元定界符，以便 Cursor / VS Code 内置 Markdown 预览（KaTeX）正确渲染。
+
+## 必须使用
+
+- 行内公式：`$...$`
+- 独立公式块：`$$` 单独成行包裹
+
+```markdown
+行内：$P_{\max}$、$\mathrm{AI}$
+
+块级：
+
+$$
+P = \min(P_{\max},\; \mathrm{AI}\cdot B_{\mathrm{mem}})
+$$
+```
+
+## 禁止使用
+
+- `\(...\)`（行内）
+- `\[...\]`（块级）
+
+Cursor 侧边预览对上述 LaTeX 括号定界符**不渲染**；只有 `$` / `$$` 可靠。
+
+## 查看预览
+
+- 使用 **Markdown: Open Preview to the Side**（`Ctrl+K` 再 `V`，或 `Ctrl+Shift+V`）
+- 不要依赖编辑器右上角的 Cursor 原生 **Preview**（已知不渲染公式）
+
+## 改写已有内容
+
+若发现文档仍含 `\(...\)` / `\[...\]`，应一并改成 `$...$` / `$$...$$`，不要混用。

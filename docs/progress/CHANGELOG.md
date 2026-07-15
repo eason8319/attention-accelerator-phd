@@ -4,6 +4,14 @@
 
 ---
 
+## 2026-07-15
+
+- 完成 P3 架构评估工具链：Roofline + SCALE-Sim v3（WS/OS）+ Timeloop/Accelergy Docker，交叉出图与偏差说明。
+- 产出 `sim/arch_eval/analysis.md`：decode util≈1%–2.5%、片外 traffic≈49%、16 MiB 约容纳 INT8 KV ~2K token。
+- 新增 `docs/progress/p3_arch_eval_report.md`；独立环境 `p3-arch-eval`。
+
+---
+
 ## 2026-07-14
 
 - 修复 P2 BDR：由 Gaussian-QR 块旋转改为 QuaRot/SAW 风格 `block_diag(H) @ D`，消除默认 seed 下 PPL 崩坏。

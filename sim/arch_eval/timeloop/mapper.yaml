@@ -1,0 +1,9 @@
+mapper:
+  algorithm: random_pruned
+  optimization_metrics:
+    - energy
+    - delay
+  num_threads: 4
+  search_size: 200
+  victory_condition: 50
+  timeout: 1000

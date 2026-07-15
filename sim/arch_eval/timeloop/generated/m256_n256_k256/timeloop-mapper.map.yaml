@@ -1,0 +1,41 @@
+mapping:
+  - target: Registers
+    type: datatype
+    keep:
+      - Outputs
+    bypass:
+      - Weights
+      - Inputs
+  - target: GlobalBuffer
+    type: datatype
+    keep:
+      - Weights
+      - Inputs
+      - Outputs
+    bypass:
+      []
+  - target: DRAM
+    type: datatype
+    keep:
+      - Weights
+      - Inputs
+      - Outputs
+    bypass:
+      []
+  - target: Registers
+    type: temporal
+    factors: R1 S1 P1 Q1 C1 K1 N1
+    permutation: RSPQCKN
+  - target: GlobalBuffer
+    type: spatial
+    factors: R1 S1 P1 Q1 C32 K32 N1
+    permutation: CKRSPQN
+    split: 1
+  - target: GlobalBuffer
+    type: temporal
+    factors: R1 S1 P256 Q1 C8 K2 N1
+    permutation: CPKRSQN
+  - target: DRAM
+    type: temporal
+    factors: R1 S1 P1 Q1 C1 K4 N1
+    permutation: KRSPQCN

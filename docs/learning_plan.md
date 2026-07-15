@@ -46,11 +46,11 @@ flowchart LR
 
 ### 验收标准
 
-- [ ] 三种实现（标准/分块/online）对拍误差 fp32 下 max abs error < 1e-5
-- [ ] online softmax 支持任意块大小且结果与块大小无关
-- [ ] RoPE、RMSNorm 与 transformers 参考实现一致
-- [ ] decode-step attention 与 prefill 全量计算结果一致
-- [ ] 写一页笔记：online softmax 的 rescale 推导（这是主线1硬件设计的核心公式）
+- [x] 三种实现（标准/分块/online）对拍误差 fp32 下 max abs error < 1e-5
+- [x] online softmax 支持任意块大小且结果与块大小无关
+- [x] RoPE、RMSNorm 与 transformers 参考实现一致
+- [x] decode-step attention 与 prefill 全量计算结果一致
+- [x] 写一页笔记：online softmax 的 rescale 推导（这是主线1硬件设计的核心公式）
 
 ### 阅读材料
 
@@ -78,10 +78,10 @@ flowchart LR
 
 ### 验收标准
 
-- [ ] fake-quant 库通过与 `torch.float8_*` 及手算样例的对拍测试
-- [ ] 复现"旋转显著降低 INT4 量化误差"的现象（误差降低量化数据 + 分布直方图）
-- [ ] 小模型 KV cache INT4 + 旋转的困惑度退化 < 直接 INT4
-- [ ] 输出一份误差分析报告（脚本自动生成图表）
+- [x] fake-quant 库通过与 `torch.float8_*` 及手算样例的对拍测试
+- [x] 复现"旋转显著降低 INT4 量化误差"的现象（误差降低量化数据 + 分布直方图）
+- [x] 小模型 KV cache INT4 + 旋转的困惑度退化 < 直接 INT4
+- [x] 输出一份误差分析报告（脚本自动生成图表）
 
 ### 阅读材料
 
@@ -121,10 +121,10 @@ docker pull timeloopaccelergy/timeloop-accelergy-pytorch:latest  # Timeloop+Acce
 
 ### 验收标准
 
-- [ ] SCALE-Sim 跑通 attention GEMM 序列，输出 cycle/utilization/traffic csv
-- [ ] Timeloop 跑通同一 workload，输出 energy 分解
-- [ ] 复现 decode PE 利用率显著低于 prefill 的现象，并有 roofline 解释
-- [ ] 产出 `sim/arch_eval/analysis.md` 瓶颈分析短文
+- [x] SCALE-Sim 跑通 attention GEMM 序列，输出 cycle/utilization/traffic csv
+- [x] Timeloop 跑通同一 workload，输出 energy 分解
+- [x] 复现 decode PE 利用率显著低于 prefill 的现象，并有 roofline 解释
+- [x] 产出 `sim/arch_eval/analysis.md` 瓶颈分析短文
 
 ### 阅读材料
 
