@@ -611,7 +611,11 @@ Closing the loop between dense single-chip co-design (Sections~\ref{sec:l1}--\re
 
 Cross-review of Sections~\ref{sec:l1}--\ref{sec:l4} confirms the survey storyline: LLM inference is increasingly memory-bound on attention and KV traffic~\cite{dao2023flashdecoding,bitdecoding2026,sawint42026}; L1--L4 each mitigate one facet; yet most publications optimize one or two facets in isolation on mismatched platforms and benchmarks~\cite{lin2025systolicattention,liu2024kivi,mive2026,plena2025,sawint42026}.
 Table~\ref{tab:metrics} unifies reporting dimensions, but phase-separated prefill/decode data, open mapper artifacts, and joint accuracy--PPA curves remain rare.
-This section synthesizes research gaps and relates them to the integrated monolithic accelerator program outlined in the companion research plan.
+This section synthesizes research gaps and relates them to the companion research plan.
+
+\paragraph{Companion-plan focus (decode-centric refinement).}
+While the taxonomy above motivates \emph{integrated} L1--L4 co-design, the companion research plan deliberately \emph{narrows} the doctoral knife-edge to long-context \emph{decode}: real cache-path low-bit or mixed-precision KV representation, streaming fused dequantization that avoids materializing a full high-precision KV tile, and precision-aware mapping under ASIC cost models, validated through architecture simulation and critical-path RTL/PPA.
+Full-stack ISA/compiler completeness, RMSNorm/RoPE as primary contributions, and sparse/PIM/chiplet paths remain out of the mainline; PLENA-class stacks serve as comparators rather than templates to enlarge~\cite{plena2025,bitdecoding2026,sawint42026}.
 
 \subsection{Cross-Cutting Research Gaps}
 \label{sec:gaps-synthesis}
@@ -647,26 +651,25 @@ The following open problems recur across surveyed themes:
 \subsection{Positioning Relative to Prior Work}
 \label{sec:gaps-positioning}
 
-The gaps above motivate an integrated monolithic accelerator agenda---not incremental improvement within a single L-theme---with three differentiation vectors aligned to prior art:
+The gaps above still motivate closing L1--L4 concerns \emph{on one platform}, but the companion plan prioritizes a decode-centric subset rather than a broader PLENA-like full stack.
+Differentiation vectors for that refined agenda:
 
-\paragraph{Architecture (L1)}
-Target a FlashAttention-\emph{native} systolic or flattened array with \emph{in-place} online softmax (row-max/row-sum and fused $\exp$), eliminating full $N \times N$ score materialization and reducing dependence on external vector softmax units~\cite{lin2025systolicattention,wang2023cosa,desa2025}.
-Unlike COSA+'s dual-array partition or GPU kernels tied to shared memory, the goal is single-chip utilization across prefill \emph{and} decode through phase-aware mapping~\cite{plena2025,streamattention2025}.
+\paragraph{Streaming low-bit KV datapath (L2-first, L1-supporting)}
+Realize packed or paged compressed-KV fetch with fused dequantization into $QK^\top$/online softmax/$PV$, without default materialization of a full FP16 KV tile~\cite{bitdecoding2026,sawint42026,liu2024kivi}.
+FlashAttention-native reductions remain necessary plumbing, not the sole claimed novelty~\cite{lin2025systolicattention,plena2025}.
 
-\paragraph{Numerics and datapath (L2--L3)}
-Combine mixed-precision KV storage (INT4/FP8/MXFP4 class formats) with higher-precision matmul/softmax accumulators, rotation- or block-aware outlier suppression, and on-chip dequantization fused at the MAC boundary~\cite{sawint42026,batquant2026,liu2024kivi,ashkboos2024quarot}.
-Pair this with unified or in-array non-GEMM approximations whose error budgets are validated jointly rather than per operator~\cite{mive2026,sole2025,guaranteednorm2026,koca2023exp}.
+\paragraph{Precision as a first-class mapping variable (L2+L4)}
+Treat bit width, group or RoPE-block containers, tile shapes, and SRAM/DMA allocation as a joint search under accuracy and buffer caps, counting metadata and control overhead in traffic and energy~\cite{plena2025,batquant2026,sawint42026}.
 
-\paragraph{Software--hardware co-design (L4)}
-Provide automatic tiling, buffer allocation, mixed-precision configuration, and GEMM/non-GEMM pipeline scheduling with a custom ISA or intermediate representation, using Timeloop/Accelergy, SCALE-Sim v3, and TransInferSim for architectural exploration and RTL for calibration~\cite{parashar2019timeloop,wu2019accelergy,scalesimv3_2025,klhufek2025transinfersim,plena2025}.
+\paragraph{Calibrated evaluation chain}
+Retain three-layer calibration---algorithmic golden models, attention-aware architecture simulation, and RTL PPA for critical blocks---while reporting prefill only as a secondary appendix~\cite{parashar2019timeloop,scalesimv3_2025,klhufek2025transinfersim,lin2025systolicattention}.
 
 \paragraph{Quantifiable targets}
-% TODO: calibrate against FlashAttention/FlashDecoding and PLENA baselines after phase-1 modeling
-Relative to GPU FlashAttention/FlashDecoding and documented monolithic references, quantifiable goals for such an integrated design include improved PE utilization, reduced HBM bytes per decode token, and lower energy per token at 32K--128K context, with task accuracy or perplexity degradation bounded by a Pareto envelope comparable to SAW-INT4/KIVI-class KV schemes~\cite{sawint42026,liu2024kivi,dao2023flashdecoding}.
-Absolute targets remain \emph{to be calibrated} once baseline models and workloads are fixed (Table~\ref{tab:metrics}).
+% TODO: calibrate against FlashAttention/FlashDecoding and PLENA baselines after R1 modeling
+Relative to GPU FlashAttention/FlashDecoding and documented monolithic references, goals emphasize reduced HBM bytes per decode token and energy per token at 32K--128K context under a Pareto accuracy envelope comparable to SAW-INT4/KIVI-class schemes~\cite{sawint42026,liu2024kivi,dao2023flashdecoding}.
+Absolute multipliers remain \emph{to be calibrated} once baselines are locked (Table~\ref{tab:metrics}).
 
-Adjacent sparse and memory-centric systems (Section~\ref{sec:adjacent}) serve as upper-bound comparators and scope guards rather than primary implementation paths.
-Success for the monolithic agenda is demonstrated by closing the L1--L4 gaps \emph{on one platform} with reproducible evaluation artifacts, not by matching multi-chiplet or PIM peak bandwidth in isolation~\cite{amma2026,salca2026,plena2025}.
+Adjacent sparse and memory-centric systems (Section~\ref{sec:adjacent}) remain upper-bound comparators and scope guards~\cite{amma2026,salca2026,plena2025}.
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -680,9 +683,8 @@ Most studies optimize one or two concerns---for example, GPU decode bandwidth, s
 Unified comparison along shared metrics (Table~\ref{tab:metrics}) and separation of prefill versus decode results are necessary but still inconsistently applied.
 Adjacent sparse-attention and memory-centric scale-out directions (Section~\ref{sec:adjacent}) address related memory-wall pressures at system granularity but lie outside the monolithic taxonomy developed here.
 
-Section~\ref{sec:gaps} argued that the central open problem is \emph{integrated} co-design on a single chip: FlashAttention-native tiling, mixed-precision KV datapaths, fused non-GEMM stages, and compile-time scheduling validated jointly through algorithmic, architectural, and RTL evaluation.
-Until such end-to-end artifact chains become common, reported energy-per-token and utilization gains will remain difficult to interpret across the L1--L4 literature.
-Closing this gap is the logical next step for energy-efficient attention acceleration research within the monolithic scope defined at the outset of this survey.
+Section~\ref{sec:gaps} argued that integrated co-design remains necessary, while the companion research plan refines the doctoral focus to decode-centric streaming low-bit or mixed-precision KV datapaths with precision-aware mapping and calibrated architecture/RTL evaluation---rather than enlarging a full L1--L4 ISA/compiler stack in isolation.
+Until end-to-end artifact chains become common for that knife-edge, reported energy-per-token and utilization gains will remain difficult to interpret across the L1--L4 literature.
 
 \bibliographystyle{IEEEtran}
 \begingroup

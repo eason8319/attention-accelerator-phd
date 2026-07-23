@@ -1,5 +1,7 @@
 # P1–P5 Learning Synthesis Manuscript
 
+> **Archived R0 write-up.** Does not define the doctoral mainline; see [`docs/research_plan.md`](../../docs/research_plan.md) (R0–R5) and [`research/`](../../research/).
+
 English IEEE conference-style short paper synthesizing the completed learning projects.
 
 | File | Role |

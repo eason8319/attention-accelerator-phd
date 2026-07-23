@@ -192,7 +192,8 @@ Timeloop energy shares are PAT-model dependent.
 These limits are acceptable for skill building but must be closed before claiming silicon-level energy per token.
 
 \paragraph{Research mapping.}
-P1 and P4 feed FlashAttention-native datapaths; P2 feeds mixed-precision stages; P3 is Stage-1 bottleneck analysis material; and P5 seeds later compile and tile-mapping work.
+P1 and P4 feed online-softmax and array numerics for later streaming decode datapaths; P2 motivates mixed-precision KV work but remains a projection-output \emph{proxy}; P3 supplies Stage-R0 bottleneck evidence; P5 seeds tile search that must later model compressed KV metadata.
+This manuscript is an archived learning synthesis; the doctoral agenda is defined by the companion research plan (decode-centric R0--R5), not by the older four-theme full-stack outline.
 
 \section{Conclusion}
 \label{sec:concl}

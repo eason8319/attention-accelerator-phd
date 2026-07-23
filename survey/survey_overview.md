@@ -1,7 +1,8 @@
 # 综述内容整理
 
-> 阶段 0 文献综述已完成。英文正文与 BibTeX 文献库见 [manuscript/](manuscript/)。  
-> IEEE 类文件与官方示例见顶层模板库 [`templates/latex/ieee/`](../templates/latex/ieee/)。
+> **R0 文献地图（已完成）。** 英文正文与 BibTeX 见 [manuscript/](manuscript/)。  
+> 分类法 L1–L4 仍是**文献组织框架**；**博士课题刀锋**以 [`docs/research_plan.md`](../docs/research_plan.md) 为准（decode × 低比特/混合精度 KV 流式通路），综述 gaps 段已加 companion-plan 脚注。  
+> 近年核实对照：[docs/recent_works_comparison.md](../docs/recent_works_comparison.md)、[docs/lit_watch/](../docs/lit_watch/)。
 
 ## 基本信息
 
@@ -10,8 +11,8 @@
 | **标题** | Energy-Efficient Attention Accelerators for Transformer Inference: A Survey of Software-Hardware Co-Design |
 | **格式** | IEEE conference（`IEEEtran`） |
 | **正文文件** | [attention_accelerator_survey.tex](manuscript/attention_accelerator_survey.tex) |
-| **文献库** | [references.bib](manuscript/references.bib)（约 45 条） |
-| **状态** | 初稿完成，待校准量化目标与作者信息 |
+| **文献库** | [references.bib](manuscript/references.bib) |
+| **状态** | 初稿完成；bib 关键作者已于 2026-07-23 按 ledger 校正；待本机编译 PDF |
 
 ## 综述范围
 
@@ -118,6 +119,6 @@ templates/latex/ieee/                  # 全项目 LaTeX 模板（权威）
 ## 后续待办（非阻塞）
 
 - [ ] 填写作者与机构信息（`\author` 块）
-- [ ] 校准 Section 7.3 量化目标（相对 FlashAttention/PLENA 基线）
-- [ ] 通读引用与 Table I 数值一致性
-- [ ] 编译 PDF 并检查排版（两栏、图表、参考文献）
+- [ ] 通读引用与 Table 数值一致性（对照 `docs/lit_watch/ledger.yaml`）
+- [ ] 本机编译 PDF 并检查排版
+- [ ] 量化倍数目标在 R1 baseline 锁定后再写入（勿在综述中承诺未校准倍数）

@@ -1,36 +1,48 @@
 # 研究里程碑
 
-对照 [research_plan.md](../research_plan.md) 第四节「研究阶段与里程碑」。
+对照现行 [`research_plan.md`](../research_plan.md) 的深度阶段 **R0–R5**（不按日历年）。  
+旧「阶段 0–6 / 四主线」表已废止。
 
-| 阶段 | 内容 | 产出 | 状态 |
+| 深度 | 内容 | 产出 | 状态 |
 |------|------|------|------|
-| 阶段0 | 文献与基线调研 | survey + 选题报告 | 进行中 |
-| 阶段1 | Baseline 建模与瓶颈定位 | 瓶颈分析 + 短文 | 未开始 |
-| 阶段2 | FlashAttention-native 架构 | 架构论文 | 未开始 |
-| 阶段3 | 混合精度 datapath | 核心论文 | 未开始 |
-| 阶段4 | 非 GEMM 单元与协同调度 | 模块级论文 | 未开始 |
-| 阶段5 | 编译映射框架 | 软硬件协同论文 | 未开始 |
-| 阶段6 | 系统集成与博士论文 | PPA 评估 + 学位论文 | 未开始 |
+| R0 | Survey + Learning 技能与证据基线 | `survey/`、`learning/`、本仓库计划与对比手册 | **已完成**（持续文献监视除外） |
+| R1 | 真实 KV cache-path、误差—流量模型、decode simulator 骨架 | 可复现测量 + 协议锁定 | **下一步 / 未开始** |
+| R2 | 静态 INT4（或 R1 选定主格式）流式通路；无完整 FP16 展开；关键 RTL | 架构主张 + 首版综合 | 未开始 |
+| R3 | 可规则化混合 / 结构感知比特分配 | 精度—硬件代价 Pareto | 未开始 |
+| R4 | 精度—布局—映射联合优化 | 映射方法与系统评估 | 未开始 |
+| R5 | 模拟器—RTL 校准、长压力测试、学位论文 | 校准实验包 + 论文 | 未开始 |
 
-## 阶段 0 细项
+## R0 细项
 
-- [x] 文献 BibTeX 与对标矩阵
-- [x] 综述写作计划
-- [x] 论文下载脚本（本地执行）
-- [ ] `00_overview.md` 综述总览
-- [ ] `01`–`04` 四条主线分章
-- [ ] `05` 对照与展望
-- [ ] `06` gap 分析与定位
-- [ ] 选题报告定稿
+- [x] 英文综述稿 `survey/manuscript/`
+- [x] 综述内容整理 `survey/survey_overview.md`
+- [x] 学习管线 P1–P5 与验收报告 `learning/`
+- [x] 研究计划收敛为 R0–R5 `docs/research_plan.md`
+- [x] 近年成果对比手册 + lit_watch `docs/recent_works_comparison.md`、`docs/lit_watch/`
+- [x] 背景与基线对齐现行计划 `docs/00_background_and_baselines.md`
+- [ ] 综述 PDF 本机编译与作者信息定稿（可选）
+- [ ] 选题报告 / 开题材料（按学校要求，内容以 research_plan 为准）
 
-## 学习阶段里程碑（P1–P5）
+## R1 入口门槛（摘自计划）
 
-对照 [learning/README.md](../../learning/README.md)，与阶段 0 → 阶段 1 过渡期并行推进。
+进入 R2 前须全部满足：
 
-| 项目 | 内容 | 验收点 | 状态 |
-|------|------|--------|------|
-| P1 | Attention 数值内核复现 | 三种实现对拍通过 + rescale 推导笔记 | 已完成（pytest 22/22 通过，见 [验收报告](../../learning/p1_attention_numerics/REPORT.md)） |
-| P2 | 低精度量化实验 | 旋转降误差复现 + KV INT4 困惑度报告 | 已完成（pytest 13/13；Qwen2.5-0.5B 上 Hadamard/BDR PPL < INT4，见 [验收报告](../../learning/p2_quantization/REPORT.md)） |
-| P3 | 架构评估工具链 | SCALE-Sim/Timeloop 跑通 + `analysis.md` 瓶颈短文 | 已完成（见 [验收报告](../../learning/p3_arch_eval/REPORT.md)） |
-| P4 | RTL 关键模块 | exp/softmax/systolic array 与 golden model 对拍通过 | 已完成（`make sim-all` 三模块 PASSED；见 [验收报告](../../learning/p4_rtl/REPORT.md)） |
-| P5 | tile-level 模拟器 | Pareto 前沿 + 与 SCALE-Sim 趋势校验 | 已完成（`run_p5.py` 25 pytest + 6/6 趋势 PASS；见 [验收报告](../../learning/p5_tile_sim/REPORT.md)） |
+1. 真实 token-wise KV quantize→store→load→dequant→attention 可复现；与 proxy 差异已文档化  
+2. 至少一条长上下文 bytes/token–精度 Pareto  
+3. 专用模拟器与独立工具在约定检查点趋势一致  
+4. 默认模型列表与硬件包络假设已锁定  
+
+工作目录建议：[`../../research/`](../../research/README.md)。
+
+## 学习阶段（P1–P5）— 已归档
+
+P1–P5 **已全部完成**，属 R0 技能建设；**不再定义课题主线**（旧「主线1–4」映射仅作历史说明）。  
+详见 [`learning/README.md`](../../learning/README.md)。
+
+| 项目 | 状态 |
+|------|------|
+| P1 Attention 数值 | 已完成 |
+| P2 量化（含 proxy 局限） | 已完成 |
+| P3 架构评估 | 已完成 |
+| P4 RTL 玩具模块 | 已完成 |
+| P5 tile 模拟器 | 已完成 |

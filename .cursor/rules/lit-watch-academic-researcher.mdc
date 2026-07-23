@@ -1,0 +1,35 @@
+---
+description: 更新文献、lit_watch、对比手册或 related work 时，必须先加载并遵循 academic-researcher skill
+globs: docs/lit_watch/**/*,docs/recent_works_comparison.md,survey/manuscript/**/*,**/references.bib,**/cite_log.md
+alwaysApply: false
+---
+
+# 文献更新默认使用 academic-researcher
+
+当任务涉及以下任一情形时，**在动手改文件之前**，先用 Read 工具打开并完整遵循：
+
+`/root/.cursor/skills/academic-researcher/SKILL.md`
+
+触发情形包括（不限于）：
+
+- 更新 `docs/lit_watch/`（检索、inbox、ledger、卡片）
+- 更新 `docs/recent_works_comparison.md`
+- 为 survey / learning 增补参考文献或 related work
+- 用户说「更新文献」「查新论文」「核实 venue/DOI」「文献监视」等
+
+## 必须遵守（与 skill 一致）
+
+- **禁止编造引用**：未定位并核实（题名、作者、venue、年份、DOI/URL）的论文不得写入 ledger 或对比表。
+- **精确标注状态**：区分 peer-reviewed（会议/期刊/Findings）与 preprint；仅有 arXiv comment「accepted」时写明 DOI 待补。
+- **先核实再写数字**：实验结果优先正文表格；摘要与正文冲突须标注来源。
+- **仓库流程**：遵循 `docs/lit_watch/README.md`（queries → inbox → 核实 → ledger → 对比手册 → CHANGELOG）。
+
+## 本仓库落点
+
+| 产出 | 路径 |
+|------|------|
+| 检索词 / 未审箱 / 台账 | `docs/lit_watch/` |
+| 对比手册 | `docs/recent_works_comparison.md` |
+| 机器可读已核实元数据 | `docs/lit_watch/ledger.yaml` |
+
+不要跳过 skill 直接根据记忆或网页摘要填 Venue/加速比。

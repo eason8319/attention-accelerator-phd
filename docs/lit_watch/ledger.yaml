@@ -1,0 +1,432 @@
+# Literature ledger — verified metadata only
+# status: verified | provisional
+# venue_type: proceedings | journal | findings | preprint | workshop
+# bucket: algo_gpu | hw_asic_fpga | survey | adjacent
+#
+# Verification pass: 2026-07-23 (arXiv API + PMLR/ACL/IEEE where available)
+
+cutoff:
+  date: "2026-07-23"
+  latest_seen:
+    arxiv_id: "2607.08057"
+    title: "Towards Efficient Large Language Model Serving: A Survey on System-Aware KV Cache Optimization"
+    note: "ACL 2026 Findings; arXiv first posted 2026-07-09"
+
+papers:
+  - id: kivi
+    short_name: KIVI
+    title_official: "KIVI: A Tuning-Free Asymmetric 2bit Quantization for KV Cache"
+    title_arxiv: "KIVI: A Tuning-Free Asymmetric 2bit Quantization for KV Cache"
+    authors:
+      - Zirui Liu
+      - Jiayi Yuan
+      - Hongye Jin
+      - Shaochen Zhong
+      - Zhaozhuo Xu
+      - Vladimir Braverman
+      - Beidi Chen
+      - Xia Hu
+    venue: "ICML 2024"
+    venue_detail: "Proceedings of the 41st International Conference on Machine Learning, PMLR 235:32332-32344"
+    venue_type: proceedings
+    year: 2024
+    arxiv_id: "2402.02750"
+    arxiv_first_posted: "2024-02-05"
+    arxiv_last_updated: "2024-07-25"
+    doi: null
+    canonical_url: "https://proceedings.mlr.press/v235/liu24bz.html"
+    code: "https://github.com/jy-yuan/KIVI"
+    bucket: algo_gpu
+    status: verified
+    verified_on: "2026-07-23"
+    verify_sources:
+      - "https://proceedings.mlr.press/v235/liu24bz.html"
+      - "arXiv API 2402.02750"
+    notes: "Author Hongye Jin (not Hongbin). arXiv DOI field may list non-Crossref RG id; prefer PMLR URL."
+
+  - id: bitdecoding
+    short_name: BitDecoding
+    title_official: "BitDecoding: Unlocking Tensor Cores for Long-Context LLMs with Low-Bit KV Cache"
+    authors:
+      - Dayou Du
+      - Shijie Cao
+      - Jianyi Cheng
+      - Luo Mai
+      - Ting Cao
+      - Mao Yang
+    venue: "HPCA 2026"
+    venue_detail: "2026 IEEE International Symposium on High Performance Computer Architecture (HPCA), pp. 1-13"
+    venue_type: proceedings
+    year: 2026
+    arxiv_id: "2503.18773"
+    arxiv_first_posted: "2025-03-24"
+    arxiv_last_updated: "2026-01-05"
+    doi: "10.1109/HPCA68181.2026.11408481"
+    canonical_url: "https://doi.org/10.1109/HPCA68181.2026.11408481"
+    code: "https://github.com/OpenBitSys/BitDecoding"
+    bucket: algo_gpu
+    status: verified
+    verified_on: "2026-07-23"
+    verify_sources:
+      - "IEEE DOI / GitHub CITATION"
+      - "arXiv API 2503.18773"
+    notes: "Treat as peer-reviewed HPCA'26; arXiv is preprint mirror."
+
+  - id: saw_int4
+    short_name: SAW-INT4
+    title_official: "SAW-INT4: System-Aware 4-Bit KV-Cache Quantization for Real-World LLM Serving"
+    authors:
+      - Jinda Jia
+      - Jisen Li
+      - Zhongzhu Zhou
+      # et al.
+    venue: "preprint (arXiv)"
+    venue_detail: null
+    venue_type: preprint
+    year: 2026
+    arxiv_id: "2604.19157"
+    arxiv_first_posted: "2026-04-21"
+    arxiv_last_updated: "2026-04-21"
+    doi: null
+    canonical_url: "https://arxiv.org/abs/2604.19157"
+    code: null
+    bucket: algo_gpu
+    status: verified
+    verified_on: "2026-07-23"
+    verify_sources:
+      - "arXiv API 2604.19157"
+    notes: "No journal_ref/DOI as of cutoff; keep as preprint."
+
+  - id: minikv
+    short_name: MiniKV
+    title_official: "MiniKV: Pushing the Limits of 2-Bit KV Cache via Compression and System Co-Design for Efficient Long Context Inference"
+    title_arxiv: "MiniKV: Pushing the Limits of LLM Inference via 2-Bit Layer-Discriminative KV Cache"
+    authors:
+      - Akshat Sharma
+      - Hangliang Ding
+      - Jianping Li
+      - Neel Dani
+      - Minjia Zhang
+    venue: "ACL 2025 Findings"
+    venue_detail: "Findings of the Association for Computational Linguistics: ACL 2025, pages 18506-18523, Vienna, Austria"
+    venue_type: findings
+    year: 2025
+    arxiv_id: "2411.18077"
+    arxiv_first_posted: "2024-11-27"
+    arxiv_last_updated: "2025-06-08"
+    doi: "10.18653/v1/2025.findings-acl.952"
+    canonical_url: "https://aclanthology.org/2025.findings-acl.952/"
+    code: null
+    bucket: algo_gpu
+    status: verified
+    verified_on: "2026-07-23"
+    verify_sources:
+      - "https://aclanthology.org/2025.findings-acl.952/"
+      - "arXiv API 2411.18077"
+    notes: "Use ACL official title; arXiv title string differs."
+
+  - id: kvtuner
+    short_name: KVTuner
+    title_official: "KVTuner: Sensitivity-Aware Layer-Wise Mixed-Precision KV Cache Quantization for Efficient and Nearly Lossless LLM Inference"
+    authors:
+      - Xing Li
+      - Zeyu Xing
+      - Yiming Li
+      - Linping Qu
+      - Hui-Ling Zhen
+      - Yiwu Yao
+      - Wulong Liu
+      - Sinno Jialin Pan
+      - Mingxuan Yuan
+    venue: "ICML 2025"
+    venue_detail: "Proceedings of the 42nd International Conference on Machine Learning, PMLR 267:36451-36485"
+    venue_type: proceedings
+    year: 2025
+    arxiv_id: "2502.04420"
+    arxiv_first_posted: "2025-02-06"
+    arxiv_last_updated: "2025-11-20"
+    doi: null
+    canonical_url: "https://proceedings.mlr.press/v267/li25dd.html"
+    code: "https://github.com/cmd2001/KVTuner"
+    bucket: algo_gpu
+    status: verified
+    verified_on: "2026-07-23"
+    verify_sources:
+      - "https://proceedings.mlr.press/v267/li25dd.html"
+      - "arXiv API 2502.04420 (comment: Accepted by ICML25)"
+
+  - id: innerq
+    short_name: InnerQ
+    title_official: "InnerQ: Hardware-Aware Tuning-Free Quantization of KV Cache for Large Language Models"
+    authors:
+      - Sayed Mohammadreza Tayaranian Hosseini
+      - Amir Ardakani
+      - Warren J. Gross
+    venue: "preprint (arXiv)"
+    venue_type: preprint
+    year: 2026
+    arxiv_id: "2602.23200"
+    arxiv_first_posted: "2026-02-26"
+    arxiv_last_updated: "2026-05-20"
+    doi: null
+    canonical_url: "https://arxiv.org/abs/2602.23200"
+    bucket: algo_gpu
+    status: verified
+    verified_on: "2026-07-23"
+    verify_sources:
+      - "arXiv API 2602.23200"
+    notes: "No venue yet at cutoff. Abstract speedup numbers vary across versions; cite table when using."
+
+  - id: block_gtq
+    short_name: Block-GTQ
+    title_official: "RoPE-Aware Bit Allocation for KV-Cache Quantization"
+    method_name: Block-GTQ
+    authors:
+      - Fengfeng Liang
+      - Yuechen Zhang
+      - Jiaya Jia
+    venue: "preprint (arXiv)"
+    venue_type: preprint
+    year: 2026
+    arxiv_id: "2606.24033"
+    arxiv_first_posted: "2026-06-23"
+    arxiv_last_updated: "2026-06-23"
+    doi: null
+    canonical_url: "https://arxiv.org/abs/2606.24033"
+    code: "https://github.com/JIA-Lab-research/blockgtq"
+    bucket: algo_gpu
+    status: verified
+    verified_on: "2026-07-23"
+    verify_sources:
+      - "arXiv API 2606.24033"
+    notes: "Paper title is RoPE-Aware...; Block-GTQ is the method name."
+
+  - id: ultraquant
+    short_name: UltraQuant
+    title_official: "UltraQuant: 4-bit KV Caching for Context-Heavy Agents"
+    authors:
+      - Inesh Chakrabarti
+      - David Limpus
+      - Aditi Ghai Rana
+      # et al.
+    venue: "preprint (arXiv)"
+    venue_type: preprint
+    year: 2026
+    arxiv_id: "2606.20474"
+    arxiv_first_posted: "2026-06-18"
+    arxiv_last_updated: "2026-06-19"
+    doi: null
+    canonical_url: "https://arxiv.org/abs/2606.20474"
+    bucket: algo_gpu
+    status: verified
+    verified_on: "2026-07-23"
+    verify_sources:
+      - "arXiv API 2606.20474"
+
+  - id: dont_waste_bits
+    short_name: DontWasteBits
+    title_official: "Don't Waste Bits! Adaptive KV-Cache Quantization for Lightweight On-Device LLMs"
+    authors:
+      - Sayed Pedram Haeri Boroujeni
+      - Niloufar Mehrabi
+      - Patrick Woods
+      # et al.
+    venue: "CVPR 2026 (accepted; confirm camera-ready)"
+    venue_type: proceedings
+    year: 2026
+    arxiv_id: "2604.04722"
+    arxiv_first_posted: "2026-04-06"
+    arxiv_last_updated: "2026-04-06"
+    doi: null
+    canonical_url: "https://arxiv.org/abs/2604.04722"
+    bucket: algo_gpu
+    status: verified
+    verified_on: "2026-07-23"
+    verify_sources:
+      - "arXiv API comment: Accepted by CVPR 2026"
+    notes: "Venue from arXiv comment; add proceedings DOI when available."
+
+  - id: kv_serving_survey_acl26
+    short_name: KVServingSurvey26
+    title_official: "Towards Efficient Large Language Model Serving: A Survey on System-Aware KV Cache Optimization"
+    authors:
+      - Jiantong Jiang
+      - Peiyu Yang
+      - Rui Zhang
+      # et al.
+    venue: "ACL 2026 Findings"
+    venue_detail: "Findings of the Association for Computational Linguistics: ACL 2026, pp. 38450-38476"
+    venue_type: findings
+    year: 2026
+    arxiv_id: "2607.08057"
+    arxiv_first_posted: "2026-07-09"
+    arxiv_last_updated: "2026-07-09"
+    doi: "10.18653/v1/2026.findings-acl.1916"
+    canonical_url: "https://arxiv.org/abs/2607.08057"
+    bucket: survey
+    status: verified
+    verified_on: "2026-07-23"
+    verify_sources:
+      - "arXiv API journal_ref + doi fields"
+    notes: "This is the cutoff-latest paper in the watch set."
+
+  - id: systolicattention
+    short_name: SystolicAttention
+    title_official: "SystolicAttention: Fusing FlashAttention within a Single Systolic Array"
+    authors:
+      - Jiawei Lin
+      - Yuanlong Li
+      - Guokai Chen
+      # et al. (Thomas Bourgeat et al. on some mirrors)
+    venue: "preprint (arXiv)"
+    venue_type: preprint
+    year: 2025
+    arxiv_id: "2507.11331"
+    arxiv_first_posted: "2025-07-15"
+    arxiv_last_updated: "2025-12-08"
+    doi: null
+    canonical_url: "https://arxiv.org/abs/2507.11331"
+    bucket: hw_asic_fpga
+    status: verified
+    verified_on: "2026-07-23"
+    verify_sources:
+      - "arXiv API 2507.11331"
+    notes: "Also referred to as FSA in text. Not a peer-reviewed venue at cutoff."
+
+  - id: plena
+    short_name: PLENA
+    title_official: "Combating the Memory Walls: Optimization Pathways for Long-Context Agentic LLM Inference"
+    authors:
+      - Haoran Wu
+      - Can Xiao
+      - Jiayi Nie
+      # et al.
+    venue: "preprint (arXiv)"
+    venue_type: preprint
+    year: 2025
+    arxiv_id: "2509.09505"
+    arxiv_first_posted: "2025-09-11"
+    arxiv_last_updated: "2026-04-12"
+    doi: null
+    canonical_url: "https://arxiv.org/abs/2509.09505"
+    code: "https://github.com/AICrossSim/PLENA_Simulator"
+    bucket: hw_asic_fpga
+    status: verified
+    verified_on: "2026-07-23"
+    verify_sources:
+      - "arXiv API 2509.09505"
+    notes: "System name PLENA; paper title is Combating the Memory Walls..."
+
+  - id: flatattention
+    short_name: FlatAttention
+    title_official: "FlatAttention: Dataflow and Fabric Collectives Co-Optimization for Large Attention-Based Model Inference on Tile-Based Accelerators"
+    authors:
+      - Chi Zhang
+      - Luca Colagrande
+      - Renzo Andri
+      - Luca Benini
+    venue: "preprint (arXiv); submitted to IEEE Transactions on Computers"
+    venue_type: preprint
+    year: 2026
+    arxiv_id: "2604.02110"
+    arxiv_first_posted: "2026-04-02"
+    arxiv_last_updated: "2026-04-02"
+    doi: null
+    canonical_url: "https://arxiv.org/abs/2604.02110"
+    bucket: hw_asic_fpga
+    status: verified
+    verified_on: "2026-07-23"
+    verify_sources:
+      - "arXiv API comment: Submitted to IEEE Transactions on Computers"
+    notes: "Not yet published journal version at cutoff."
+
+  - id: acllm
+    short_name: AccLLM
+    title_official: "AccLLM: Accelerating Long-Context LLM Inference Via Algorithm-Hardware Co-Design"
+    authors:
+      - Yanbiao Liang
+      - Huihong Shi
+      - Haikuo Shao
+      - Zhongfeng Wang
+    venue: "preprint (arXiv)"
+    venue_type: preprint
+    year: 2025
+    arxiv_id: "2505.03745"
+    arxiv_first_posted: "2025-04-07"
+    arxiv_last_updated: "2025-04-07"
+    doi: null
+    canonical_url: "https://arxiv.org/abs/2505.03745"
+    bucket: hw_asic_fpga
+    status: verified
+    verified_on: "2026-07-23"
+    verify_sources:
+      - "arXiv API 2505.03745"
+    notes: "Abs id 2505.* but first_posted 2025-04-07."
+
+  - id: flightllm
+    short_name: FlightLLM
+    title_official: "FlightLLM: Efficient Large Language Model Inference with a Complete Mapping Flow on FPGAs"
+    authors:
+      - Shulin Zeng
+      - Jun Liu
+      - Guohao Dai
+      # et al.
+    venue: "FPGA 2024"
+    venue_detail: "ACM/SIGDA International Symposium on Field-Programmable Gate Arrays (FPGA'24)"
+    venue_type: proceedings
+    year: 2024
+    arxiv_id: "2401.03868"
+    arxiv_first_posted: "2024-01-08"
+    arxiv_last_updated: "2024-01-09"
+    doi: "10.1145/3626202.3637562"
+    canonical_url: "https://doi.org/10.1145/3626202.3637562"
+    bucket: hw_asic_fpga
+    status: verified
+    verified_on: "2026-07-23"
+    verify_sources:
+      - "arXiv API comment: Accepted to FPGA'24"
+      - "DOI 10.1145/3626202.3637562"
+
+  - id: salca
+    short_name: Salca
+    title_official: "Salca: A Sparsity-Aware Hardware Accelerator for Efficient Long-Context Attention Decoding"
+    authors:
+      - Wang Fan
+      - Wei Cao
+      - Xi Zha
+      # et al.
+    venue: "preprint (arXiv)"
+    venue_type: preprint
+    year: 2026
+    arxiv_id: "2604.24820"
+    arxiv_first_posted: "2026-04-27"
+    arxiv_last_updated: "2026-04-27"
+    doi: null
+    canonical_url: "https://arxiv.org/abs/2604.24820"
+    bucket: adjacent
+    status: verified
+    verified_on: "2026-07-23"
+    verify_sources:
+      - "arXiv API 2604.24820"
+    notes: "Sparse ASIC; adjacent upper bound, not mainline."
+
+  - id: titanus
+    short_name: Titanus
+    title_official: "Titanus: Enabling KV Cache Pruning and Quantization On-the-Fly for LLM Acceleration"
+    authors:
+      - Peilin Chen
+      - Xiaoxuan Yang
+    venue: "GLSVLSI 2025"
+    venue_type: proceedings
+    year: 2025
+    arxiv_id: "2505.17787"
+    arxiv_first_posted: "2025-05-23"
+    arxiv_last_updated: "2025-05-23"
+    doi: null
+    canonical_url: "https://arxiv.org/abs/2505.17787"
+    bucket: adjacent
+    status: verified
+    verified_on: "2026-07-23"
+    verify_sources:
+      - "arXiv API comment: Accepted to GLSVLSI 2025"
+    notes: "Chiplet/CIM adjacent; confirm ACM/IEEE proceedings DOI when citing formally."
