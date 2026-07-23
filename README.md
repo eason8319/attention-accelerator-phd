@@ -14,24 +14,27 @@
 | [docs/research_plan.md](docs/research_plan.md) | 完整研究计划 |
 | [docs/00_background_and_baselines.md](docs/00_background_and_baselines.md) | 背景与对标基线 |
 | [docs/metrics.md](docs/metrics.md) | 评估指标体系 |
-| [docs/learning_plan.md](docs/learning_plan.md) | **项目式学习方案（P1–P5）** |
+| [learning/](learning/) | **项目式学习方案（P1–P5，已完成）** |
 
-### 学习项目（P1–P5，配套 learning_plan.md）
+### 学习项目（P1–P5）
 | 目录 | 说明 |
 |------|------|
-| [experiments/p1_attention_numerics/](experiments/p1_attention_numerics/) | P1：attention / online softmax 数值内核复现 |
-| [experiments/p2_quantization/](experiments/p2_quantization/) | P2：INT4/FP8/MXFP4 量化与旋转实验 |
-| [sim/arch_eval/](sim/arch_eval/) | P3：SCALE-Sim / Timeloop 架构评估 |
-| [rtl/](rtl/) | P4：exp / softmax / systolic array RTL 模块 |
-| [sim/tile_sim/](sim/tile_sim/) | P5：tile-level 性能模拟器 |
+| [learning/](learning/) | **统一父目录**（计划 + 代码 + 验收报告） |
+| [learning/p1_attention_numerics/](learning/p1_attention_numerics/) | P1：attention / online softmax 数值内核复现 |
+| [learning/p2_quantization/](learning/p2_quantization/) | P2：INT4/FP8/MXFP4 量化与旋转实验 |
+| [learning/p3_arch_eval/](learning/p3_arch_eval/) | P3：SCALE-Sim / Timeloop 架构评估 |
+| [learning/p4_rtl/](learning/p4_rtl/) | P4：exp / softmax / systolic array RTL 模块 |
+| [learning/p5_tile_sim/](learning/p5_tile_sim/) | P5：tile-level 性能模拟器 |
 
 Python 依赖见 [requirements.txt](requirements.txt)。
 
-### 文献与综述
+### 文献与综述（阶段 0）
 | 文档 | 说明 |
 |------|------|
-| [docs/survey/survey_overview.md](docs/survey/survey_overview.md) | **综述内容整理**（章节、分类法、结论） |
-| [docs/survey/manuscript/](docs/survey/manuscript/) | **英文综述 LaTeX 稿** + BibTeX 文献库（编译 PDF） |
+| [survey/](survey/) | **项目初期调查综述**（总览 + 英文稿 + 论文库） |
+| [survey/survey_overview.md](survey/survey_overview.md) | 综述内容整理（章节、分类法、结论） |
+| [survey/manuscript/](survey/manuscript/) | 英文综述 LaTeX 稿 + BibTeX 文献库（编译 PDF） |
+| [templates/](templates/) | **文本类产出模板**（LaTeX IEEE 等） |
 
 ### 研究进展（请在此更新）
 | 文档 | 说明 |

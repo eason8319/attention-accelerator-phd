@@ -1,0 +1,36 @@
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = [
+  "learning/p3_arch_eval/timeloop/generated",
+  "learning/p4_rtl/build",
+  "**/outputs",
+]
+
+[tool.ruff.lint]
+select = [
+  "E",   # pycodestyle errors
+  "F",   # pyflakes
+  "I",   # isort
+  "UP",  # pyupgrade
+  "B",   # bugbear
+]
+ignore = [
+  "E501",  # 行宽交由 formatter；文档字符串中长公式可超宽
+  "E402",  # 允许脚本在改 sys.path 后再导入同目录模块
+  "E741",  # 允许 FlashAttention 记号 l（running sum），勿强行改名
+  "UP042", # str+Enum 粒度枚举保留现写法
+]
+
+[tool.ruff.lint.isort]
+known-first-party = []
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "lf"
+
+[tool.pytest.ini_options]
+testpaths = ["learning"]
+python_files = ["test_*.py"]

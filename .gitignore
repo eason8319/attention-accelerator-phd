@@ -17,11 +17,15 @@
 *.bcf
 *.run.xml
 
+# 模板库内的说明/示例 PDF 允许入库
+!templates/**/*.pdf
+
 # Python
 __pycache__/
 *.py[cod]
 .Python
 .venv/
+.venv-*/
 venv/
 .pytest_cache/
 
@@ -36,3 +40,24 @@ Thumbs.db
 *.tmp
 *.log
 condaenv.*.requirements.txt
+
+# ---------------------------------------------------------------------------
+# 学习项目（P1–P5）运行时产物 —— 本地可复现，不同步云端
+# ---------------------------------------------------------------------------
+
+# 通用：脚本写出的 outputs/（图、CSV、自动报告）
+learning/**/outputs/
+
+# P3：SCALE-Sim 运行时写出的 topology/layout
+learning/p3_arch_eval/scale-sim/attention_tiles.csv
+learning/p3_arch_eval/scale-sim/default_layout.csv
+
+# P3：Timeloop / Accelergy 运行时产物
+learning/p3_arch_eval/timeloop/generated/
+learning/p3_arch_eval/timeloop/accelergy_outputs/
+
+# P4：Verilator 编译、测试向量与仿真产物
+learning/p4_rtl/build/
+
+# Local tool downloads
+.tools/

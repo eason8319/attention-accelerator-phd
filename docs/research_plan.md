@@ -51,7 +51,7 @@ flowchart TB
 
 | 阶段 | 内容 | 产出 |
 |------|------|------|
-| 阶段0 | 文献与基线调研 | survey + 选题报告（`docs/00_background_and_baselines.md`, `docs/metrics.md`） |
+| 阶段0 | 文献与基线调研 | survey + 选题报告（`survey/`，`docs/00_background_and_baselines.md`, `docs/metrics.md`） |
 | 阶段1 | Baseline 建模与瓶颈定位 | 瓶颈分析 + 第一篇 workshop/会议短文 |
 | 阶段2 | FlashAttention-native 架构 | 架构论文（目标 DAC/ASP-DAC/ISCAS 或会议） |
 | 阶段3 | 混合精度 datapath | 核心论文（目标 HPCA/DAC/TCAS-I/TVLSI） |

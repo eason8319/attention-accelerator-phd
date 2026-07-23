@@ -1,0 +1,23 @@
+---
+description: 全仓库源码风格总则：格式工具、注释原则、按语言规则分流
+alwaysApply: true
+---
+
+# 源码风格总则
+
+撰写或修改代码/配置时，按文件类型遵守对应规则：
+
+| 类型 | 规则 |
+|------|------|
+| Python | `python-style` |
+| SystemVerilog | `systemverilog-style` |
+| Markdown | `markdown-docs-style` + 数学定界符规则 |
+| YAML/CFG/Makefile/TOML | `config-makefile-style` |
+
+## 共同原则
+
+- **格式**：与 `.editorconfig` 一致（UTF-8、LF、去行尾空格、文件末换行）；Python 以 `pyproject.toml` 中 Ruff 为准。
+- **注释**：一律使用**中文**（含行内注释、块注释、模块/函数/类 docstring）；写意图、约束、与论文/对拍的对应；禁止复述代码、禁止提交大段注释掉的死代码。
+- **标识符**：源码标识（变量/函数/模块名）用英文；用户可见 Markdown 文档可用中文。
+- **最小改动**：不为「统一风格」做无关重排；改文件时只让触及的行符合规范。
+- **生成物**：`outputs/`、`build/`、Timeloop `generated/` 等勿当源码提交（见 `.gitignore`）。

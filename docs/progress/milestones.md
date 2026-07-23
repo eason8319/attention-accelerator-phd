@@ -25,12 +25,12 @@
 
 ## 学习阶段里程碑（P1–P5）
 
-对照 [learning_plan.md](../learning_plan.md)，与阶段 0 → 阶段 1 过渡期并行推进。
+对照 [learning/README.md](../../learning/README.md)，与阶段 0 → 阶段 1 过渡期并行推进。
 
 | 项目 | 内容 | 验收点 | 状态 |
 |------|------|--------|------|
-| P1 | Attention 数值内核复现 | 三种实现对拍通过 + rescale 推导笔记 | 已完成（pytest 22/22 通过，见 [验收报告](p1_attention_numerics_report.md)） |
-| P2 | 低精度量化实验 | 旋转降误差复现 + KV INT4 困惑度报告 | 已完成（pytest 13/13；Qwen2.5-0.5B 上 Hadamard/BDR PPL < INT4，见 [验收报告](p2_quantization_report.md)） |
-| P3 | 架构评估工具链 | SCALE-Sim/Timeloop 跑通 + `analysis.md` 瓶颈短文 | 已完成（见 [验收报告](p3_arch_eval_report.md)） |
-| P4 | RTL 关键模块 | exp/softmax/systolic array 与 golden model 对拍通过 | 未开始 |
-| P5 | tile-level 模拟器 | Pareto 前沿 + 与 SCALE-Sim 趋势校验 | 未开始 |
+| P1 | Attention 数值内核复现 | 三种实现对拍通过 + rescale 推导笔记 | 已完成（pytest 22/22 通过，见 [验收报告](../../learning/p1_attention_numerics/REPORT.md)） |
+| P2 | 低精度量化实验 | 旋转降误差复现 + KV INT4 困惑度报告 | 已完成（pytest 13/13；Qwen2.5-0.5B 上 Hadamard/BDR PPL < INT4，见 [验收报告](../../learning/p2_quantization/REPORT.md)） |
+| P3 | 架构评估工具链 | SCALE-Sim/Timeloop 跑通 + `analysis.md` 瓶颈短文 | 已完成（见 [验收报告](../../learning/p3_arch_eval/REPORT.md)） |
+| P4 | RTL 关键模块 | exp/softmax/systolic array 与 golden model 对拍通过 | 已完成（`make sim-all` 三模块 PASSED；见 [验收报告](../../learning/p4_rtl/REPORT.md)） |
+| P5 | tile-level 模拟器 | Pareto 前沿 + 与 SCALE-Sim 趋势校验 | 已完成（`run_p5.py` 25 pytest + 6/6 趋势 PASS；见 [验收报告](../../learning/p5_tile_sim/REPORT.md)） |

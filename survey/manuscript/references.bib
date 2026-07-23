@@ -1,0 +1,367 @@
+% ===== 奠基与算法基线 =====
+
+@inproceedings{vaswani2017attention,
+  title     = {Attention Is All You Need},
+  author    = {Vaswani, Ashish and Shazeer, Noam and Parmar, Niki and others},
+  booktitle = {Advances in Neural Information Processing Systems ({NeurIPS})},
+  year      = {2017},
+  note      = {arXiv:1706.03762}
+}
+
+@inproceedings{dao2022flashattention,
+  title     = {FlashAttention: Fast and Memory-Efficient Exact Attention with {IO}-Awareness},
+  author    = {Dao, Tri and Fu, Daniel Y. and Ermon, Stefano and Rudra, Atri and R{\'e}, Christopher},
+  booktitle = {Advances in Neural Information Processing Systems ({NeurIPS})},
+  year      = {2022},
+  note      = {arXiv:2205.14135; includes block-sparse FlashAttention variants}
+}
+
+@article{dao2023flashattention2,
+  title   = {FlashAttention-2: Faster Attention with Better Parallelism and Work Partitioning},
+  author  = {Dao, Tri},
+  journal = {arXiv preprint arXiv:2307.08691},
+  year    = {2023}
+}
+
+@article{shah2024flashattention3,
+  title   = {FlashAttention-3: Fast and Accurate Attention with Asynchrony and Low-Precision},
+  author  = {Shah, Jay and Bikshandi, Ganesh and Zhang, Peng and others},
+  journal = {arXiv preprint arXiv:2407.08608},
+  year    = {2024}
+}
+
+@misc{dao2023flashdecoding,
+  title        = {Flash-Decoding for Long-Context Inference},
+  author       = {Dao, Tri and Haziza, Daniel and Massa, Francisco and Sizov, Grigory},
+  howpublished = {Stanford {CRFM} Blog},
+  year         = {2023},
+  month        = oct,
+  url          = {https://crfm.stanford.edu/2023/10/12/flashdecoding.html},
+  note         = {Also see FlashDecoding++ (arXiv:2311.01282)}
+}
+
+@article{su2024roformer,
+  title   = {{RoFormer}: Enhanced Transformer with Rotary Position Embedding},
+  author  = {Su, Jianlin and Ahmed, Murtadha and Lu, Yu and others},
+  journal = {Neurocomputing},
+  volume  = {568},
+  pages   = {127063},
+  year    = {2024},
+  doi     = {10.1016/j.neucom.2023.127063}
+}
+
+@article{zhang2019root,
+  title   = {Root Mean Square Layer Normalization},
+  author  = {Zhang, Biao and Sennrich, Rico},
+  journal = {arXiv preprint arXiv:1910.07467},
+  year    = {2019}
+}
+
+% ===== 主线1：FlashAttention 原生数据流与阵列架构 =====
+
+@article{lin2025systolicattention,
+  title   = {SystolicAttention: Fusing FlashAttention within a Single Systolic Array},
+  author  = {Lin, Yu and others},
+  journal = {arXiv preprint arXiv:2507.11331},
+  year    = {2025}
+}
+
+@article{plena2025,
+  title   = {Combating the Memory Walls: Optimization Pathways for Long-Context Agentic {LLM} Inference},
+  author  = {Wu, Haoran and Xiao, Can and Nie, Jiayi and others},
+  journal = {arXiv preprint arXiv:2509.09505},
+  year    = {2025}
+}
+
+@article{flatattention2026,
+  title   = {{FlatAttention}: Dataflow and Fabric Collectives Co-Optimization for Large Attention-Based Model Inference on Tile-Based Accelerators},
+  author  = {Zhang, Chi and Colagrande, Luca and Andri, Renzo and Benini, Luca},
+  journal = {arXiv preprint arXiv:2604.02110},
+  year    = {2026}
+}
+
+@misc{streamattention2025,
+  title         = {StreamAttention: Energy-Efficient and High-Utilization Attention on Systolic Hardware},
+  author        = {{Anonymous authors}},
+  howpublished  = {OpenReview preprint (under review)},
+  year          = {2025},
+  url           = {https://openreview.net/forum?id=SRQuPOMzkX},
+  note          = {Author identities withheld on OpenReview as of verification date}
+}
+
+@article{wang2023cosa,
+  title   = {{COSA} Plus: Enhanced Co-Operative Systolic Arrays for Attention Mechanism in Transformers},
+  author  = {Wang, Zhican and Wang, Gang and He, Guanghui},
+  journal = {IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems},
+  volume  = {44},
+  number  = {2},
+  pages   = {723--736},
+  year    = {2025},
+  doi     = {10.1109/TCAD.2024.3434447}
+}
+
+@article{desa2025,
+  title   = {{DESA}: Dataflow Efficient Systolic Array for Acceleration of Transformers},
+  author  = {Wang, Zhican and Fan, Hongxiang and He, Guanghui},
+  journal = {IEEE Transactions on Computers},
+  volume  = {74},
+  number  = {6},
+  pages   = {2058--2072},
+  year    = {2025},
+  doi     = {10.1109/TC.2025.3549621}
+}
+
+@inproceedings{ham2021a3,
+  title     = {{A$^3$}: Accelerating Attention Mechanisms in Neural Networks with Approximation},
+  author    = {Ham, Tae Jun and Jung, Sung Jun and Kim, Seonghak and others},
+  booktitle = {{IEEE} International Symposium on High-Performance Computer Architecture ({HPCA})},
+  pages     = {328--341},
+  year      = {2020},
+  doi       = {10.1109/HPCA47549.2020.00035}
+}
+
+@inproceedings{wang2021spatten,
+  title     = {{SpAtten}: Efficient Sparse Attention Architecture with Cascade Token and Head Pruning},
+  author    = {Wang, Hanrui and Zhang, Zhekai and Han, Song},
+  booktitle = {{IEEE} International Symposium on High-Performance Computer Architecture ({HPCA})},
+  year      = {2021},
+  doi       = {10.1109/HPCA51647.2021.00018}
+}
+
+@inproceedings{kao2023flat,
+  title     = {{FLAT}: An Optimized Dataflow for Mitigating Attention Bottlenecks},
+  author    = {Kao, Sheng-Chun and Subramanian, Suvinay and Agrawal, Gaurav and others},
+  booktitle = {International Conference on Architectural Support for Programming Languages and Operating Systems ({ASPLOS})},
+  year      = {2023},
+  doi       = {10.1145/3575693.3575747}
+}
+
+% ===== 主线2：混合精度 attention datapath 与 KV cache 量化 =====
+
+@article{sawint42026,
+  title   = {{SAW-INT4}: System-AWare 4-Bit {KV}-Cache Quantization for Real-World {LLM} Serving},
+  author  = {Jia, Jinda and Li, Jisen and Zhou, Zhongzhu and others},
+  journal = {arXiv preprint arXiv:2604.19157},
+  year    = {2026}
+}
+
+@inproceedings{bitdecoding2026,
+  title     = {BitDecoding: Unlocking Tensor Cores for Long-Context {LLMs} with Low-Bit {KV} Cache},
+  author    = {Du, Dayou and Cao, Shijie and Cheng, Jianyi and others},
+  booktitle = {HPCA},
+  year      = {2026},
+  note      = {arXiv:2503.18773; HPCA'26}
+}
+
+@article{batquant2026,
+  title   = {{BATQuant}: Outlier-Resilient {MXFP4} Quantization via Learnable Block-Wise Optimization},
+  author  = {Li, Ji-Fu and Zhang, Manyi and Xia, Xiaobo and others},
+  journal = {arXiv preprint arXiv:2603.16590},
+  year    = {2026}
+}
+
+@inproceedings{liu2024kivi,
+  title     = {{KIVI}: A Tuning-Free Asymmetric 2bit Quantization for {KV} Cache},
+  author    = {Liu, Zirui and Yuan, Jiayi and Jin, Hongbin and others},
+  booktitle = {International Conference on Machine Learning ({ICML})},
+  year      = {2024},
+  note      = {arXiv:2402.02750}
+}
+
+@article{ashkboos2024quarot,
+  title   = {{QuaRot}: Outlier-Free 4-Bit Inference in Rotated {LLMs}},
+  author  = {Ashkboos, Saleh and others},
+  journal = {arXiv preprint arXiv:2404.00456},
+  year    = {2024}
+}
+
+@article{liu2024spinquant,
+  title   = {{SpinQuant}: {LLM} Quantization with Learned Rotations},
+  author  = {Liu, Zechun and others},
+  journal = {arXiv preprint arXiv:2405.16406},
+  year    = {2024}
+}
+
+@article{ultraquant2026,
+  title   = {{UltraQuant}: 4-bit {KV} Caching for Context-Heavy Agents},
+  author  = {Chakrabarti, Inesh and Limpus, David and Rana, Aditi Ghai and others},
+  journal = {arXiv preprint arXiv:2606.20474},
+  year    = {2026}
+}
+
+@inproceedings{xiao2023smoothquant,
+  title     = {SmoothQuant: Accurate and Efficient Post-Training Quantization for Large Language Models},
+  author    = {Xiao, Guangxuan and Lin, Ji and Seznec, Mickael and others},
+  booktitle = {International Conference on Machine Learning ({ICML})},
+  year      = {2023},
+  note      = {arXiv:2211.10438}
+}
+
+@inproceedings{frantar2023gptq,
+  title     = {{GPTQ}: Accurate Post-Training Quantization for Generative Pre-trained Transformers},
+  author    = {Frantar, Elias and Ashkboos, Saleh and Hoefler, Torsten and Alistarh, Dan},
+  booktitle = {International Conference on Learning Representations ({ICLR})},
+  year      = {2023},
+  note      = {arXiv:2210.17323}
+}
+
+@article{micikevicius2022fp8,
+  title   = {{FP8} Formats for Deep Learning},
+  author  = {Micikevicius, Paulius and others},
+  journal = {arXiv preprint arXiv:2209.05433},
+  year    = {2022}
+}
+
+% ===== 主线3：非 GEMM 专用硬件 =====
+
+@article{mive2026,
+  title   = {{MIVE}: A Minimalist Integer Vector Engine for Softmax LayerNorm and {RMSNorm} Acceleration},
+  author  = {Alexandridis, Kosmas and Dimitrakopoulos, Giorgos},
+  journal = {arXiv preprint arXiv:2606.17781},
+  year    = {2026}
+}
+
+@article{sole2025,
+  title   = {{SOLE}: Hardware-Software Co-design of Softmax and LayerNorm for Efficient Transformer Inference},
+  author  = {Wang, Wenxun and Zhou, Shuchang and Sun, Wenyu and others},
+  journal = {arXiv preprint arXiv:2510.17189},
+  year    = {2025}
+}
+
+@article{softmaxrmsnorm2026,
+  title   = {Hardware-Oriented Approximations of Softmax and {RMSNorm} for Efficient Transformer Inference},
+  author  = {Kang, Yiwen and Wang, Dong},
+  journal = {Micromachines},
+  volume  = {17},
+  number  = {1},
+  pages   = {84},
+  year    = {2026},
+  doi     = {10.3390/mi17010084}
+}
+
+@article{guaranteednorm2026,
+  title   = {Hardware-Efficient Softmax and Layer Normalization with Guaranteed Normalization for Edge Devices},
+  author  = {Choi, Dawon and Kim, Hana and Kim, Ji-Hoon},
+  journal = {arXiv preprint arXiv:2604.23647},
+  year    = {2026}
+}
+
+@inproceedings{koca2023exp,
+  title     = {Hardware-Efficient Softmax Approximation for Self-Attention Networks},
+  author    = {Koca, Nazim Altar and Do, Anh Tuan and Chang, Chip-Hong},
+  booktitle = {IEEE International Symposium on Circuits and Systems ({ISCAS})},
+  pages     = {1--5},
+  year      = {2023},
+  doi       = {10.1109/ISCAS46773.2023.10181465}
+}
+
+@inproceedings{sun2022softmax,
+  title     = {Softermax: Hardware/Software Co-Design of an Efficient Softmax for Transformers},
+  author    = {Stevens, Jacob R. and Venkatesan, Rangharajan and Dai, Steve and Khailany, Brucek and Raghunathan, Anand},
+  booktitle = {{ACM}/{IEEE} Design Automation Conference ({DAC})},
+  pages     = {469--474},
+  year      = {2021},
+  doi       = {10.1109/DAC18074.2021.9586134}
+}
+
+% ===== 主线4：编译/映射与软硬件协同 =====
+
+@inproceedings{parashar2019timeloop,
+  title     = {Timeloop: A Systematic Approach to {DNN} Accelerator Evaluation},
+  author    = {Parashar, Angshuman and Raina, Priyanka and Shao, Yakun Sophia and others},
+  booktitle = {{IEEE} International Symposium on Performance Analysis of Systems and Software ({ISPASS})},
+  year      = {2019},
+  doi       = {10.1109/ISPASS.2019.00042}
+}
+
+@inproceedings{wu2019accelergy,
+  title     = {Accelergy: An Architecture-Level Energy Estimation Methodology for Accelerator Designs},
+  author    = {Wu, Yannan Nellie and Emer, Joel S. and Sze, Vivienne},
+  booktitle = {{IEEE}/{ACM} International Conference on Computer-Aided Design ({ICCAD})},
+  year      = {2019},
+  doi       = {10.1109/ICCAD45719.2019.8942149}
+}
+
+@article{scalesimv3_2025,
+  title   = {{SCALE-Sim} v3: A Modular Cycle-Accurate Systolic Accelerator Simulator for End-to-End System Analysis},
+  author  = {Raj, Ritik and Banerjee, Sarbartha and Chandra, Nikhil and others},
+  journal = {arXiv preprint arXiv:2504.15377},
+  year    = {2025}
+}
+
+@article{klhufek2025transinfersim,
+  title   = {{TransInferSim}: Toward Fast and Accurate Evaluation of Embedded Hardware Accelerators for Transformer Networks},
+  author  = {Klhufek, Jan and Marchisio, Alberto and Mrazek, Vojtech and Sekanina, Lukas and Shafique, Muhammad},
+  journal = {IEEE Access},
+  volume  = {13},
+  pages   = {177215--177226},
+  year    = {2025},
+  doi     = {10.1109/ACCESS.2025.3621062}
+}
+
+@article{tilelang2025,
+  title   = {TileLang: A Composable Tiled Programming Model for {AI} Systems},
+  author  = {Wang, Lei and Cheng, Yu and Shi, Yining and others},
+  journal = {arXiv preprint arXiv:2504.17577},
+  year    = {2025}
+}
+
+@inproceedings{chen2016eyeriss,
+  title     = {Eyeriss: An Energy-Efficient Reconfigurable Accelerator for Deep Convolutional Neural Networks},
+  author    = {Chen, Yu-Hsin and Krishna, Tushar and Emer, Joel S. and Sze, Vivienne},
+  booktitle = {{IEEE} International Solid-State Circuits Conference ({ISSCC})},
+  year      = {2016},
+  doi       = {10.1109/ISSCC.2016.7418007}
+}
+
+@inproceedings{ma2024tpuv4i,
+  title     = {{TPU} v4: An Optically Reconfigurable Supercomputer for Machine Learning with Hardware Support for Embeddings},
+  author    = {Jouppi, Norman P. and Kurian, George and Li, Sheng and others},
+  booktitle = {International Symposium on Computer Architecture ({ISCA})},
+  year      = {2023},
+  doi       = {10.1145/3579371.3589350},
+  note      = {arXiv:2304.01433}
+}
+
+% ===== 对照A：稀疏/动态 attention =====
+
+@article{salca2026,
+  title   = {{Salca}: A Sparsity-Aware Hardware Accelerator for Efficient Long-Context Attention Decoding},
+  author  = {Fan, Wang and Cao, Wei and Zha, Xi and others},
+  journal = {arXiv preprint arXiv:2604.24820},
+  year    = {2026}
+}
+
+@inproceedings{liu2021sanger,
+  title     = {Sanger: A Co-Design Framework for Enabling Sparse Attention using Reconfigurable Architecture},
+  author    = {Lu, Liqiang and Jin, Yicheng and Bi, Hangrui and others},
+  booktitle = {{IEEE}/{ACM} International Symposium on Microarchitecture ({MICRO})},
+  year      = {2021},
+  doi       = {10.1145/3466752.3480125}
+}
+
+
+% ===== 对照B：访存中心架构（展望） =====
+
+@article{amma2026,
+  title   = {{AMMA}: A Multi-Chiplet Memory-Centric Architecture for Low-Latency 1M Context Attention Serving},
+  author  = {Yu, Zhongkai and Ye, Haotian and Zhou, Chenyang and others},
+  journal = {arXiv preprint arXiv:2604.26103},
+  year    = {2026}
+}
+
+@article{lolpim2024,
+  title   = {{PIMphony}: Overcoming Bandwidth and Capacity Inefficiency in {PIM}-Based Long-Context {LLM} Inference System},
+  author  = {Kwon, Hyucksung and Koo, Kyungmo and Kim, Janghyeon and others},
+  journal = {arXiv preprint arXiv:2412.20166},
+  year    = {2024},
+  note      = {Also referred to as LoL-PIM}
+}
+
+@inproceedings{heo2024nuepim,
+  title     = {{NeuPIMs}: {NPU}-{PIM} Heterogeneous Acceleration for Batched {LLM} Inferencing},
+  author    = {Heo, Guseul and Lee, Sangyeop and Cho, Jaehoon and others},
+  booktitle = {International Conference on Architectural Support for Programming Languages and Operating Systems ({ASPLOS})},
+  year      = {2024},
+  doi       = {10.1145/3620666.3651380}
+}

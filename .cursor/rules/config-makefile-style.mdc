@@ -1,0 +1,24 @@
+---
+description: YAML/CFG/Makefile 等配置与构建文件的格式约定
+globs: "**/{Makefile,makefile,*.mk,*.yml,*.yaml,*.cfg,*.toml}"
+alwaysApply: false
+---
+
+# 配置与 Makefile 风格
+
+## YAML / TOML
+
+- 2 空格缩进（YAML）；`pyproject.toml` 跟随现有表结构，勿无关重排。
+- 键名稳定、可读；**注释一律中文**，说明「为何需要该值」，非复述键名。
+- conda `environment.yml`：固定或范围化关键依赖版本，与对应 `README` 中的环境名一致。
+
+## SCALE-Sim / 工具 CFG
+
+- 保持与生成脚本约定一致的段名与键；手工改参数时用**中文注释**写清单位（MiB、MHz、字宽）。
+- 运行时生成的 `attention_tiles.csv` 等勿当源码维护（已在 `.gitignore`）。
+
+## Makefile
+
+- 目标名 `snake-case` 或现有风格（如 `sim-all`、`sim-exp`）；`.PHONY` 列出伪目标。
+- 配方行用 Tab；变量 `UPPER_SNAKE`。
+- **中文注释**说明依赖（Verilator 版本、conda env 名）与「一键入口」用途。

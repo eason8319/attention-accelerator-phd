@@ -25,7 +25,7 @@
 2. **架构级（性能/能量/面积）**：本仓库的解析模型与 cycle-emulated 仿真器
    （`baseline_model.py`, `flash_dataflow.py`, `simulator.py`, `energy.py`）。
    对应真实工具：Timeloop+Accelergy、SCALE-Sim v3、TransInferSim。
-3. **RTL 级（PPA）**：`rtl/` 下 SystemVerilog 关键模块 + iverilog 仿真对拍。
+3. **RTL 级（PPA）**：`learning/p4_rtl/` 下 SystemVerilog 关键模块 + Verilator 仿真对拍。
    对应真实工具：Synopsys DC / Cadence Genus 综合。
 
 ## 3. 能量模型说明

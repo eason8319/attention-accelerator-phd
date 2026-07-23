@@ -1,0 +1,36 @@
+---
+description: SystemVerilog RTL 格式、命名与注释约定
+globs: "**/*.{sv,svh,v}"
+alwaysApply: false
+---
+
+# SystemVerilog 风格
+
+## 格式
+
+- 缩进 4 空格；一行一事；端口列表与 `always_ff`/`always_comb` 块对齐清晰。
+- 信号用 `logic`；禁止在可综合代码里用 `reg`/`wire` 混搭（testbench 可放宽）。
+- 一模块一文件；文件名与模块名一致（如 `exp_approx.sv` ↔ `module exp_approx`）。
+- 时钟/复位命名：`clk`、`rst_n`（低有效）或与现有模块一致；不要同一仓库混用 `reset`/`rstn`。
+
+## 命名
+
+- 模块/实例：`snake_case`；参数/localparam：`UPPER_SNAKE`。
+- 有符号/定点在信号名或邻近注释标明格式（如 Q6.10、UQ0.24）。
+- 与 Python golden 对拍的位宽、延迟常数（如 `LAT`）在注释中写清，便于 `scripts/` 同步。
+
+## 注释
+
+- **一律中文**：`//` 行注释与文件头说明均使用中文；信号名、参数名保持英文。
+- 行注释用 `//`；块注释 `/* */` 仅用于临时关断大段（合并前应删除）。
+- 文件头用简短注释块：模块职责、流水级数、与 P1/P4 笔记或 golden 的对应关系。
+- 注释写 **协议与时序**（何时 valid、skew/deskew、与哪一拍对齐），不要逐行翻译 HDL。
+- 公式/算法步骤可引用论文或 `notes/*.md`，避免在 RTL 里复制长篇推导。
+
+```systemverilog
+// ❌ BAD — 英文 / 复述
+assign y = x + 1; // add one
+
+// ✅ GOOD — 中文说明时序与出处
+// 第 2 级：对小数部分做 PWL；流水延迟与 LAT=3 对齐（见 notes/exp_unit.md）
+```

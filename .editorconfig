@@ -1,0 +1,26 @@
+# 与 .cursor/rules 源码风格约定对齐的编辑器底线
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{py,sv,svh,v,md,mdx}]
+indent_style = space
+indent_size = 4
+
+[*.{yml,yaml,toml}]
+indent_style = space
+indent_size = 2
+
+[*.{cfg,ini}]
+indent_style = space
+indent_size = 4
+
+[Makefile]
+indent_style = tab
+
+[*.md]
+trim_trailing_whitespace = false

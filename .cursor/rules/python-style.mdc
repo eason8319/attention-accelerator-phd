@@ -1,0 +1,40 @@
+---
+description: Python 源码格式、类型注解与注释/文档字符串约定
+globs: "**/*.py"
+alwaysApply: false
+---
+
+# Python 风格
+
+## 格式
+
+- 缩进 4 空格；行宽优先 ≤ 100；UTF-8；文件末尾保留换行。
+- 字符串默认双引号 `"..."`；需嵌套或含 `"` 时再用单引号。
+- 导入顺序：标准库 → 第三方 → 本项目；组间空一行；禁止未使用导入。
+- 每个模块首行附近保留模块级 docstring；新文件加 `from __future__ import annotations`。
+- 与仓库一致时可用 Ruff：`ruff format` / `ruff check --fix`（见根目录 `pyproject.toml`）。
+
+## 命名与类型
+
+- 模块/函数/变量：`snake_case`；类：`PascalCase`；常量：`UPPER_SNAKE`。
+- 公共函数与 dataclass 字段写类型注解；内部小助手可省略，但不要混用无注解的公开 API。
+- Prefer `@dataclass`（只读配置用 `frozen=True`）表达结构化参数，避免松散 dict 当配置。
+
+## 注释与 docstring
+
+- **一律中文**：模块/类/函数 docstring、行内注释、块注释均使用中文；专有名词（FlashAttention、SRAM、`Br`/`Bc` 等）可保留英文。Docstring 小节标题用中文：`参数` / `返回` / `异常`（勿用 `Args`/`Returns`）。
+- **Docstring**：公共函数/类说明「做什么 + 关键约定」（shape、单位、误差口径）。
+- **行内注释**：只写 *why* / 不变量 / 与论文公式的对应；禁止复述显而易见的代码。
+- 禁止大段注释掉的旧代码；删除或收入 git 历史。
+- 公式可用 LaTeX，在 docstring 里用 `:math:`...`` 或纯文本 `Br×Bc`；不要用未转义的裸 `$` 干扰部分工具。
+- `# type: ignore[...]` 的忽略码保持英文机器标记；若需说明原因，用中文写在同行或上一行。
+
+```python
+# ❌ BAD — 英文注释 / 复述代码
+x = x + 1  # increment x
+
+# ✅ GOOD — 中文说明约束或出处
+# Footprint 须装入 SRAM；双缓冲需要 2×（见 FA IO 笔记 §1.2）
+if 2 * footprint > hw.sram_bytes:
+    return infeasible(...)
+```
