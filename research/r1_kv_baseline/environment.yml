@@ -1,0 +1,7 @@
+# 创建环境后请再执行: pip install -r requirements.txt
+name: r1-kv-baseline
+channels:
+  - defaults
+dependencies:
+  - python=3.11
+  - pip

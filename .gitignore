@@ -60,12 +60,17 @@ learning/p3_arch_eval/timeloop/accelergy_outputs/
 learning/p4_rtl/build/
 
 # ---------------------------------------------------------------------------
-# 正式研究实验产物 —— 全量在 experiments/ 本地保留；云端仅同步 REPORT.md
+# 正式研究实验产物 —— 云端仅同步 REPORT.md；其余仅本地
 # ---------------------------------------------------------------------------
-# 约定：research/**/experiments/<name>/{run_*.py, REPORT.md, results/}
-# 云端仅同步 REPORT.md；脚本与 results/ 仅本地。
-research/**/experiments/**/results/
-research/**/experiments/**/run_*.py
+# 约定：research/**/experiments/<name>/{run_*.py, REPORT.md, results/, ...}
+# research 下非 experiments 的目录（cache_path、protocols 等）正常入库。
+# experiments 骨架（.gitkeep、configs/）保留；各实验子目录只入库 REPORT.md。
+research/**/experiments/**/*
+!research/**/experiments/**/
+!research/**/experiments/.gitkeep
+!research/**/experiments/configs/
+!research/**/experiments/configs/**
+!research/**/experiments/**/REPORT.md
 research/**/outputs/
 
 # Local tool downloads

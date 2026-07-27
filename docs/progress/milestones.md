@@ -6,7 +6,7 @@
 | 深度 | 内容 | 产出 | 状态 |
 |------|------|------|------|
 | R0 | Survey + Learning 技能与证据基线 | `survey/`、`learning/`、本仓库计划与对比手册 | **已完成**（持续文献监视除外） |
-| R1 | 真实 KV cache-path、误差—流量模型、decode simulator 骨架 | 可复现测量 + 协议锁定 | **进行中**（M0–M1 完成；下一步 M2） |
+| R1 | 真实 KV cache-path、误差—流量模型、decode simulator 骨架 | 可复现测量 + 协议锁定 | **进行中**（M0–M2 完成；下一步 M3） |
 | R2 | 静态 INT4（或 R1 选定主格式）流式通路；无完整 FP16 展开；关键 RTL | 架构主张 + 首版综合 | 未开始 |
 | R3 | 可规则化混合 / 结构感知比特分配 | 精度—硬件代价 Pareto | 未开始 |
 | R4 | 精度—布局—映射联合优化 | 映射方法与系统评估 | 未开始 |
@@ -38,7 +38,7 @@
 
 - [x] **M0** 协议锁定：[`protocols/models_context.md`](../../research/r1_kv_baseline/protocols/models_context.md)、[`protocols/metrics.md`](../../research/r1_kv_baseline/protocols/metrics.md)（v1.0，2026-07-24）
 - [x] **M1** contiguous cache-path（FP16/INT8/INT4）：[`cache_path/`](../../research/r1_kv_baseline/cache_path/)；实验报告 [`experiments/m1_codec_accuracy/REPORT.md`](../../research/r1_kv_baseline/experiments/m1_codec_accuracy/REPORT.md)
-- [ ] M2 INT4+BDR
+- [x] **M2** INT4+BDR：[`cache_path/`](../../research/r1_kv_baseline/cache_path/)（`Int4BdrCodec`）；实验 [`experiments/m2_int4_bdr/REPORT.md`](../../research/r1_kv_baseline/experiments/m2_int4_bdr/REPORT.md)
 - [ ] M3 KIVI 编解码 + 阶段 B 表格复现
 - [ ] M4 paged 双报告
 - [ ] M5 bytes/token Pareto + decode 压力点

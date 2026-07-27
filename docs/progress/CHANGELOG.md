@@ -4,6 +4,17 @@
 
 ---
 
+## 2026-07-27（R1 M2 INT4+BDR 实验）
+
+- `experiments/m2_int4_bdr/`：真实 cache-path 上 INT4 vs INT4+BDR（$n{=}20$ 配对）；gaussian 持平，outlier 下 BDR 相对误差下降约 42%–56%（win-rate 100%），bytes 与 INT4 相同。
+- 报告：`experiments/m2_int4_bdr/REPORT.md`；milestones M2 勾选。
+
+## 2026-07-27（删除 quant/；research 自包含）
+
+- 删除 `research/r1_kv_baseline/quant/`；`BlockDiagonalRotation` 等迁入 `cache_path/rotation.py`，由 `kv_codecs.Int4BdrCodec` 本地导入。
+- 约定：正式研究不运行时依赖 `learning/`；需用的逻辑抄入/重写到 `research/`。计划 M1/M2/M7 等「复用 learning」条目已改写。
+- `protocols/models_context.md` → v1.1（去掉 `quant/` 路径；offline 按需自建）。
+
 ## 2026-07-27（R1 M1 实验归档约定）
 
 - 实验整包迁入 `research/r1_kv_baseline/experiments/m1_codec_accuracy/`（脚本 + `REPORT.md` + 本地 `results/`）。

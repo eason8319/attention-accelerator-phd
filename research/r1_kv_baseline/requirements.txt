@@ -1,0 +1,22 @@
+# R1 真实 KV cache-path 基线依赖
+#
+# GPU 机（推荐，≥24GB）默认安装即可：
+#   pip install -r requirements.txt
+# 当前无 GPU / 弱机准备阶段用 CPU wheel（更小、更快）：
+#   pip install torch --index-url https://download.pytorch.org/whl/cpu
+#   pip install -r requirements.txt
+#
+torch>=2.4
+numpy>=1.26
+matplotlib>=3.8
+pytest>=8.0
+transformers>=4.44
+datasets>=2.20
+scipy>=1.11
+tokenizers>=0.22
+accelerate>=0.33
+huggingface_hub>=0.24
+# KIVI 复现 / 任务评测
+lm-eval>=0.4.5
+tqdm>=4.66
+pyyaml>=6.0
