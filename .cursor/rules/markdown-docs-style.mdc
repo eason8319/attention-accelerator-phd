@@ -1,15 +1,22 @@
 ---
-description: Markdown 文档结构、链接与注释性文字约定（数学定界符见专用规则）
+description: Markdown 文档结构、链接与「非必要不写说明文档」约定（数学定界符见专用规则）
 globs: "**/*.{md,mdx}"
-alwaysApply: false
+alwaysApply: true
 ---
 
 # Markdown 文档风格
 
+## 何时写文档（全项目）
+
+- **默认不主动新增**说明性 Markdown：子目录 `README.md`、`*_NOTES.md`、阶段性小结、复现说明等，**除非用户明确要求**。
+- 进度与变更只更新既有入口：`docs/progress/milestones.md`、`docs/progress/CHANGELOG.md`，以及用户已指定的协议/计划文件。
+- **实验记录**统一放在 `research/**/experiments/<实验名>/`（本地：脚本 + `results/` + `REPORT.md`）；**云端仅同步 `REPORT.md`**（`results/` 与 `run_*.py` 已 gitignore）。
+- 验收级总报告（如 R1 结束时的顶层 `REPORT.md`）仅在计划里程碑或用户点名时写，且尽量一份，勿拆成多份平行说明。
+
 ## 结构
 
 - 一篇文档一个主标题 `#`；章节用 `##` / `###`，勿跳级。
-- 学习项目目录优先自包含：`PLAN.md`、`REPORT.md`、`README.md`、`reading_notes.md`。
+- 学习项目（`learning/p*/`）可保留既有 `PLAN.md` / `REPORT.md` / `README.md` / `reading_notes.md`；**新阶段 research 不要照搬「每目录一份 README」**。
 - 相对链接指向现行路径（`learning/p*/`）；不要引用已废弃的 `experiments/`、`sim/`、顶层 `rtl/`。
 
 ## 文字与「注释」

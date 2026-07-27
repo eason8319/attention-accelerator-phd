@@ -4,6 +4,42 @@
 
 ---
 
+## 2026-07-27（R1 M1 实验归档约定）
+
+- 实验整包迁入 `research/r1_kv_baseline/experiments/m1_codec_accuracy/`（脚本 + `REPORT.md` + 本地 `results/`）。
+- `.gitignore`：`research/**/experiments/**/results/` 与 `research/**/outputs/`；云端仅同步实验 `REPORT.md`。
+
+## 2026-07-27（R1 M1 编码精度实验）
+
+- 新增 `experiments/m1_codec_accuracy/run_m1_codec_accuracy.py`：C0/C1/C2 在真实 contiguous cache-path 上对拍 float golden。
+- 报告：`experiments/m1_codec_accuracy/REPORT.md`。结论：INT8≈半流量、弱误差；INT4≈0.28×流量、rel-$\ell_2\sim 0.14$，误差平台化不随步数发散。
+
+## 2026-07-27（R1 M1 contiguous cache-path）
+
+- 实现 `cache_path/kv_codecs.py`（C0–C2 encode/decode/bytes/`get_codec`）、`kv_cache.py`、`attention_with_cache.py`（prefill/decode_step）。
+- milestones：M1 勾选完成；下一步 M2（INT4+BDR）。
+- 删除 `cache_path/M1_NOTES.md`、`cache_path/README.md`、`cache_path/test_cache_path.py`；约定非用户要求不主动新增说明文档。
+
+## 2026-07-24（R1 M0 协议锁定）
+
+- 新增 [`research/r1_kv_baseline/protocols/models_context.md`](../../research/r1_kv_baseline/protocols/models_context.md)：模型阶梯、上下文阶梯、decode 压力点 $D(16384,1024)$、阶段 A（弱机）/B（≥24 GB GPU）、硬件包络（32×32 @ 1 GHz / 16 MiB / 1 TB/s）。
+- 新增 [`research/r1_kv_baseline/protocols/metrics.md`](../../research/r1_kv_baseline/protocols/metrics.md)：分层指标、bytes/token 分项公式、对照谱 C0–C5、双布局必报。
+- 约定：当前为阶段 A，不下 7B/8B；主机内存不强制 128 GB。
+- milestones：R1 → 进行中，M0 勾选完成。
+
+## 2026-07-24（R1 quant 独立化）
+
+- 将 `research/r1_kv_baseline/p2_legacy/` 重命名为 `quant/`，去掉 P2 / 副本表述。
+- 精简 `quant/`：仅保留 `fakequant.py`、`rotation.py`、`offline_utils.py`；删除测试、报告、PLAN、误差分析脚本与 outputs。
+- 更新 `research/r1_kv_baseline/README.md`、`research/README.md`、`docs/progress/milestones.md`。
+
+## 2026-07-23（R1 准备工作）
+
+- 创建 `research/r1_kv_baseline/`（protocols / cache_path / kivi_repro / bytes_accounting / experiments / outputs）与 `research/r1_decode_sim/`。
+- 在 `research/r1_kv_baseline/` 下建立量化工具库（现为 `quant/`）；`learning/` 保持归档只读。
+- 新增 conda 环境 `r1-kv-baseline`（Python 3.11）及 `requirements.txt`（torch / transformers / lm-eval 等）。
+- 更新 `research/README.md`：R1 状态为准备中。
+
 ## 2026-07-23（文档与定位对齐）
 
 - 以 `docs/research_plan.md`（R0–R5）为唯一真源，重写 `docs/00_background_and_baselines.md`、`docs/progress/milestones.md`、根 `README.md`、`docs/progress/README.md`。

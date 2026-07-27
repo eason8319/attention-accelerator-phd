@@ -59,5 +59,14 @@ learning/p3_arch_eval/timeloop/accelergy_outputs/
 # P4：Verilator 编译、测试向量与仿真产物
 learning/p4_rtl/build/
 
+# ---------------------------------------------------------------------------
+# 正式研究实验产物 —— 全量在 experiments/ 本地保留；云端仅同步 REPORT.md
+# ---------------------------------------------------------------------------
+# 约定：research/**/experiments/<name>/{run_*.py, REPORT.md, results/}
+# 云端仅同步 REPORT.md；脚本与 results/ 仅本地。
+research/**/experiments/**/results/
+research/**/experiments/**/run_*.py
+research/**/outputs/
+
 # Local tool downloads
 .tools/
