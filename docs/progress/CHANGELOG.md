@@ -4,10 +4,65 @@
 
 ---
 
+## 2026-07-31（评测模块去论文数字、通用化）
+
+- `lm_eval_tasks.py`：删除 `PAPER_TABLE3` / `compare_to_paper`；改为 `evaluate_lm_eval` + 可选 `score_delta(reference=...)`。
+- `long_bench_tasks.py`：`KIVI_DEFAULT_DATASETS` → `EXTENDED_DATASETS`；弱化论文/KIVI 专用表述。
+
+## 2026-07-31（lm_eval_tasks：Table 3 / LM-Eval）
+
+- 新增 `kivi_repro/lm_eval_tasks.py`：CoQA / TruthfulQA / GSM8K；`KiviHFLM` 包装本仓库 cache-path。
+
+## 2026-07-31（long_bench_tasks：LongBench 四子组）
+
+- 新增 `kivi_repro/long_bench_tasks.py`：子组映射、官方 prompt/max_gen、预测与 scorer（对齐 KIVI）；默认代表 qasper / qmsum / trec / lcc。
+- `requirements.txt` 增加 `rouge` / `fuzzywuzzy`（LongBench 打分）。
+
+## 2026-07-31（kivi_eval 冒烟改为整模路径）
+
+- `experiments/kivi_eval/run_smoke.py` 改为测 `kivi_repro`（patch / 前向 / generate / clear）；默认玩具 Llama，仅 PASS/FAIL。
+- 更新 `experiments/kivi_eval/REPORT.md` §4.1：4/4 PASS。
+
+## 2026-07-31（hf_generate：generate 封装）
+
+- 新增 `kivi_repro/hf_generate.py`：`load_llama_for_generate` / `generate_ids` / `generate_text`；生成前清空 Kivi cache。
+- 玩具模型冒烟：KIVI patch 后贪心续写有限，`GenerateInfo` 含 bytes。
+
+## 2026-07-31（patch_llama：整模替换入口）
+
+- 新增 `kivi_repro/patch_llama.py`：`patch_llama_model` / `build_llama_kivi`；默认超参对齐协议。
+- 玩具模型冒烟：幂等 patch、prefill 残差窗与 bytes 汇总正常。
+
+## 2026-07-31（LlamaKiviAttention 整模接入）
+
+- 新增 `kivi_repro/llama_kivi_attn.py`：`LlamaKiviAttention` 经本仓库 `KiviKVCache` 写/读；提供 `from_llama_attention` / `clear_llama_kivi_caches`。
+- 玩具 Llama 冒烟：prefill+decode 有限，残差窗长度符合协议。
+
+## 2026-07-28（KIVI 阶段 A 冒烟通过）
+
+- `experiments/kivi_eval/run_smoke.py`：Qwen2.5-0.5B 真实 `past_key_values` → C0/C4/C5 cache-path；512/1024 prefill + 136-step 残差窗 decode；**10/10 PASS**。
+- 更新 `experiments/kivi_eval/REPORT.md` §4.1。
+
+## 2026-07-28（新建 KIVI 模型评测实验目录）
+
+- 新增 `experiments/kivi_eval/`：阶段 A 冒烟（0.5B 短序列）+ 阶段 B Table 3 / LongBench；`REPORT.md` 标明未开始。
+- 更新 `research/r1_kv_baseline/README.md`、`milestones.md` M3 链接。
+
+## 2026-07-28（删除 m1/m2 实验目录）
+
+- 删除 `experiments/m1_codec_accuracy/`、`experiments/m2_int4_bdr/`；C0–C5 对照统一由 `experiments/codec_compare/` 承担。
+- 更新 `milestones.md` M1/M2 链接至 `codec_compare/REPORT.md`。
+
+## 2026-07-28（C0–C5 编码统一对照）
+
+- 新增 `experiments/codec_compare/`：合并原 M1/M2 口径，加入 KIVI 风格 C4/C5；同一真实 cache-path 上配对比较精度与 bytes。
+- 结论要点：outlier 下 BDR 仍优于均匀 INT4；KIVI-4 刷窗后精度优于 INT4 但流量更高；KIVI-2 合成设定误差过大；短于残差窗时 KIVI≡FP16。
+- 报告：`experiments/codec_compare/REPORT.md`。
+- `cache_path/`：KIVI 核 + `KiviKVCache` + `AttentionWithCache` 已支持 C4/C5（M3 B1–B4）。
+
 ## 2026-07-27（R1 M2 INT4+BDR 实验）
 
-- `experiments/m2_int4_bdr/`：真实 cache-path 上 INT4 vs INT4+BDR（$n{=}20$ 配对）；gaussian 持平，outlier 下 BDR 相对误差下降约 42%–56%（win-rate 100%），bytes 与 INT4 相同。
-- 报告：`experiments/m2_int4_bdr/REPORT.md`；milestones M2 勾选。
+- （历史）曾用 `experiments/m2_int4_bdr/`；现已并入 `codec_compare` 并删除原目录。
 
 ## 2026-07-27（删除 quant/；research 自包含）
 
@@ -17,13 +72,12 @@
 
 ## 2026-07-27（R1 M1 实验归档约定）
 
-- 实验整包迁入 `research/r1_kv_baseline/experiments/m1_codec_accuracy/`（脚本 + `REPORT.md` + 本地 `results/`）。
+- （历史）实验曾落在 `experiments/m1_codec_accuracy/`；现已并入 `codec_compare` 并删除原目录。
 - `.gitignore`：`research/**/experiments/**/results/` 与 `research/**/outputs/`；云端仅同步实验 `REPORT.md`。
 
 ## 2026-07-27（R1 M1 编码精度实验）
 
-- 新增 `experiments/m1_codec_accuracy/run_m1_codec_accuracy.py`：C0/C1/C2 在真实 contiguous cache-path 上对拍 float golden。
-- 报告：`experiments/m1_codec_accuracy/REPORT.md`。结论：INT8≈半流量、弱误差；INT4≈0.28×流量、rel-$\ell_2\sim 0.14$，误差平台化不随步数发散。
+- （历史）曾新增 M1 C0/C1/C2 对照；结论已并入 `experiments/codec_compare/REPORT.md`。
 
 ## 2026-07-27（R1 M1 contiguous cache-path）
 

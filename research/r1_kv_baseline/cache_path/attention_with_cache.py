@@ -1,11 +1,11 @@
-"""经 ContiguousKVCache 的 decode attention（写 cache → load → attend）。"""
+"""经 ContiguousKVCache / KiviKVCache 的 decode attention（写 cache → load → attend）。"""
 
 from __future__ import annotations
 
 import torch
 
-from kv_cache import ContiguousKVCache
-from kv_codecs import KVCodec, get_codec
+from kv_cache import ContiguousKVCache, KiviKVCache
+from kv_codecs import KVCodec, KiviFormat, get_codec
 
 
 def scaled_dot_product_attention(
@@ -26,40 +26,73 @@ def scaled_dot_product_attention(
 
 
 class AttentionWithCache:
-    """持有一个 ContiguousKVCache，提供 prefill 写入与 decode 步进。
+    """持有 ContiguousKVCache（C0–C3）或 KiviKVCache（C4/C5），提供 prefill / decode。
 
-    ``codec`` 可为 ``KVCodec`` 实例，或 ``get_codec`` 可识别的格式名
-    （如 ``fp16`` / ``int8`` / ``int4`` / ``int4_bdr`` 或 ``C0``–``C3``）。
-    字符串路径会传入 ``dim=head_dim``，以便 INT4+BDR 绑定旋转维；
-    额外关键字（如 ``seed``）转发给 ``get_codec``。
+    ``codec`` 可为：
+
+    - ``KVCodec`` 实例，或 C0–C3 格式名（``fp16`` / ``int8`` / ``int4`` / ``int4_bdr``）
+    - ``KiviFormat`` 实例，或 C4/C5 格式名（``kivi2`` / ``C4`` / ``kivi4`` / ``C5``）
+
+    字符串路径会传入 ``dim=head_dim``（供 INT4+BDR）；其余关键字转发给 ``get_codec``
+    （如 ``seed``、``group_size``、``residual_length``）。
     """
 
     def __init__(
         self,
-        codec: KVCodec | str,
+        codec: KVCodec | KiviFormat | str,
         *,
         num_heads: int,
         head_dim: int,
         device: torch.device | None = None,
         **codec_kwargs,
     ) -> None:
-        if isinstance(codec, str):
-            codec = get_codec(codec, dim=head_dim, **codec_kwargs)
-        elif codec_kwargs:
-            raise TypeError(
-                "传入 KVCodec 实例时不要再给 codec 关键字参数；"
-                "请在 get_codec(...) 时设置，或改用格式字符串"
-            )
-        self.cache = ContiguousKVCache(
-            codec, num_heads=num_heads, head_dim=head_dim, device=device
-        )
+        self._kivi_format: KiviFormat | None = None
         self.num_heads = num_heads
         self.head_dim = head_dim
+
+        if isinstance(codec, str):
+            resolved = get_codec(codec, dim=head_dim, **codec_kwargs)
+            if isinstance(resolved, KiviFormat):
+                self._kivi_format = resolved
+                self.cache: ContiguousKVCache | KiviKVCache = resolved.make_cache(
+                    num_heads=num_heads, head_dim=head_dim, device=device
+                )
+            else:
+                self.cache = ContiguousKVCache(
+                    resolved, num_heads=num_heads, head_dim=head_dim, device=device
+                )
+        elif isinstance(codec, KiviFormat):
+            if codec_kwargs:
+                raise TypeError(
+                    "传入 KiviFormat 时不要再给 codec 关键字参数；"
+                    "请在 get_codec(...) 时设置，或改用格式字符串"
+                )
+            self._kivi_format = codec
+            self.cache = codec.make_cache(
+                num_heads=num_heads, head_dim=head_dim, device=device
+            )
+        elif isinstance(codec, KVCodec):
+            if codec_kwargs:
+                raise TypeError(
+                    "传入 KVCodec 实例时不要再给 codec 关键字参数；"
+                    "请在 get_codec(...) 时设置，或改用格式字符串"
+                )
+            self.cache = ContiguousKVCache(
+                codec, num_heads=num_heads, head_dim=head_dim, device=device
+            )
+        else:
+            raise TypeError(
+                f"codec 须为 KVCodec / KiviFormat / str，得到 {type(codec).__name__}"
+            )
+
         self.device = self.cache.device
 
     @property
-    def codec(self) -> KVCodec:
-        """当前 cache 使用的编解码器。"""
+    def codec(self) -> KVCodec | KiviFormat:
+        """C0–C3 返回 ``KVCodec``；C4/C5 返回构造时的 ``KiviFormat``。"""
+        if self._kivi_format is not None:
+            return self._kivi_format
+        assert isinstance(self.cache, ContiguousKVCache)
         return self.cache.codec
 
     def clear(self) -> None:

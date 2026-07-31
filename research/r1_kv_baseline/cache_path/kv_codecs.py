@@ -1,4 +1,4 @@
-"""KV Cache 编解码器（C0 FP16 / C1 INT8 / C2 INT4 / C3 INT4+BDR）。"""
+"""KV Cache 编解码器（C0–C3 + KIVI 风格 K/V 量化核）。"""
 
 from __future__ import annotations
 
@@ -146,6 +146,201 @@ def _decode_uniform_int(
 
 
 # ---------------------------------------------------------------------------
+# KIVI 风格非对称量化核（对齐 jy-yuan/KIVI quant/new_pack.py）
+# ---------------------------------------------------------------------------
+# 约定输入形状 ``(T, H, D)``（与 ContiguousKVCache 一致）。
+# Key：沿 token 维按 group_size 分组，对每个 channel 做 min-max（per-channel）。
+# Value：沿 channel 维按 group_size 分组，对每个 token 做 min-max（per-token）。
+# 反量化：``x̂ = q * scale + mn``；``EncodedKV.zero_point`` 存 float16 的 ``mn``。
+# 载荷暂用 uint8 存网格值（未 bit-pack）；bytes_payload 按名义比特记账。
+
+
+def _kivi_qmax(bits: int) -> int:
+    if bits not in (2, 4):
+        raise ValueError(f"KIVI 核仅支持 2/4 bit，得到 {bits}")
+    return (1 << bits) - 1
+
+
+def _bytes_lowbit_payload(numel: int, bits: int) -> int:
+    """名义低比特载荷字节数（未 pack 时的记账口径）。"""
+    return (numel * bits + 7) // 8
+
+
+def encode_kivi_key(
+    x: torch.Tensor,
+    *,
+    bits: int = 2,
+    group_size: int = 32,
+) -> EncodedKV:
+    """KIVI Key：per-channel 分组量化。
+
+    将 token 维 ``T`` 划为 ``T // group_size`` 组；组内沿 token 维求
+    min/max，每个 ``(group, head, channel)`` 共享一套 ``scale`` / ``mn``。
+
+    参数
+        x: ``(T, H, D)``，要求 ``T % group_size == 0``。
+        bits: 2 或 4。
+        group_size: 每组 token 数（协议默认 32）。
+    """
+    if x.ndim != 3:
+        raise ValueError(f"KIVI Key 期望 (T, H, D)，得到 {tuple(x.shape)}")
+    t, h, d = x.shape
+    if t <= 0 or t % group_size != 0:
+        raise ValueError(
+            f"KIVI Key 要求 T>0 且能被 group_size={group_size} 整除，得到 T={t}"
+        )
+    qmax = _kivi_qmax(bits)
+    n_groups = t // group_size
+    work = x.float().reshape(n_groups, group_size, h, d)
+    mn = work.amin(dim=1, keepdim=True)
+    mx = work.amax(dim=1, keepdim=True)
+    scale = ((mx - mn) / qmax).clamp(min=1e-8)
+    q = ((work - mn) / scale).clamp(0, qmax).round()
+    payload = q.reshape(t, h, d).to(torch.uint8)
+    # scale/mn: (n_groups, 1, H, D) → (n_groups, H, D)
+    scale_out = scale.squeeze(1).to(torch.float16)
+    mn_out = mn.squeeze(1).to(torch.float16)
+    return EncodedKV(payload=payload, scale=scale_out, zero_point=mn_out)
+
+
+def decode_kivi_key(
+    encoded: EncodedKV,
+    *,
+    group_size: int = 32,
+) -> torch.Tensor:
+    """与 ``encode_kivi_key`` 对称的反量化，返回 float32 ``(T, H, D)``。"""
+    if encoded.scale is None or encoded.zero_point is None:
+        raise ValueError("KIVI Key decode 需要 scale 与 mn（zero_point）")
+    q = encoded.payload.float()
+    t, h, d = q.shape
+    if t % group_size != 0:
+        raise ValueError(f"payload T={t} 不能被 group_size={group_size} 整除")
+    n_groups = t // group_size
+    scale = encoded.scale.float()
+    mn = encoded.zero_point.float()
+    if scale.shape != (n_groups, h, d) or mn.shape != (n_groups, h, d):
+        raise ValueError(
+            f"scale/mn 形状须为 {(n_groups, h, d)}，得到 scale={tuple(scale.shape)}, "
+            f"mn={tuple(mn.shape)}"
+        )
+    q_g = q.reshape(n_groups, group_size, h, d)
+    out = q_g * scale.unsqueeze(1) + mn.unsqueeze(1)
+    return out.reshape(t, h, d)
+
+
+def encode_kivi_value(
+    x: torch.Tensor,
+    *,
+    bits: int = 2,
+    group_size: int = 32,
+) -> EncodedKV:
+    """KIVI Value：per-token 分组量化。
+
+    将 channel 维 ``D`` 划为 ``D // group_size`` 组；组内沿 channel 维求
+    min/max，每个 ``(token, head, group)`` 共享一套 ``scale`` / ``mn``。
+
+    参数
+        x: ``(T, H, D)``，要求 ``D % group_size == 0``。
+        bits: 2 或 4。
+        group_size: 每组 channel 数（协议默认 32）。
+    """
+    if x.ndim != 3:
+        raise ValueError(f"KIVI Value 期望 (T, H, D)，得到 {tuple(x.shape)}")
+    t, h, d = x.shape
+    if d <= 0 or d % group_size != 0:
+        raise ValueError(
+            f"KIVI Value 要求 D>0 且能被 group_size={group_size} 整除，得到 D={d}"
+        )
+    qmax = _kivi_qmax(bits)
+    n_groups = d // group_size
+    work = x.float().reshape(t, h, n_groups, group_size)
+    mn = work.amin(dim=-1, keepdim=True)
+    mx = work.amax(dim=-1, keepdim=True)
+    scale = ((mx - mn) / qmax).clamp(min=1e-8)
+    q = ((work - mn) / scale).clamp(0, qmax).round()
+    payload = q.reshape(t, h, d).to(torch.uint8)
+    # scale/mn: (T, H, n_groups, 1) → (T, H, n_groups)
+    scale_out = scale.squeeze(-1).to(torch.float16)
+    mn_out = mn.squeeze(-1).to(torch.float16)
+    return EncodedKV(payload=payload, scale=scale_out, zero_point=mn_out)
+
+
+def decode_kivi_value(
+    encoded: EncodedKV,
+    *,
+    group_size: int = 32,
+) -> torch.Tensor:
+    """与 ``encode_kivi_value`` 对称的反量化，返回 float32 ``(T, H, D)``。"""
+    if encoded.scale is None or encoded.zero_point is None:
+        raise ValueError("KIVI Value decode 需要 scale 与 mn（zero_point）")
+    q = encoded.payload.float()
+    t, h, d = q.shape
+    if d % group_size != 0:
+        raise ValueError(f"payload D={d} 不能被 group_size={group_size} 整除")
+    n_groups = d // group_size
+    scale = encoded.scale.float()
+    mn = encoded.zero_point.float()
+    if scale.shape != (t, h, n_groups) or mn.shape != (t, h, n_groups):
+        raise ValueError(
+            f"scale/mn 形状须为 {(t, h, n_groups)}，得到 scale={tuple(scale.shape)}, "
+            f"mn={tuple(mn.shape)}"
+        )
+    q_g = q.reshape(t, h, n_groups, group_size)
+    out = q_g * scale.unsqueeze(-1) + mn.unsqueeze(-1)
+    return out.reshape(t, h, d)
+
+
+class KiviKeyCodec(KVCodec):
+    """KIVI Key 编解码器（per-channel，非对称 2/4-bit）。
+
+    仅量化完整 group；残差窗由 ``KiviKVCache`` 维护。
+    """
+
+    def __init__(self, bits: int = 2, group_size: int = 32) -> None:
+        _kivi_qmax(bits)
+        self.bits = bits
+        self.group_size = group_size
+
+    @property
+    def name(self) -> str:
+        return f"kivi_key_{self.bits}bit"
+
+    def encode(self, x: torch.Tensor) -> EncodedKV:
+        return encode_kivi_key(x, bits=self.bits, group_size=self.group_size)
+
+    def decode(self, encoded: EncodedKV) -> torch.Tensor:
+        return decode_kivi_key(encoded, group_size=self.group_size)
+
+    def bytes_payload(self, encoded: EncodedKV) -> int:
+        return _bytes_lowbit_payload(encoded.payload.numel(), self.bits)
+
+
+class KiviValueCodec(KVCodec):
+    """KIVI Value 编解码器（per-token，非对称 2/4-bit）。
+
+    仅量化历史段；残差窗由 ``KiviKVCache`` 维护。
+    """
+
+    def __init__(self, bits: int = 2, group_size: int = 32) -> None:
+        _kivi_qmax(bits)
+        self.bits = bits
+        self.group_size = group_size
+
+    @property
+    def name(self) -> str:
+        return f"kivi_value_{self.bits}bit"
+
+    def encode(self, x: torch.Tensor) -> EncodedKV:
+        return encode_kivi_value(x, bits=self.bits, group_size=self.group_size)
+
+    def decode(self, encoded: EncodedKV) -> torch.Tensor:
+        return decode_kivi_value(encoded, group_size=self.group_size)
+
+    def bytes_payload(self, encoded: EncodedKV) -> int:
+        return _bytes_lowbit_payload(encoded.payload.numel(), self.bits)
+
+
+# ---------------------------------------------------------------------------
 # C0 / C1 / C2 / C3
 # ---------------------------------------------------------------------------
 
@@ -270,11 +465,76 @@ class Int4BdrCodec(KVCodec):
         return (encoded.payload.numel() + 1) // 2
 
 
-def get_codec(format_id: str, **kwargs) -> KVCodec:
-    """按格式别名返回编解码器。
+@dataclass(frozen=True)
+class KiviFormat:
+    """C4/C5 格式句柄：KIVI 非对称量化 + 残差窗参数。
 
-    支持：``fp16``/``C0``，``int8``/``C1``，``int4``/``C2``，
-    ``int4_bdr``/``int4+bdr``/``C3``。
+    不能当作单张量 ``KVCodec`` 使用（K/V 粒度不同且含残差窗）。
+    通过 ``make_cache`` 构造 ``KiviKVCache``。
+    """
+
+    bits: int
+    group_size: int = 32
+    residual_length: int = 128
+    k_bits: int | None = None
+    v_bits: int | None = None
+
+    def __post_init__(self) -> None:
+        _kivi_qmax(self.bits)
+        if self.k_bits is not None:
+            _kivi_qmax(self.k_bits)
+        if self.v_bits is not None:
+            _kivi_qmax(self.v_bits)
+        if self.residual_length <= 0:
+            raise ValueError(f"residual_length 须为正，得到 {self.residual_length}")
+        if self.residual_length % self.group_size != 0:
+            raise ValueError(
+                f"residual_length={self.residual_length} 须能被 "
+                f"group_size={self.group_size} 整除"
+            )
+
+    @property
+    def name(self) -> str:
+        """短名：``kivi2`` / ``kivi4``（与 ``get_codec`` 别名一致）。"""
+        return f"kivi{self.bits}"
+
+    @property
+    def format_id(self) -> str:
+        """协议对照谱 ID：2-bit→C4，4-bit→C5。"""
+        if self.bits == 2:
+            return "C4"
+        if self.bits == 4:
+            return "C5"
+        return f"kivi{self.bits}"
+
+    def make_cache(
+        self,
+        *,
+        num_heads: int,
+        head_dim: int,
+        device: torch.device | None = None,
+    ):
+        """构造带残差窗的 ``KiviKVCache``（延迟导入以避免循环依赖）。"""
+        from kv_cache import KiviKVCache
+
+        return KiviKVCache(
+            num_heads=num_heads,
+            head_dim=head_dim,
+            bits=self.bits,
+            k_bits=self.k_bits,
+            v_bits=self.v_bits,
+            group_size=self.group_size,
+            residual_length=self.residual_length,
+            device=device,
+        )
+
+
+def get_codec(format_id: str, **kwargs) -> KVCodec | KiviFormat:
+    """按格式别名返回编解码器或 KIVI 格式句柄。
+
+    支持：
+    - ``fp16``/``C0``，``int8``/``C1``，``int4``/``C2``，``int4_bdr``/``C3`` → ``KVCodec``
+    - ``kivi2``/``C4``，``kivi4``/``C5`` → ``KiviFormat``（再 ``.make_cache(...)``）
     """
     key = format_id.strip().lower().replace("-", "_").replace("+", "_")
     aliases = {
@@ -288,10 +548,19 @@ def get_codec(format_id: str, **kwargs) -> KVCodec:
         "int4bdr": "int4_bdr",
         "bdr": "int4_bdr",
         "c3": "int4_bdr",
+        "kivi2": "kivi2",
+        "kivi_2": "kivi2",
+        "kivi_2bit": "kivi2",
+        "c4": "kivi2",
+        "kivi4": "kivi4",
+        "kivi_4": "kivi4",
+        "kivi_4bit": "kivi4",
+        "c5": "kivi4",
     }
     if key not in aliases:
         raise ValueError(
-            f"未知 format_id={format_id!r}；支持 fp16/int8/int4/int4_bdr 或 C0–C3"
+            f"未知 format_id={format_id!r}；支持 fp16/int8/int4/int4_bdr/kivi2/kivi4 "
+            f"或 C0–C5"
         )
     name = aliases[key]
     if name == "fp16":
@@ -302,5 +571,16 @@ def get_codec(format_id: str, **kwargs) -> KVCodec:
         return Int4Codec(
             **{k: v for k, v in kwargs.items() if k in {"symmetric", "group_size"}}
         )
+    if name in {"kivi2", "kivi4"}:
+        bits = 2 if name == "kivi2" else 4
+        kivi_keys = {"group_size", "residual_length", "k_bits", "v_bits", "bits"}
+        params = {k: v for k, v in kwargs.items() if k in kivi_keys}
+        # 别名已锁定默认 bits；仅当显式传入且冲突时拒绝
+        if "bits" in params and params["bits"] != bits:
+            raise ValueError(
+                f"{format_id!r} 对应 bits={bits}，与传入 bits={params['bits']} 冲突"
+            )
+        params["bits"] = bits
+        return KiviFormat(**params)
     bdr_keys = {"symmetric", "group_size", "block_size", "seed", "dim"}
     return Int4BdrCodec(**{k: v for k, v in kwargs.items() if k in bdr_keys})

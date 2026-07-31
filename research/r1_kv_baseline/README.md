@@ -38,7 +38,7 @@ r1_kv_baseline/
 
 ## 状态
 
-- **M0 完成**：协议 v1.0 见 [`protocols/`](protocols/)。  
-- **M1 完成**：contiguous C0–C2 见 [`cache_path/`](cache_path/)。  
-- **M2 完成**：INT4+BDR（C3）接入；实验见 [`experiments/m2_int4_bdr/REPORT.md`](experiments/m2_int4_bdr/REPORT.md)。  
-- 下一步：**M3** KIVI 风格复现。
+- **M0 完成**：协议见 [`protocols/`](protocols/)。  
+- **M1–M2 完成**：C0–C3 contiguous cache-path。  
+- **M3（进行中）**：C4/C5 cache-path 已接入；合成对照 [`codec_compare`](experiments/codec_compare/)；[`kivi_eval`](experiments/kivi_eval/) **阶段 A 冒烟已通过**，Table 3 / LongBench 待阶段 B。  
+- 下一步：实现 `run_table3.py` / `run_longbench.py` 并在 ≥24 GB GPU 上复现。

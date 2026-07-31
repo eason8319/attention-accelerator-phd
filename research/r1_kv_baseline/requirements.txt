@@ -20,3 +20,7 @@ huggingface_hub>=0.24
 lm-eval>=0.4.5
 tqdm>=4.66
 pyyaml>=6.0
+# LongBench 打分（摘要 ROUGE / 代码 fuzzy；缺省时 code 回退 difflib）
+rouge>=1.0.1
+fuzzywuzzy>=0.18.0
+python-Levenshtein>=0.25.0

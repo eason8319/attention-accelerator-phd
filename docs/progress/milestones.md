@@ -37,9 +37,9 @@
 ### R1 细项
 
 - [x] **M0** 协议锁定：[`protocols/models_context.md`](../../research/r1_kv_baseline/protocols/models_context.md)、[`protocols/metrics.md`](../../research/r1_kv_baseline/protocols/metrics.md)（v1.0，2026-07-24）
-- [x] **M1** contiguous cache-path（FP16/INT8/INT4）：[`cache_path/`](../../research/r1_kv_baseline/cache_path/)；实验报告 [`experiments/m1_codec_accuracy/REPORT.md`](../../research/r1_kv_baseline/experiments/m1_codec_accuracy/REPORT.md)
-- [x] **M2** INT4+BDR：[`cache_path/`](../../research/r1_kv_baseline/cache_path/)（`Int4BdrCodec`）；实验 [`experiments/m2_int4_bdr/REPORT.md`](../../research/r1_kv_baseline/experiments/m2_int4_bdr/REPORT.md)
-- [ ] M3 KIVI 编解码 + 阶段 B 表格复现
+- [x] **M1** contiguous cache-path（FP16/INT8/INT4）：[`cache_path/`](../../research/r1_kv_baseline/cache_path/)；谱系对照见 [`experiments/codec_compare/REPORT.md`](../../research/r1_kv_baseline/experiments/codec_compare/REPORT.md)
+- [x] **M2** INT4+BDR：[`cache_path/`](../../research/r1_kv_baseline/cache_path/)（`Int4BdrCodec`）；同上 [`codec_compare`](../../research/r1_kv_baseline/experiments/codec_compare/REPORT.md)
+- [ ] M3 KIVI 编解码 + 阶段 B 表格复现：[`experiments/kivi_eval/`](../../research/r1_kv_baseline/experiments/kivi_eval/)（含阶段 A 冒烟 + Table 3 / LongBench）
 - [ ] M4 paged 双报告
 - [ ] M5 bytes/token Pareto + decode 压力点
 - [ ] M6 误差—流量敏感性
