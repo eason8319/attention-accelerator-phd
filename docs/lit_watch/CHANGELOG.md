@@ -4,6 +4,33 @@
 
 ---
 
+## 2026-09-03（全文定量与发表状态复核）
+
+- 对 `ledger.yaml` 全部 21 篇记录完成全文级定量复核；每个结果补齐模型/负载、平台、基线、正文表图位置与适用边界，详见 `AUDIT_2026-09-03.md`。
+- 当前状态汇总为 10 篇正式会刊/期刊或 workshop、11 篇预印本/在投；未发现重复 ID、DOI 或 BibTeX key。
+- 状态升级：PLENA → ISCA 2026；AccLLM → IEEE TVLSI 2026；Don't Waste Bits → CVPR 2026 Workshops（LoViF）；Titanus 补齐 ACM DOI 与页码。
+- 发现 SystolicAttention 摘要与 §6.1 对 1.77×/4.83× 的 TPUv5e/Neuron-v2 对应关系互相颠倒，标记为引用前待作者勘误。
+- 维护规则改为：摘要定量数字必须记录，同时追溯正文表/图；保留 `up to` 限定，并报告负向结果、元数据、dense shadow、转换峰值与端到端口径。
+
+---
+
+## 2026-09-03（academic-researcher 迁入仓库）
+
+- 项目 skill 落点改为 `.cursor/skills/academic-researcher/SKILL.md`（随 git，本机与 Cloud Agent 共用）。
+- 规则与本 README 去掉 `/root/.cursor/skills/...` 绝对路径。
+
+---
+
+## 2026-09-03（2026 年 8 月增量检索）
+
+- 将检索截止从 2026-07-23 更新至 2026-09-03；窗口内最新收录为 PuzzleKV（arXiv:2608.23843，首发 2026-08-24）。
+- 新增并核实 4 篇预印本：SPECTRA（2608.07915）、AATC（2608.14191）、Minima-KV（2608.23834）、PuzzleKV（2608.23843）。
+- 将 Minima-KV 标为 R2–R3 的最近直接对照：mixed-format paged attention、分格式 partial state、global online-softmax merge、无 cache-sized dense shadow。
+- 本轮只依据 arXiv 原始条目核实元数据与摘要；未把摘要中的定量结果直接升级为对比表结论，正式引用前须复核正文表格。
+- 扩充 `queries.md`：加入 transform coding、rate-distortion、mixed-format paged attention、page-wise compression 等查询。
+
+---
+
 ## 2026-07-23（Agent 默认技能）
 
 - 新增项目规则 `.cursor/rules/lit-watch-academic-researcher.mdc`：更新文献 / `lit_watch` / 对比手册时默认先遵循 academic-researcher skill。

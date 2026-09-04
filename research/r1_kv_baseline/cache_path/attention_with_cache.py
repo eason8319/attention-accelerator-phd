@@ -1,11 +1,19 @@
-"""经 ContiguousKVCache / KiviKVCache 的 decode attention（写 cache → load → attend）。"""
+"""经 contiguous / paged KV Cache 的 decode attention（写 cache → load → attend）。"""
 
 from __future__ import annotations
 
 import torch
 
-from kv_cache import ContiguousKVCache, KiviKVCache
-from kv_codecs import KVCodec, KiviFormat, get_codec
+from kv_cache import BytesBreakdown, ContiguousKVCache, KiviKVCache
+from kv_codecs import KiviFormat, KVCodec, get_codec
+from paged_cache import (
+    DEFAULT_PAGE_SIZE,
+    DEFAULT_PTE_BYTES,
+    PagedKiviKVCache,
+    PagedUniformKVCache,
+)
+
+CacheBackend = ContiguousKVCache | KiviKVCache | PagedUniformKVCache | PagedKiviKVCache
 
 
 def scaled_dot_product_attention(
@@ -26,13 +34,14 @@ def scaled_dot_product_attention(
 
 
 class AttentionWithCache:
-    """持有 ContiguousKVCache（C0–C3）或 KiviKVCache（C4/C5），提供 prefill / decode。
+    """持有 contiguous 或 paged 的 C0–C5 cache，提供 prefill / decode。
 
     ``codec`` 可为：
 
     - ``KVCodec`` 实例，或 C0–C3 格式名（``fp16`` / ``int8`` / ``int4`` / ``int4_bdr``）
     - ``KiviFormat`` 实例，或 C4/C5 格式名（``kivi2`` / ``C4`` / ``kivi4`` / ``C5``）
 
+    ``layout`` 为 ``contiguous``（默认）或 ``paged``（``metrics.md`` §8）。
     字符串路径会传入 ``dim=head_dim``（供 INT4+BDR）；其余关键字转发给 ``get_codec``
     （如 ``seed``、``group_size``、``residual_length``）。
     """
@@ -44,23 +53,23 @@ class AttentionWithCache:
         num_heads: int,
         head_dim: int,
         device: torch.device | None = None,
+        layout: str = "contiguous",
+        page_size: int = DEFAULT_PAGE_SIZE,
+        pte_bytes: int = DEFAULT_PTE_BYTES,
         **codec_kwargs,
     ) -> None:
+        if layout not in {"contiguous", "paged"}:
+            raise ValueError(f"layout 须为 contiguous / paged，得到 {layout!r}")
         self._kivi_format: KiviFormat | None = None
         self.num_heads = num_heads
         self.head_dim = head_dim
+        self.layout = layout
 
         if isinstance(codec, str):
             resolved = get_codec(codec, dim=head_dim, **codec_kwargs)
-            if isinstance(resolved, KiviFormat):
-                self._kivi_format = resolved
-                self.cache: ContiguousKVCache | KiviKVCache = resolved.make_cache(
-                    num_heads=num_heads, head_dim=head_dim, device=device
-                )
-            else:
-                self.cache = ContiguousKVCache(
-                    resolved, num_heads=num_heads, head_dim=head_dim, device=device
-                )
+            self.cache: CacheBackend = self._make_cache(
+                resolved, device=device, page_size=page_size, pte_bytes=pte_bytes
+            )
         elif isinstance(codec, KiviFormat):
             if codec_kwargs:
                 raise TypeError(
@@ -68,8 +77,8 @@ class AttentionWithCache:
                     "请在 get_codec(...) 时设置，或改用格式字符串"
                 )
             self._kivi_format = codec
-            self.cache = codec.make_cache(
-                num_heads=num_heads, head_dim=head_dim, device=device
+            self.cache = self._make_cache(
+                codec, device=device, page_size=page_size, pte_bytes=pte_bytes
             )
         elif isinstance(codec, KVCodec):
             if codec_kwargs:
@@ -77,8 +86,8 @@ class AttentionWithCache:
                     "传入 KVCodec 实例时不要再给 codec 关键字参数；"
                     "请在 get_codec(...) 时设置，或改用格式字符串"
                 )
-            self.cache = ContiguousKVCache(
-                codec, num_heads=num_heads, head_dim=head_dim, device=device
+            self.cache = self._make_cache(
+                codec, device=device, page_size=page_size, pte_bytes=pte_bytes
             )
         else:
             raise TypeError(
@@ -87,12 +96,43 @@ class AttentionWithCache:
 
         self.device = self.cache.device
 
+    def _make_cache(
+        self,
+        resolved: KVCodec | KiviFormat,
+        *,
+        device: torch.device | None,
+        page_size: int,
+        pte_bytes: int,
+    ) -> CacheBackend:
+        if isinstance(resolved, KiviFormat):
+            self._kivi_format = resolved
+            return resolved.make_cache(
+                num_heads=self.num_heads,
+                head_dim=self.head_dim,
+                device=device,
+                layout=self.layout,
+                page_size=page_size,
+                pte_bytes=pte_bytes,
+            )
+        if self.layout == "paged":
+            return PagedUniformKVCache(
+                resolved,
+                num_heads=self.num_heads,
+                head_dim=self.head_dim,
+                page_size=page_size,
+                pte_bytes=pte_bytes,
+                device=device,
+            )
+        return ContiguousKVCache(
+            resolved, num_heads=self.num_heads, head_dim=self.head_dim, device=device
+        )
+
     @property
     def codec(self) -> KVCodec | KiviFormat:
         """C0–C3 返回 ``KVCodec``；C4/C5 返回构造时的 ``KiviFormat``。"""
         if self._kivi_format is not None:
             return self._kivi_format
-        assert isinstance(self.cache, ContiguousKVCache)
+        assert isinstance(self.cache, (ContiguousKVCache, PagedUniformKVCache))
         return self.cache.codec
 
     def clear(self) -> None:
@@ -172,3 +212,7 @@ class AttentionWithCache:
     def bytes_stored(self) -> tuple[int, int]:
         """转发 ``cache.bytes_stored()``。"""
         return self.cache.bytes_stored()
+
+    def bytes_breakdown(self) -> BytesBreakdown:
+        """转发 ``cache.bytes_breakdown()``。"""
+        return self.cache.bytes_breakdown()

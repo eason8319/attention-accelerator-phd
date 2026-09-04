@@ -8,7 +8,9 @@ alwaysApply: false
 
 当任务涉及以下任一情形时，**在动手改文件之前**，先用 Read 工具打开并完整遵循：
 
-`/root/.cursor/skills/academic-researcher/SKILL.md`
+`.cursor/skills/academic-researcher/SKILL.md`
+
+（相对仓库根目录；本机与 Cloud Agent 共用，不要使用 `/root/.cursor/skills/` 等绝对路径。）
 
 触发情形包括（不限于）：
 
@@ -31,5 +33,6 @@ alwaysApply: false
 | 检索词 / 未审箱 / 台账 | `docs/lit_watch/` |
 | 对比手册 | `docs/recent_works_comparison.md` |
 | 机器可读已核实元数据 | `docs/lit_watch/ledger.yaml` |
+| 项目 skill | `.cursor/skills/academic-researcher/SKILL.md` |
 
 不要跳过 skill 直接根据记忆或网页摘要填 Venue/加速比。

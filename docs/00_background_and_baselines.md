@@ -27,8 +27,8 @@
 | KVTuner | ICML 2025；PMLR 267:36451–36485 | 层间混合精度离线表 | R3 混合精度入口 |
 | Block-GTQ | arXiv:2606.24033（预印本） | RoPE 块感知比特；不物化完整 FP16 KV | R3–R5 精度前沿对标 |
 | SystolicAttention (FSA) | arXiv:2507.11331（预印本） | 单阵列内 FA / online softmax | softmax/$PV$ 电路参考，非完整贡献 |
-| PLENA | arXiv:2509.09505（预印本） | 扁平阵列 + 非对称量化 + FA ISA | **全栈对照**；本课题不做更大复刻 |
-| AccLLM / FlightLLM | 预印本 / FPGA’24 | FPGA 上 W2A8KV4 等 | 可选 FPGA 延伸对照 |
+| PLENA | ISCA 2026；DOI 10.1109/ISCA66397.2026.00023 | 扁平阵列 + 非对称量化 + FA ISA | **全栈对照**；本课题不做更大复刻 |
+| AccLLM / FlightLLM | IEEE TVLSI 2026 / FPGA’24 | FPGA 上 W2A8KV4 等 | 可选 FPGA 延伸对照 |
 | Salca | arXiv:2604.24820（预印本） | 稀疏长上下文 decode ASIC | 相邻上界，非主路径 |
 
 ## 3. 本课题的差异化定位

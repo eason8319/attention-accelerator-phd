@@ -1,6 +1,7 @@
 # 正式研究目录（自 R1 起）
 
-> 现行计划：[`docs/research_plan.md`](../docs/research_plan.md)。  
+> 长线计划：[`docs/research_plan.md`](../docs/research_plan.md)。  
+> R1 实施细则：[`r1_kv_baseline/PLAN.md`](r1_kv_baseline/PLAN.md)。  
 > R0（`survey/` + `learning/`）已完成技能与文献地图；**本目录承接正式研究**。
 
 ## 当前状态
@@ -8,7 +9,7 @@
 | 深度 | 状态 | 说明 |
 |------|------|------|
 | R0 | 完成 | 见 `survey/`、`learning/`、`docs/lit_watch/` |
-| R1 | **进行中** | M0–M2 完成；下一步 M3 KIVI |
+| R1 | **进行中** | M0–M4 完成；M5 WP1–WP3 已落地，下一步精度点 |
 | R2–R5 | 未开始 | 见研究计划验收门槛 |
 
 ## 布局
@@ -24,7 +25,7 @@ research/
 
 ## R1 最低交付（摘录）
 
-1. Token-wise KV：quantize → pack/store → load → dequant → attention（对照 FP16 / INT8 / INT4±BDR）  
+1. Token-wise KV：quantize → pack/store → load → dequant → attention（对照 FP16 / INT8 / INT4±BDR / KIVI 2–4 bit）  
 2. contiguous **与** paged 双报告  
 3. bytes/token–精度 Pareto（至少一种长上下文设定）  
 4. 与 Roofline / SCALE-Sim 的相对趋势交叉检查协议  

@@ -58,7 +58,7 @@ $$
 
 ---
 
-## 2. PLENA（Wu et al., arXiv:2509.09505）
+## 2. PLENA（Wu et al., ISCA 2026；arXiv:2509.09505）
 
 **回答什么问题**：长上下文 **agentic** 推理同时撞上 **带宽墙** 与 **容量墙**（KV 随序列膨胀、batch 被压小 →「瘦/胖」GEMM），方阵 systolic / Tensor Core 利用率差。PLENA 用三条 pathway 做硬件–软件协同。
 
@@ -92,7 +92,7 @@ ISA 粗分类（Table I）：Matrix / Vector / Scalar / HBM / Control；attentio
 
 **对 P4 的启示**：P4 练的是「积木」（exp、softmax 归约、小 WS 阵列），不是完整 PLENA。读 PLENA 是为了知道积木之后往 **ISA + 编译映射 + 非方阵几何** 演化；P5 / 主线 4 再碰 tile 搜索与指令流。
 
-链接：[arXiv:2509.09505](https://arxiv.org/abs/2509.09505)
+链接：[ISCA 2026 DOI](https://doi.org/10.1109/ISCA66397.2026.00023)；[arXiv:2509.09505](https://arxiv.org/abs/2509.09505)
 
 ---
 

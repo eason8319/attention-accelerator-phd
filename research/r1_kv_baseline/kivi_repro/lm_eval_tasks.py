@@ -1,29 +1,25 @@
 """LM-Eval 生成任务封装（CoQA / TruthfulQA / GSM8K 等）。
 
-将已加载的 HF 因果 LM（可经本仓库 KIVI patch）包装为 lm-eval ``HFLM``，
-在每次 generate 前清空本仓库 Kivi cache。默认任务集可按需替换。
-
-用法：
-
-  from kivi_repro.hf_generate import load_llama_for_generate
-  from kivi_repro.lm_eval_tasks import evaluate_lm_eval
-
-  model, tok = load_llama_for_generate(..., kv_format="kivi2")
-  bundle = evaluate_lm_eval(model, tok, kv_format="kivi2", limit=None)
-  print(bundle.primary_scores)
+将已加载的 HF 因果 LM（可经本仓库 C0–C5 cache-path patch）包装为 lm-eval
+``HFLM``，在每次 generate 前清空本仓库 KV cache。默认任务集可按需替换。
 """
 
 from __future__ import annotations
 
 import json
+from collections.abc import Sequence
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any
 
 import torch.nn as nn
 
-from .hf_generate import kv_format_to_bits, load_llama_for_generate
-from .llama_kivi_attn import clear_llama_kivi_caches
+from .hf_generate import load_llama_for_generate, resolve_kv_load_format
+from .llama_kivi_attn import (
+    clear_llama_kivi_caches,
+    is_cache_path_patched,
+    is_kivi_format,
+)
 from .patch_llama import is_llama_kivi_patched
 
 __all__ = [
@@ -70,8 +66,18 @@ DEFAULT_MODEL_ID = "NousResearch/Llama-2-7b-hf"
 _FORMAT_ALIASES: dict[str, str] = {
     "fp16": "fp16",
     "16bit": "fp16",
-    "c0": "fp16",
+    "hf": "fp16",
     "baseline": "fp16",
+    "c0": "fp16_codec",
+    "fp16_codec": "fp16_codec",
+    "int8": "int8",
+    "c1": "int8",
+    "int4": "int4",
+    "c2": "int4",
+    "int4_bdr": "int4_bdr",
+    "int4bdr": "int4_bdr",
+    "bdr": "int4_bdr",
+    "c3": "int4_bdr",
     "kivi2": "kivi2",
     "kivi_2": "kivi2",
     "c4": "kivi2",
@@ -109,7 +115,7 @@ def resolve_tasks(tasks: str | Sequence[str] | None = "default") -> list[str]:
 
 
 def normalize_kv_format(kv_format: str) -> str:
-    """``fp16`` / ``kivi2`` / ``kivi4`` 规范化。"""
+    """规范化：``fp16`` 为原生 HF；``fp16_codec`` / C1–C5 为本仓库 cache-path。"""
     key = kv_format.strip().lower().replace("-", "_").replace("+", "_")
     if key not in _FORMAT_ALIASES:
         raise ValueError(f"未知 kv_format={kv_format!r}")
@@ -126,9 +132,7 @@ def _require_lm_eval():
         import lm_eval  # noqa: F401
         from lm_eval.models.huggingface import HFLM
     except ImportError as e:
-        raise ImportError(
-            "需要 lm-eval：pip install 'lm-eval>=0.4.5' accelerate"
-        ) from e
+        raise ImportError("需要 lm-eval：pip install 'lm-eval>=0.4.5' accelerate") from e
     return HFLM
 
 
@@ -140,9 +144,9 @@ def wrap_for_lm_eval(
     max_batch_size: int = 1,
     device: str | None = None,
 ) -> Any:
-    """将已加载（可已 KIVI patch）的 HF 模型包装为 lm-eval ``HFLM``。
+    """将已加载（可已 cache-path patch）的 HF 模型包装为 lm-eval ``HFLM``。
 
-    每次 ``_model_generate`` 前清空 ``LlamaKiviAttention`` cache，避免跨样本残留。
+    每次 ``_model_generate`` 前清空本仓库 cache-path KV，避免跨样本残留。
     """
     HFLM = _require_lm_eval()
 
@@ -156,11 +160,9 @@ def wrap_for_lm_eval(
             stop: list[str],
             **generation_kwargs: Any,
         ):
-            if is_llama_kivi_patched(self.model):
+            if is_cache_path_patched(self.model):
                 clear_llama_kivi_caches(self.model)
-            return super()._model_generate(
-                context, max_length, stop, **generation_kwargs
-            )
+            return super()._model_generate(context, max_length, stop, **generation_kwargs)
 
     if device is None:
         device = str(next(model.parameters()).device)
@@ -257,15 +259,12 @@ def extract_primary_scores(
         metrics = dict(raw[task])
         if task not in metric_map:
             raise KeyError(
-                f"任务 {task} 未配置 primary metric；"
-                f"请传入 primary_metrics={{'{task}': '...'}}"
+                f"任务 {task} 未配置 primary metric；请传入 primary_metrics={{'{task}': '...'}}"
             )
         primary = metric_map[task]
         val = _pick_metric(metrics, primary)
         if val is None:
-            raise KeyError(
-                f"任务 {task} 找不到主指标 {primary!r}；键={list(metrics)}"
-            )
+            raise KeyError(f"任务 {task} 找不到主指标 {primary!r}；键={list(metrics)}")
         out[task] = TaskScore(
             task=task,
             primary_metric=primary,
@@ -287,9 +286,7 @@ def score_delta(
     for k, v in scores.items():
         flat[k] = v.score if isinstance(v, TaskScore) else float(v)
     return {
-        task: round(flat[task] - float(ref), 4)
-        for task, ref in reference.items()
-        if task in flat
+        task: round(flat[task] - float(ref), 4) for task, ref in reference.items() if task in flat
     }
 
 
@@ -340,6 +337,7 @@ def evaluate_lm_eval(
     out_dir: Path | str | None = None,
     group_size: int = 32,
     residual_length: int = 128,
+    layout: str = "contiguous",
     device: str | None = None,
     log_samples: bool = False,
     primary_metrics: dict[str, str] | None = None,
@@ -359,6 +357,7 @@ def evaluate_lm_eval(
             kv_format=fmt,
             group_size=group_size,
             residual_length=residual_length,
+            layout=layout,
             device=device,
             **load_kwargs,
         )
@@ -368,9 +367,13 @@ def evaluate_lm_eval(
             getattr(getattr(model, "config", None), "_name_or_path", "") or "unknown"
         )
 
-    bits = kv_format_to_bits(fmt)
-    patched = is_llama_kivi_patched(model)
-    if bits is not None and not patched:
+    loaded = resolve_kv_load_format(fmt)
+    if loaded is not None and not is_cache_path_patched(model):
+        raise RuntimeError(
+            f"kv_format={fmt} 需要 cache-path patch，但模型未 patch；"
+            "请用 load_llama_for_generate(..., kv_format=...) 或 patch_llama_cache_path"
+        )
+    if loaded is not None and is_kivi_format(loaded) and not is_llama_kivi_patched(model):
         raise RuntimeError(
             f"kv_format={fmt} 需要 KIVI patch，但模型未 patch；"
             "请用 load_llama_for_generate(..., kv_format=...) 或 patch_llama_model"
@@ -384,9 +387,7 @@ def evaluate_lm_eval(
         batch_size=batch_size,
         log_samples=log_samples,
     )
-    scored = extract_primary_scores(
-        lm_results, task_list, primary_metrics=primary_metrics
-    )
+    scored = extract_primary_scores(lm_results, task_list, primary_metrics=primary_metrics)
     primary = {t: s.score for t, s in scored.items()}
 
     bundle = LmEvalBundle(
@@ -419,6 +420,7 @@ def evaluate_lm_eval_formats(
     out_dir: Path | str | None = None,
     group_size: int = 32,
     residual_length: int = 128,
+    layout: str = "contiguous",
     device: str | None = None,
     primary_metrics: dict[str, str] | None = None,
     **load_kwargs: Any,
@@ -436,6 +438,7 @@ def evaluate_lm_eval_formats(
             out_dir=out_dir,
             group_size=group_size,
             residual_length=residual_length,
+            layout=layout,
             device=device,
             primary_metrics=primary_metrics,
             **load_kwargs,

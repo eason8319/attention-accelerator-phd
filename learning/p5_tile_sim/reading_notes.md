@@ -137,7 +137,7 @@ Dataflow（WS / OS / RS…）在 Timeloop 里不是魔法标签，而是一组 *
 
 ---
 
-## 3. PLENA 编译器 / ISA（Wu et al., arXiv:2509.09505）
+## 3. PLENA 编译器 / ISA（Wu et al., ISCA 2026；arXiv:2509.09505）
 
 **本笔记精读**：§III-D ISA、§III-F FlashAttention 四项能力、§III-G 编译与仿真栈。  
 阵列 flattened / MX 量化见 P4；此处只谈 **软件如何把 tile 选择变成可执行调度**。
@@ -176,7 +176,7 @@ Dataflow（WS / OS / RS…）在 Timeloop 里不是魔法标签，而是一组 *
 
 DSE 在多层保真度之间切换。P5 对应栈中的 **analytic / 粗粒度代价模型** 一层：给 mapper 用的 latency 与 traffic，**不生成 ISA 指令流**（留给阶段 5 / 主线 4）。
 
-链接：[arXiv:2509.09505](https://arxiv.org/abs/2509.09505)
+链接：[ISCA 2026 DOI](https://doi.org/10.1109/ISCA66397.2026.00023)；[arXiv:2509.09505](https://arxiv.org/abs/2509.09505)
 
 ---
 

@@ -20,6 +20,10 @@ BitDecoding OR FlashDecoding "KV"
 "attention accelerator" OR systolic FlashAttention
 "paged" "KV" quantization serving
 RoPE-aware OR "bit allocation" "KV cache"
+"transform coding" "KV cache"
+spectral OR rate-distortion "KV cache" compression
+"mixed-format" paged attention KV
+"page-wise" OR "page-level" "KV cache" compression
 ```
 
 ## 硬件向补充查询
@@ -29,6 +33,7 @@ FlashAttention systolic OR "online softmax" accelerator
 flattened systolic LLM OR PLENA accelerator
 FPGA LLM KV cache OR FlightLLM OR AccLLM
 long-context attention ASIC decode
+heterogeneous-format attention decode
 ```
 
 ## 排除（默认不进主对照，可进相邻）

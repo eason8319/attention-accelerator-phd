@@ -1,16 +1,13 @@
-"""HuggingFace ``generate`` 封装：FP16 基线或本仓库 KIVI 整模路径。
+"""HuggingFace ``generate`` 封装：原生 FP16 或本仓库 C0–C5 cache-path。
 
-在每次生成前清空 ``LlamaKiviAttention`` 的 Kivi cache，避免跨样本残留。
-默认 ``batch=1``、贪心解码，便于 Table 3 / 冒烟对齐。
+在每次生成前清空 cache-path KV，避免跨样本残留。
+默认 ``batch=1``、贪心解码。
 
-用法：
-
-  from kivi_repro.hf_generate import load_llama_for_generate, generate_text
-
-  model, tok = load_llama_for_generate(
-      "NousResearch/Llama-2-7b-hf", kv_format="kivi2", device="cuda",
-  )
-  text, info = generate_text(model, tok, "Q: 1+1=?\\nA:", max_new_tokens=32)
+``kv_format``：
+  - ``fp16`` / ``hf`` / ``baseline``：原生 HF attention（M3 C0 精度上界）
+  - ``c0`` / ``fp16_codec``：FP16 **codec** cache-path（M5 Pareto C0）
+  - ``int8`` / ``int4`` / ``int4_bdr``：均匀 C1–C3
+  - ``kivi2`` / ``kivi4``：C4/C5
 """
 
 from __future__ import annotations
@@ -22,9 +19,19 @@ import torch
 import torch.nn as nn
 from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
 
-from .llama_kivi_attn import bytes_stored_llama_kivi, clear_llama_kivi_caches
-from .patch_llama import build_llama_kivi, is_llama_kivi_patched
-from .patch_mistral import build_mistral_kivi
+from .llama_kivi_attn import (
+    bytes_stored_llama_kivi,
+    canonical_cache_format,
+    clear_llama_kivi_caches,
+    is_cache_path_patched,
+    is_kivi_format,
+)
+from .patch_llama import (
+    build_llama_cache_path,
+    build_llama_kivi,
+    is_llama_kivi_patched,
+)
+from .patch_mistral import build_mistral_cache_path, build_mistral_kivi
 
 __all__ = [
     "GenerateInfo",
@@ -32,31 +39,28 @@ __all__ = [
     "generate_ids",
     "generate_text",
     "kv_format_to_bits",
+    "resolve_kv_load_format",
 ]
+
+_NATIVE_ALIASES = frozenset({"fp16", "hf", "baseline", "16bit"})
+
+
+def resolve_kv_load_format(kv_format: str) -> str | None:
+    """``None`` = 原生 HF；否则为本仓库 cache-path 规范名。"""
+    key = kv_format.strip().lower().replace("-", "_").replace("+", "_")
+    if key in _NATIVE_ALIASES:
+        return None
+    return canonical_cache_format(kv_format)
 
 
 def kv_format_to_bits(kv_format: str) -> int | None:
-    """格式别名 → bits；``fp16`` / ``C0`` 返回 ``None``（不 patch）。"""
-    key = kv_format.strip().lower().replace("-", "_").replace("+", "_")
-    aliases: dict[str, int | None] = {
-        "fp16": None,
-        "c0": None,
-        "hf": None,
-        "baseline": None,
-        "kivi2": 2,
-        "kivi_2": 2,
-        "kivi_2bit": 2,
-        "c4": 2,
-        "kivi4": 4,
-        "kivi_4": 4,
-        "kivi_4bit": 4,
-        "c5": 4,
-    }
-    if key not in aliases:
-        raise ValueError(
-            f"未知 kv_format={kv_format!r}；支持 fp16/kivi2/kivi4 或 C0/C4/C5"
-        )
-    return aliases[key]
+    """KIVI 比特；原生 HF 与均匀 C0–C3 返回 ``None``。"""
+    loaded = resolve_kv_load_format(kv_format)
+    if loaded == "kivi2":
+        return 2
+    if loaded == "kivi4":
+        return 4
+    return None
 
 
 @dataclass(frozen=True)
@@ -73,6 +77,34 @@ class GenerateInfo:
     finish_reason: str
 
 
+def _native_hf_causal_lm(
+    model_id: str,
+    *,
+    device: torch.device,
+    dtype: torch.dtype,
+    trust_remote_code: bool,
+    from_pretrained_kwargs: dict[str, Any],
+) -> tuple[nn.Module, Any]:
+    """加载未 patch 的 HF 因果 LM（M3 C0 精度上界）。"""
+    tokenizer = AutoTokenizer.from_pretrained(model_id, trust_remote_code=trust_remote_code)
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
+    model = AutoModelForCausalLM.from_pretrained(
+        model_id,
+        dtype=dtype,
+        trust_remote_code=trust_remote_code,
+        **from_pretrained_kwargs,
+    )
+    model.to(device)
+    model.eval()
+    cfg = getattr(model, "config", None)
+    if cfg is not None:
+        cfg.kivi_patched = False
+        cfg.cache_path_patched = False
+        cfg.cache_kv_format = "fp16"
+    return model, tokenizer
+
+
 def load_llama_for_generate(
     model_id: str = "NousResearch/Llama-2-7b-hf",
     *,
@@ -80,72 +112,88 @@ def load_llama_for_generate(
     bits: int | None = None,
     group_size: int = 32,
     residual_length: int = 128,
+    layout: str = "contiguous",
     device: str | torch.device | None = None,
     dtype: torch.dtype | None = None,
     trust_remote_code: bool = False,
     **from_pretrained_kwargs: Any,
 ) -> tuple[nn.Module, Any]:
-    """按 ``kv_format`` 选择 FP16 基线或 KIVI patch 加载模型。
+    """按 ``kv_format`` 选择原生 HF、均匀 cache-path 或 KIVI。
 
     参数
         model_id: HF ID 或本地路径。
-        kv_format: ``fp16`` / ``kivi2`` / ``kivi4``（或 C0/C4/C5）。
-        bits: 若给定则覆盖 ``kv_format`` 解析出的比特；``None`` 且 format 为 fp16 则不 patch。
-        group_size / residual_length: 仅 KIVI 路径生效。
+        kv_format: 见模块 docstring；``fp16`` 保持原生 HF（勿与 ``c0`` 混淆）。
+        bits: 若给定则走 KIVI，并覆盖 ``kv_format`` 解析出的比特。
+        group_size / residual_length: cache-path / KIVI 超参。
+        layout: ``contiguous``（默认）或 ``paged``；主 Pareto 精度默认连续。
         device / dtype: 见 ``build_llama_kivi``。
 
     返回
         ``(model, tokenizer)``，已 ``eval()``。
 
     架构
-        FP16 基线不做 attention patch，支持任意 HF ``AutoModelForCausalLM``。
-        KIVI patch（``kivi2``/``kivi4``）按 ``config.model_type`` 分发：
-        ``llama`` → ``build_llama_kivi``，``mistral`` → ``build_mistral_kivi``。
-        其它架构仍会抛出 ``TypeError``。
+        原生 FP16 不做 attention patch，支持任意 HF ``AutoModelForCausalLM``。
+        cache-path / KIVI 按 ``config.model_type`` 分发 llama / mistral。
     """
-    resolved_bits = bits if bits is not None else kv_format_to_bits(kv_format)
+    if device is None:
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    else:
+        device = torch.device(device)
+    if dtype is None:
+        dtype = torch.float16 if device.type == "cuda" else torch.float32
 
-    if resolved_bits is None:
-        if device is None:
-            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        else:
-            device = torch.device(device)
-        if dtype is None:
-            dtype = torch.float16 if device.type == "cuda" else torch.float32
+    if bits is not None:
+        if bits not in (2, 4):
+            raise ValueError(f"KIVI bits 须为 2 或 4，得到 {bits}")
+        loaded = "kivi2" if bits == 2 else "kivi4"
+        resolved_bits = bits
+    else:
+        loaded = resolve_kv_load_format(kv_format)
+        resolved_bits = kv_format_to_bits(kv_format)
 
-        tokenizer = AutoTokenizer.from_pretrained(
-            model_id, trust_remote_code=trust_remote_code
-        )
-        if tokenizer.pad_token is None:
-            tokenizer.pad_token = tokenizer.eos_token
-
-        model = AutoModelForCausalLM.from_pretrained(
+    if loaded is None:
+        return _native_hf_causal_lm(
             model_id,
+            device=device,
+            dtype=dtype,
+            trust_remote_code=trust_remote_code,
+            from_pretrained_kwargs=from_pretrained_kwargs,
+        )
+
+    cfg = AutoConfig.from_pretrained(model_id, trust_remote_code=trust_remote_code)
+    model_type = str(getattr(cfg, "model_type", "") or "").lower()
+    if model_type not in {"llama", "mistral"}:
+        raise TypeError(
+            f"cache-path 目前支持 llama / mistral，得到 model_type={model_type!r} "
+            f"（{type(cfg).__name__}）"
+        )
+
+    if resolved_bits is not None or is_kivi_format(loaded):
+        kivi_bits = resolved_bits if resolved_bits is not None else (2 if loaded == "kivi2" else 4)
+        kivi_builder = {
+            "llama": build_llama_kivi,
+            "mistral": build_mistral_kivi,
+        }[model_type]
+        return kivi_builder(
+            model_id,
+            bits=kivi_bits,
+            group_size=group_size,
+            residual_length=residual_length,
+            layout=layout,
+            device=device,
             dtype=dtype,
             trust_remote_code=trust_remote_code,
             **from_pretrained_kwargs,
         )
-        model.to(device)
-        model.eval()
-        if getattr(model.config, "kivi_patched", False):
-            model.config.kivi_patched = False
-        return model, tokenizer
 
-    cfg = AutoConfig.from_pretrained(model_id, trust_remote_code=trust_remote_code)
-    model_type = str(getattr(cfg, "model_type", "") or "").lower()
-    builder = {
-        "llama": build_llama_kivi,
-        "mistral": build_mistral_kivi,
-    }.get(model_type)
-    if builder is None:
-        raise TypeError(
-            f"KIVI patch 目前支持 llama / mistral，得到 model_type={model_type!r} "
-            f"（{type(cfg).__name__}）"
-        )
-
-    return builder(
+    cache_builder = {
+        "llama": build_llama_cache_path,
+        "mistral": build_mistral_cache_path,
+    }[model_type]
+    return cache_builder(
         model_id,
-        bits=resolved_bits,
+        kv_format=loaded,
+        layout=layout,
         group_size=group_size,
         residual_length=residual_length,
         device=device,
@@ -172,7 +220,7 @@ def generate_ids(
 
     参数
         input_ids: ``(1, prompt_len)``（当前协议 batch=1）。
-        clear_kivi: 生成前是否 ``clear_llama_kivi_caches``（KIVI 路径建议 True）。
+        clear_kivi: 生成前是否清空本仓库 cache-path KV（C0–C5 建议 True）。
 
     返回
         ``(output_ids, info)``；``output_ids`` 含 prompt + 新生成 token。
@@ -180,7 +228,7 @@ def generate_ids(
     if input_ids.ndim != 2 or input_ids.shape[0] != 1:
         raise ValueError(f"期望 input_ids 形状 (1, L)，得到 {tuple(input_ids.shape)}")
 
-    if clear_kivi and is_llama_kivi_patched(model):
+    if clear_kivi and is_cache_path_patched(model):
         clear_llama_kivi_caches(model)
 
     device = next(model.parameters()).device
@@ -210,13 +258,12 @@ def generate_ids(
     new_tokens = max(0, total - prompt_len)
 
     payload, meta = (0, 0)
-    if is_llama_kivi_patched(model):
+    if is_cache_path_patched(model):
         payload, meta = bytes_stored_llama_kivi(model)
 
-    kv_format = "fp16"
-    if is_llama_kivi_patched(model):
-        bits = int(getattr(model.config, "kivi_bits", 2))
-        kv_format = f"kivi{bits}"
+    kv_format = str(getattr(model.config, "cache_kv_format", "") or "")
+    if not kv_format:
+        kv_format = "fp16"
 
     # 粗略结束原因
     finish = "length"

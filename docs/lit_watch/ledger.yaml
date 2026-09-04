@@ -1,16 +1,21 @@
-# Literature ledger — verified metadata only
+# Literature ledger — verified metadata; quantitative audit is tracked separately
 # status: verified | provisional
 # venue_type: proceedings | journal | findings | preprint | workshop
 # bucket: algo_gpu | hw_asic_fpga | survey | adjacent
 #
-# Verification pass: 2026-07-23 (arXiv API + PMLR/ACL/IEEE where available)
+# Verification pass: 2026-09-03 (arXiv abs + PMLR/ACL/IEEE where available)
+
+quantitative_audit:
+  date: "2026-09-03"
+  report: "docs/lit_watch/AUDIT_2026-09-03.md"
+  scope: "all 21 ledger entries; latest public full text or official proceedings"
 
 cutoff:
-  date: "2026-07-23"
+  date: "2026-09-03"
   latest_seen:
-    arxiv_id: "2607.08057"
-    title: "Towards Efficient Large Language Model Serving: A Survey on System-Aware KV Cache Optimization"
-    note: "ACL 2026 Findings; arXiv first posted 2026-07-09"
+    arxiv_id: "2608.23843"
+    title: "PuzzleKV: Page-Wise Low-Rank Decomposition for KV Cache Compression"
+    note: "preprint; arXiv first posted 2026-08-24"
 
 papers:
   - id: kivi
@@ -79,7 +84,14 @@ papers:
       - Jinda Jia
       - Jisen Li
       - Zhongzhu Zhou
-      # et al.
+      - Jung Hwan Heo
+      - Jue Wang
+      - Tri Dao
+      - Shuaiwen Leon Song
+      - Ben Athiwaratkun
+      - Chenfeng Xu
+      - Tianyi Zhang
+      - Xiaoxia Wu
     venue: "preprint (arXiv)"
     venue_detail: null
     venue_type: preprint
@@ -201,6 +213,103 @@ papers:
       - "arXiv API 2606.24033"
     notes: "Paper title is RoPE-Aware...; Block-GTQ is the method name."
 
+  - id: spectra
+    short_name: SPECTRA
+    title_official: "SPECTRA: Pushing the KV Cache Beyond the 2-Bit Cliff via Spectral Transform Coding"
+    authors:
+      - Jiamu Zhang
+      - Liang Wu
+      - Kelly Wan
+      - Hanjie Chen
+      - Liangjie Hong
+    venue: "preprint (arXiv)"
+    venue_type: preprint
+    year: 2026
+    arxiv_id: "2608.07915"
+    arxiv_first_posted: "2026-08-08"
+    arxiv_last_updated: "2026-08-08"
+    doi: null
+    canonical_url: "https://arxiv.org/abs/2608.07915"
+    code: null
+    bucket: algo_gpu
+    status: verified
+    verified_on: "2026-09-03"
+    verify_sources:
+      - "https://arxiv.org/abs/2608.07915"
+    notes: "No venue or external DOI as of cutoff. Full-text quantitative audit completed; see AUDIT_2026-09-03.md."
+
+  - id: aatc
+    short_name: AATC
+    title_official: "KV Cache Compression Through the Lens of Transform Coding"
+    method_name: "Attention-Aware Transform Coding (AATC)"
+    authors:
+      - Hannah Laus
+      - Claudio Mayrink Verdun
+      - Hao Wang
+      - Flavio du Pin Calmon
+      - Felix Krahmer
+    venue: "preprint (arXiv)"
+    venue_type: preprint
+    year: 2026
+    arxiv_id: "2608.14191"
+    arxiv_first_posted: "2026-08-14"
+    arxiv_last_updated: "2026-08-14"
+    doi: null
+    canonical_url: "https://arxiv.org/abs/2608.14191"
+    code: null
+    bucket: algo_gpu
+    status: verified
+    verified_on: "2026-09-03"
+    verify_sources:
+      - "https://arxiv.org/abs/2608.14191"
+    notes: "Attention-aware distortion decomposition and reverse-water-filling bit allocation; full-text quantitative audit completed."
+
+  - id: minima_kv
+    short_name: Minima-KV
+    title_official: "Minima-KV: Retention-Preserving KV Cache Compression with Mixed-Format Paged Attention"
+    authors:
+      - Sergii Kozyrev
+      - Davyd Maiboroda
+    venue: "preprint (arXiv)"
+    venue_type: preprint
+    year: 2026
+    arxiv_id: "2608.23834"
+    arxiv_first_posted: "2026-08-24"
+    arxiv_last_updated: "2026-08-24"
+    doi: null
+    canonical_url: "https://arxiv.org/abs/2608.23834"
+    code: null
+    bucket: algo_gpu
+    status: verified
+    verified_on: "2026-09-03"
+    verify_sources:
+      - "https://arxiv.org/abs/2608.23834"
+    notes: "Closest new overlap with R2-R3: mixed-format paged attention, format-specific partial states, global online-softmax merge, and no cache-sized dense shadow. Full-text quantitative audit completed with canary limitations recorded."
+
+  - id: puzzlekv
+    short_name: PuzzleKV
+    title_official: "PuzzleKV: Page-Wise Low-Rank Decomposition for KV Cache Compression"
+    authors:
+      - Zizhong Wang
+      - Jieying Wang
+      - Zhao Zhang
+      - Jiajia Li
+    venue: "preprint (arXiv)"
+    venue_type: preprint
+    year: 2026
+    arxiv_id: "2608.23843"
+    arxiv_first_posted: "2026-08-24"
+    arxiv_last_updated: "2026-08-24"
+    doi: null
+    canonical_url: "https://arxiv.org/abs/2608.23843"
+    code: null
+    bucket: adjacent
+    status: verified
+    verified_on: "2026-09-03"
+    verify_sources:
+      - "https://arxiv.org/abs/2608.23843"
+    notes: "Page-wise low-rank adjacent route; computes attention over dense and factorized pages and can combine with quantization. Full-text quantitative audit completed, including TTFT/TPOT and peak/steady-state memory."
+
   - id: ultraquant
     short_name: UltraQuant
     title_official: "UltraQuant: 4-bit KV Caching for Context-Heavy Agents"
@@ -208,7 +317,10 @@ papers:
       - Inesh Chakrabarti
       - David Limpus
       - Aditi Ghai Rana
-      # et al.
+      - Bowen Bao
+      - Spandan Tiwari
+      - Thiago Crepaldi
+      - Ashish Sirasao
     venue: "preprint (arXiv)"
     venue_type: preprint
     year: 2026
@@ -230,21 +342,25 @@ papers:
       - Sayed Pedram Haeri Boroujeni
       - Niloufar Mehrabi
       - Patrick Woods
-      # et al.
-    venue: "CVPR 2026 (accepted; confirm camera-ready)"
-    venue_type: proceedings
+      - Gabriel Hillesheim
+      - Abolfazl Razi
+    venue: "CVPR 2026 Workshops (LoViF)"
+    venue_detail: "Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops, pp. 4957-4966"
+    venue_type: workshop
     year: 2026
     arxiv_id: "2604.04722"
     arxiv_first_posted: "2026-04-06"
     arxiv_last_updated: "2026-04-06"
     doi: null
-    canonical_url: "https://arxiv.org/abs/2604.04722"
+    canonical_url: "https://openaccess.thecvf.com/content/CVPR2026W/LoViF/html/Boroujeni_Dont_Waste_Bits_Adaptive_KV-Cache_Quantization_for_Lightweight_On-Device_LLMs_CVPRW_2026_paper.html"
+    code: "https://github.com/SayedPedramHaeri/Dont-Waste-Bits"
     bucket: algo_gpu
     status: verified
-    verified_on: "2026-07-23"
+    verified_on: "2026-09-03"
     verify_sources:
-      - "arXiv API comment: Accepted by CVPR 2026"
-    notes: "Venue from arXiv comment; add proceedings DOI when available."
+      - "CVF Open Access CVPR 2026 Workshops proceedings page"
+      - "arXiv API 2604.04722"
+    notes: "Published as a CVPR 2026 workshop paper (LoViF), not a CVPR main-conference paper; official pages 4957-4966."
 
   - id: kv_serving_survey_acl26
     short_name: KVServingSurvey26
@@ -253,7 +369,7 @@ papers:
       - Jiantong Jiang
       - Peiyu Yang
       - Rui Zhang
-      # et al.
+      - Feng Liu
     venue: "ACL 2026 Findings"
     venue_detail: "Findings of the Association for Computational Linguistics: ACL 2026, pp. 38450-38476"
     venue_type: findings
@@ -262,13 +378,14 @@ papers:
     arxiv_first_posted: "2026-07-09"
     arxiv_last_updated: "2026-07-09"
     doi: "10.18653/v1/2026.findings-acl.1916"
-    canonical_url: "https://arxiv.org/abs/2607.08057"
+    canonical_url: "https://aclanthology.org/2026.findings-acl.1916/"
     bucket: survey
     status: verified
-    verified_on: "2026-07-23"
+    verified_on: "2026-09-03"
     verify_sources:
-      - "arXiv API journal_ref + doi fields"
-    notes: "This is the cutoff-latest paper in the watch set."
+      - "https://aclanthology.org/2026.findings-acl.1916/"
+      - "arXiv API 2607.08057"
+    notes: "Official ACL Anthology metadata verified; no longer the cutoff-latest paper in the watch set."
 
   - id: systolicattention
     short_name: SystolicAttention
@@ -277,8 +394,9 @@ papers:
       - Jiawei Lin
       - Yuanlong Li
       - Guokai Chen
-      # et al. (Thomas Bourgeat et al. on some mirrors)
+      - Thomas Bourgeat
     venue: "preprint (arXiv)"
+    venue_detail: null
     venue_type: preprint
     year: 2025
     arxiv_id: "2507.11331"
@@ -288,10 +406,10 @@ papers:
     canonical_url: "https://arxiv.org/abs/2507.11331"
     bucket: hw_asic_fpga
     status: verified
-    verified_on: "2026-07-23"
+    verified_on: "2026-09-03"
     verify_sources:
       - "arXiv API 2507.11331"
-    notes: "Also referred to as FSA in text. Not a peer-reviewed venue at cutoff."
+    notes: "Also referred to as FSA in text. Not a peer-reviewed venue at cutoff. Abstract and section 6.1 reverse the TPUv5e/Neuron-v2 mapping for the reported 1.77x/4.83x utilization ratios; cite with caution."
 
   - id: plena
     short_name: PLENA
@@ -300,22 +418,39 @@ papers:
       - Haoran Wu
       - Can Xiao
       - Jiayi Nie
-      # et al.
-    venue: "preprint (arXiv)"
-    venue_type: preprint
-    year: 2025
+      - Xuan Guo
+      - Binglei Lou
+      - Jeffrey T. H. Wong
+      - Zhiwen Mo
+      - Cheng Zhang
+      - Przemyslaw Forys
+      - Chengyang Ai
+      - Timi Adeniran
+      - Wayne Luk
+      - Hongxiang Fan
+      - Jianyi Cheng
+      - Timothy M. Jones
+      - Rika Antonova
+      - Robert Mullins
+      - Aaron Zhao
+    venue: "ISCA 2026"
+    venue_detail: "Proceedings of the 53rd ACM/IEEE Annual International Symposium on Computer Architecture"
+    venue_type: proceedings
+    year: 2026
     arxiv_id: "2509.09505"
     arxiv_first_posted: "2025-09-11"
     arxiv_last_updated: "2026-04-12"
-    doi: null
-    canonical_url: "https://arxiv.org/abs/2509.09505"
+    doi: "10.1109/ISCA66397.2026.00023"
+    canonical_url: "https://doi.org/10.1109/ISCA66397.2026.00023"
     code: "https://github.com/AICrossSim/PLENA_Simulator"
     bucket: hw_asic_fpga
     status: verified
-    verified_on: "2026-07-23"
+    verified_on: "2026-09-03"
     verify_sources:
-      - "arXiv API 2509.09505"
-    notes: "System name PLENA; paper title is Combating the Memory Walls..."
+      - "https://www.iscaconf.org/isca2026/program/"
+      - "University of Cambridge accepted-version repository"
+      - "DOI 10.1109/ISCA66397.2026.00023"
+    notes: "System name PLENA; upgraded from preprint to peer-reviewed ISCA 2026. Use the final-version 2.23x/4.70x/4.04x results, not stale arXiv-abstract values."
 
   - id: flatattention
     short_name: FlatAttention
@@ -348,20 +483,23 @@ papers:
       - Huihong Shi
       - Haikuo Shao
       - Zhongfeng Wang
-    venue: "preprint (arXiv)"
-    venue_type: preprint
-    year: 2025
+    venue: "IEEE Transactions on Very Large Scale Integration (VLSI) Systems"
+    venue_detail: "vol. 34, no. 4, pp. 1217-1227"
+    venue_type: journal
+    year: 2026
     arxiv_id: "2505.03745"
     arxiv_first_posted: "2025-04-07"
     arxiv_last_updated: "2025-04-07"
-    doi: null
-    canonical_url: "https://arxiv.org/abs/2505.03745"
+    doi: "10.1109/TVLSI.2026.3658524"
+    canonical_url: "https://doi.org/10.1109/TVLSI.2026.3658524"
     bucket: hw_asic_fpga
     status: verified
-    verified_on: "2026-07-23"
+    verified_on: "2026-09-03"
     verify_sources:
+      - "IEEE TVLSI DOI 10.1109/TVLSI.2026.3658524"
+      - "DBLP journals/tvlsi/LiangSSW26"
       - "arXiv API 2505.03745"
-    notes: "Abs id 2505.* but first_posted 2025-04-07."
+    notes: "Upgraded from preprint to IEEE TVLSI 34(4), 2026. Abs id 2505.* but first_posted 2025-04-07."
 
   - id: flightllm
     short_name: FlightLLM
@@ -370,7 +508,20 @@ papers:
       - Shulin Zeng
       - Jun Liu
       - Guohao Dai
-      # et al.
+      - Xinhao Yang
+      - Tianyu Fu
+      - Hongyi Wang
+      - Wenheng Ma
+      - Hanbo Sun
+      - Shiyao Li
+      - Zixiao Huang
+      - Yadong Dai
+      - Jintao Li
+      - Zehao Wang
+      - Ruoyu Zhang
+      - Kairui Wen
+      - Xuefei Ning
+      - Yu Wang
     venue: "FPGA 2024"
     venue_detail: "ACM/SIGDA International Symposium on Field-Programmable Gate Arrays (FPGA'24)"
     venue_type: proceedings
@@ -394,7 +545,11 @@ papers:
       - Wang Fan
       - Wei Cao
       - Xi Zha
-      # et al.
+      - Kedi Ma
+      - Mingqian Sun
+      - Jialin Chen
+      - Fengzhe Zhang
+      - Fan Zhang
     venue: "preprint (arXiv)"
     venue_type: preprint
     year: 2026
@@ -417,16 +572,19 @@ papers:
       - Peilin Chen
       - Xiaoxuan Yang
     venue: "GLSVLSI 2025"
+    venue_detail: "Great Lakes Symposium on VLSI 2025, pp. 71-77"
     venue_type: proceedings
     year: 2025
     arxiv_id: "2505.17787"
     arxiv_first_posted: "2025-05-23"
     arxiv_last_updated: "2025-05-23"
-    doi: null
-    canonical_url: "https://arxiv.org/abs/2505.17787"
+    doi: "10.1145/3716368.3735145"
+    canonical_url: "https://doi.org/10.1145/3716368.3735145"
+    code: "https://github.com/peilin-chen/Titanus-for-LLM-acceleration"
     bucket: adjacent
     status: verified
-    verified_on: "2026-07-23"
+    verified_on: "2026-09-03"
     verify_sources:
-      - "arXiv API comment: Accepted to GLSVLSI 2025"
-    notes: "Chiplet/CIM adjacent; confirm ACM/IEEE proceedings DOI when citing formally."
+      - "ACM DOI 10.1145/3716368.3735145"
+      - "arXiv 2505.17787 full text"
+    notes: "Chiplet/CIM adjacent; formal ACM proceedings DOI and pages verified."

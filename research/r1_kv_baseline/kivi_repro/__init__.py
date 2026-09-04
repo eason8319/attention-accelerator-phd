@@ -1,4 +1,4 @@
-"""KIVI 整模复现：Llama / Mistral 接入与评测辅助。"""
+"""KIVI / cache-path 整模复现：Llama / Mistral 接入与评测辅助。"""
 
 from .hf_generate import (
     GenerateInfo,
@@ -6,14 +6,20 @@ from .hf_generate import (
     generate_text,
     kv_format_to_bits,
     load_llama_for_generate,
+    resolve_kv_load_format,
 )
 from .llama_kivi_attn import (
+    LlamaCachePathAttention,
     LlamaKiviAttention,
+    MistralCachePathAttention,
     MistralKiviAttention,
     bytes_stored_kivi,
     bytes_stored_llama_kivi,
+    canonical_cache_format,
     clear_kivi_caches,
     clear_llama_kivi_caches,
+    is_cache_path_patched,
+    is_kivi_format,
     is_kivi_patched,
 )
 from .lm_eval_tasks import (
@@ -31,35 +37,53 @@ from .long_bench_tasks import (
     score_predictions,
 )
 from .patch_llama import (
+    build_llama_cache_path,
     build_llama_kivi,
+    is_llama_cache_path_patched,
     is_llama_kivi_patched,
+    patch_llama_cache_path,
     patch_llama_model,
 )
 from .patch_mistral import (
+    build_mistral_cache_path,
     build_mistral_kivi,
+    is_mistral_cache_path_patched,
     is_mistral_kivi_patched,
+    patch_mistral_cache_path,
     patch_mistral_model,
 )
 
 __all__ = [
+    "LlamaCachePathAttention",
     "LlamaKiviAttention",
+    "MistralCachePathAttention",
     "MistralKiviAttention",
     "bytes_stored_kivi",
     "bytes_stored_llama_kivi",
+    "canonical_cache_format",
     "clear_kivi_caches",
     "clear_llama_kivi_caches",
+    "is_cache_path_patched",
+    "is_kivi_format",
     "is_kivi_patched",
+    "build_llama_cache_path",
     "build_llama_kivi",
+    "is_llama_cache_path_patched",
     "is_llama_kivi_patched",
+    "patch_llama_cache_path",
     "patch_llama_model",
+    "build_mistral_cache_path",
     "build_mistral_kivi",
+    "is_mistral_cache_path_patched",
     "is_mistral_kivi_patched",
+    "patch_mistral_cache_path",
     "patch_mistral_model",
     "GenerateInfo",
     "generate_ids",
     "generate_text",
     "kv_format_to_bits",
     "load_llama_for_generate",
+    "resolve_kv_load_format",
     "SUBGROUPS",
     "DEFAULT_REPRESENTATIVES",
     "resolve_tasks",

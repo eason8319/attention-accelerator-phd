@@ -19,5 +19,5 @@
 ## 当前阶段
 
 - **R0**：已完成（survey、learning P1–P5、计划收敛、对比手册 / lit_watch）  
-- **R1**：进行中（M0–M1 完成）— 见 [`../../research/r1_kv_baseline/`](../../research/r1_kv_baseline/)
-- 文献增量更新：遵循 `docs/lit_watch/` + academic-researcher skill（`.cursor/rules/lit-watch-academic-researcher.mdc`）
+- **R1**：进行中（M0–M3 完成；下一步 M4）— 见 [`../../research/r1_kv_baseline/PLAN.md`](../../research/r1_kv_baseline/PLAN.md)
+- 文献增量更新：遵循 `docs/lit_watch/` + [academic-researcher](../../.cursor/skills/academic-researcher/SKILL.md)（规则：`.cursor/rules/lit-watch-academic-researcher.mdc`）
