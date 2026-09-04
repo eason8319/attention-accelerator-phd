@@ -1,20 +1,10 @@
-"""将 HuggingFace Llama 的 attention 替换为本仓库 ``LlamaKiviAttention``。
+"""将 HuggingFace Llama 的 attention 替换为本仓库 cache-path。
 
 提供：
-  - ``patch_llama_model``：就地替换已加载模型的各层 ``self_attn``
-  - ``build_llama_kivi``：``from_pretrained`` + 替换，一键得到可 ``generate`` 的模型
+  - ``patch_llama_model`` / ``build_llama_kivi``：C4/C5 KIVI（M3 API）
+  - ``patch_llama_cache_path`` / ``build_llama_cache_path``：C0–C5
 
 超参默认对齐协议：``group_size=32``，``residual_length=128``。
-
-用法：
-
-  from kivi_repro.patch_llama import build_llama_kivi, patch_llama_model
-
-  model, tokenizer = build_llama_kivi(
-      "NousResearch/Llama-2-7b-hf", bits=2, device="cuda",
-  )
-  # 或
-  patch_llama_model(model, bits=4)
 """
 
 from __future__ import annotations
@@ -27,16 +17,23 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from transformers.models.llama.modeling_llama import LlamaAttention, LlamaForCausalLM
 
 from .llama_kivi_attn import (
+    LlamaCachePathAttention,
     LlamaKiviAttention,
     bytes_stored_llama_kivi,
+    canonical_cache_format,
     clear_llama_kivi_caches,
+    is_cache_path_patched,
+    is_kivi_format,
     is_kivi_patched,
 )
 
 __all__ = [
     "patch_llama_model",
+    "patch_llama_cache_path",
     "build_llama_kivi",
+    "build_llama_cache_path",
     "is_llama_kivi_patched",
+    "is_llama_cache_path_patched",
     "clear_llama_kivi_caches",
     "bytes_stored_llama_kivi",
 ]
@@ -46,7 +43,6 @@ def _iter_llama_layers(model: nn.Module) -> list[nn.Module]:
     """取出 Llama 解码层列表（兼容 ``model.model.layers``）。"""
     if isinstance(model, LlamaForCausalLM):
         return list(model.model.layers)
-    # 部分包装：仍尝试常见路径
     inner = getattr(model, "model", None)
     layers = getattr(inner, "layers", None) if inner is not None else None
     if layers is None:
@@ -57,12 +53,40 @@ def _iter_llama_layers(model: nn.Module) -> list[nn.Module]:
 
 
 def is_llama_kivi_patched(model: nn.Module) -> bool:
-    """是否已将全部 decoder 层的 ``self_attn`` 换成 KIVI attention。
-
-    Llama 与 Mistral（``MistralKiviAttention`` 是 ``LlamaKiviAttention`` 子类）
-    都走这一判断，避免评测脚本只认 Llama。
-    """
+    """是否已将全部 decoder 层的 ``self_attn`` 换成 KIVI attention。"""
     return is_kivi_patched(model)
+
+
+def is_llama_cache_path_patched(model: nn.Module) -> bool:
+    """是否已将全部 decoder 层换成 cache-path attention（C0–C5）。"""
+    return is_cache_path_patched(model)
+
+
+def _stamp_cache_config(
+    model: nn.Module,
+    *,
+    kv_format: str,
+    layout: str,
+    group_size: int,
+    residual_length: int,
+    kivi_bits: int | None,
+) -> None:
+    """把格式写到 ``model.config``，供 generate / 评测读取。"""
+    cfg = getattr(model, "config", None)
+    if cfg is None:
+        return
+    cfg.cache_kv_format = kv_format
+    cfg.cache_layout = layout
+    cfg.cache_path_patched = True
+    cfg.kivi_group_size = group_size
+    cfg.kivi_residual_length = residual_length
+    if kivi_bits is None:
+        cfg.kivi_patched = False
+        return
+    cfg.kivi_bits = kivi_bits
+    cfg.kivi_k_bits = kivi_bits
+    cfg.kivi_v_bits = kivi_bits
+    cfg.kivi_patched = True
 
 
 def patch_llama_model(
@@ -73,22 +97,10 @@ def patch_llama_model(
     v_bits: int | None = None,
     group_size: int = 32,
     residual_length: int = 128,
+    layout: str = "contiguous",
     inplace: bool = True,
 ) -> nn.Module:
-    """就地将各层 ``LlamaAttention`` 替换为 ``LlamaKiviAttention``（拷贝权重）。
-
-    参数
-        model: ``LlamaForCausalLM`` 或含 ``model.layers`` 的等价结构。
-        bits: K/V 默认比特（2 或 4）；可被 ``k_bits`` / ``v_bits`` 覆盖。
-        group_size / residual_length: 对齐 KIVI / 本仓库协议。
-        inplace: 必须为 True（当前只支持就地替换）。
-
-    返回
-        同一 ``model`` 引用（已 patch）。
-
-    异常
-        若某层不是 ``LlamaAttention`` / 已是 ``LlamaKiviAttention`` 则跳过或报错见下。
-    """
+    """就地将各层 attention 替换为 ``LlamaKiviAttention``（拷贝权重）。"""
     if not inplace:
         raise ValueError("当前仅支持 inplace=True 就地替换")
 
@@ -97,44 +109,136 @@ def patch_llama_model(
     for layer in layers:
         attn = layer.self_attn
         if isinstance(attn, LlamaKiviAttention):
-            # 已 patch：更新超参并清空 cache，避免旧状态
             attn.bits = bits
             attn.k_bits = bits if k_bits is None else k_bits
             attn.v_bits = bits if v_bits is None else v_bits
+            attn.kv_format = "kivi2" if bits == 2 else "kivi4"
             attn.group_size = group_size
             attn.residual_length = residual_length
+            attn.layout = layout
             attn.kivi_cache = None
             n_patched += 1
             continue
-        if not isinstance(attn, LlamaAttention):
-            raise TypeError(
-                f"layer.self_attn 类型为 {type(attn).__name__}，"
-                f"期望 LlamaAttention 或 LlamaKiviAttention"
+        if isinstance(attn, (LlamaAttention, LlamaCachePathAttention)):
+            layer.self_attn = LlamaKiviAttention.from_hf_attention(
+                attn,
+                bits=bits,
+                k_bits=k_bits,
+                v_bits=v_bits,
+                group_size=group_size,
+                residual_length=residual_length,
+                layout=layout,
             )
-        layer.self_attn = LlamaKiviAttention.from_llama_attention(
-            attn,
-            bits=bits,
-            k_bits=k_bits,
-            v_bits=v_bits,
-            group_size=group_size,
-            residual_length=residual_length,
+            n_patched += 1
+            continue
+        raise TypeError(
+            f"layer.self_attn 类型为 {type(attn).__name__}，"
+            f"期望 LlamaAttention / LlamaCachePathAttention"
         )
-        n_patched += 1
 
     if n_patched == 0:
         raise RuntimeError("未找到可 patch 的 Llama attention 层")
 
-    # 挂到 config 上便于评测脚本读取
-    cfg = getattr(model, "config", None)
-    if cfg is not None:
-        cfg.kivi_bits = bits
-        cfg.kivi_k_bits = bits if k_bits is None else k_bits
-        cfg.kivi_v_bits = bits if v_bits is None else v_bits
-        cfg.kivi_group_size = group_size
-        cfg.kivi_residual_length = residual_length
-        cfg.kivi_patched = True
-
+    _stamp_cache_config(
+        model,
+        kv_format="kivi2" if bits == 2 else "kivi4",
+        layout=layout,
+        group_size=group_size,
+        residual_length=residual_length,
+        kivi_bits=bits,
+    )
     return model
+
+
+def patch_llama_cache_path(
+    model: nn.Module,
+    *,
+    kv_format: str,
+    layout: str = "contiguous",
+    group_size: int = 32,
+    residual_length: int = 128,
+    seed: int = 0,
+    inplace: bool = True,
+) -> nn.Module:
+    """就地换成 C0–C5 cache-path。KIVI 走 ``LlamaKiviAttention``，其余走父类。"""
+    if not inplace:
+        raise ValueError("当前仅支持 inplace=True 就地替换")
+    name = canonical_cache_format(kv_format)
+    if is_kivi_format(name):
+        bits = 2 if name == "kivi2" else 4
+        return patch_llama_model(
+            model,
+            bits=bits,
+            group_size=group_size,
+            residual_length=residual_length,
+            layout=layout,
+        )
+
+    layers = _iter_llama_layers(model)
+    n_patched = 0
+    for layer in layers:
+        attn = layer.self_attn
+        if isinstance(attn, LlamaCachePathAttention) and not isinstance(attn, LlamaKiviAttention):
+            attn.kv_format = name
+            attn.layout = layout
+            attn.group_size = group_size
+            attn.residual_length = residual_length
+            attn.seed = seed
+            attn.cache = None
+            n_patched += 1
+            continue
+        if isinstance(attn, (LlamaAttention, LlamaCachePathAttention)):
+            layer.self_attn = LlamaCachePathAttention.from_hf_attention(
+                attn,
+                kv_format=name,
+                layout=layout,
+                group_size=group_size,
+                residual_length=residual_length,
+                seed=seed,
+            )
+            n_patched += 1
+            continue
+        raise TypeError(
+            f"layer.self_attn 类型为 {type(attn).__name__}，"
+            f"期望 LlamaAttention / LlamaCachePathAttention"
+        )
+
+    if n_patched == 0:
+        raise RuntimeError("未找到可 patch 的 Llama attention 层")
+
+    _stamp_cache_config(
+        model,
+        kv_format=name,
+        layout=layout,
+        group_size=group_size,
+        residual_length=residual_length,
+        kivi_bits=None,
+    )
+    return model
+
+
+def _load_llama_base(
+    model_id: str,
+    *,
+    device: torch.device,
+    dtype: torch.dtype,
+    trust_remote_code: bool,
+    from_pretrained_kwargs: dict[str, Any],
+) -> tuple[LlamaForCausalLM, Any]:
+    """from_pretrained + tokenizer；强制 eager mask。"""
+    tokenizer = AutoTokenizer.from_pretrained(model_id, trust_remote_code=trust_remote_code)
+    if tokenizer.pad_token is None:
+        tokenizer.pad_token = tokenizer.eos_token
+    from_pretrained_kwargs.setdefault("attn_implementation", "eager")
+    model = AutoModelForCausalLM.from_pretrained(
+        model_id,
+        dtype=dtype,
+        trust_remote_code=trust_remote_code,
+        **from_pretrained_kwargs,
+    )
+    if not isinstance(model, LlamaForCausalLM):
+        raise TypeError(f"仅支持 LlamaForCausalLM，得到 {type(model).__name__}")
+    return model, tokenizer
 
 
 def build_llama_kivi(
@@ -145,52 +249,27 @@ def build_llama_kivi(
     v_bits: int | None = None,
     group_size: int = 32,
     residual_length: int = 128,
+    layout: str = "contiguous",
     device: str | torch.device | None = None,
     dtype: torch.dtype | None = None,
     trust_remote_code: bool = False,
     **from_pretrained_kwargs: Any,
 ) -> tuple[LlamaForCausalLM, Any]:
-    """加载 Llama 因果 LM，替换为 KIVI attention，并返回 ``(model, tokenizer)``。
-
-    参数
-        model_id: HF 模型 ID 或本地路径（协议锚：``NousResearch/Llama-2-7b-hf``）。
-        bits / group_size / residual_length: 见 ``patch_llama_model``。
-        device: 如 ``\"cuda\"`` / ``\"cpu\"``；``None`` 则保持 ``from_pretrained`` 默认。
-        dtype: 权重 dtype；``None`` 时 GPU 用 ``float16``，CPU 用 ``float32``。
-        trust_remote_code: 传给 tokenizer / model。
-        from_pretrained_kwargs: 其余传给 ``AutoModelForCausalLM.from_pretrained``。
-
-    返回
-        ``(model, tokenizer)``；model 已 ``eval()`` 且 attention 已 patch。
-    """
+    """加载 Llama，替换为 KIVI attention，返回 ``(model, tokenizer)``。"""
     if device is None:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     else:
         device = torch.device(device)
-
     if dtype is None:
         dtype = torch.float16 if device.type == "cuda" else torch.float32
 
-    tokenizer = AutoTokenizer.from_pretrained(
-        model_id, trust_remote_code=trust_remote_code
-    )
-    if tokenizer.pad_token is None:
-        tokenizer.pad_token = tokenizer.eos_token
-
-    # KIVI attention 是显式 eager 计算，需要 HF 构造加性因果 mask；
-    # sdpa/flash 实现下 HF 可能给各层传 attention_mask=None
-    from_pretrained_kwargs.setdefault("attn_implementation", "eager")
-    model = AutoModelForCausalLM.from_pretrained(
+    model, tokenizer = _load_llama_base(
         model_id,
+        device=device,
         dtype=dtype,
         trust_remote_code=trust_remote_code,
-        **from_pretrained_kwargs,
+        from_pretrained_kwargs=from_pretrained_kwargs,
     )
-    if not isinstance(model, LlamaForCausalLM):
-        raise TypeError(
-            f"build_llama_kivi 仅支持 LlamaForCausalLM，得到 {type(model).__name__}"
-        )
-
     patch_llama_model(
         model,
         bits=bits,
@@ -198,6 +277,48 @@ def build_llama_kivi(
         v_bits=v_bits,
         group_size=group_size,
         residual_length=residual_length,
+        layout=layout,
+    )
+    model.to(device)
+    model.eval()
+    return model, tokenizer
+
+
+def build_llama_cache_path(
+    model_id: str = "meta-llama/Llama-3.1-8B-Instruct",
+    *,
+    kv_format: str,
+    layout: str = "contiguous",
+    group_size: int = 32,
+    residual_length: int = 128,
+    seed: int = 0,
+    device: str | torch.device | None = None,
+    dtype: torch.dtype | None = None,
+    trust_remote_code: bool = False,
+    **from_pretrained_kwargs: Any,
+) -> tuple[LlamaForCausalLM, Any]:
+    """加载 Llama，换成 C0–C5 cache-path，返回 ``(model, tokenizer)``。"""
+    if device is None:
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    else:
+        device = torch.device(device)
+    if dtype is None:
+        dtype = torch.float16 if device.type == "cuda" else torch.float32
+
+    model, tokenizer = _load_llama_base(
+        model_id,
+        device=device,
+        dtype=dtype,
+        trust_remote_code=trust_remote_code,
+        from_pretrained_kwargs=from_pretrained_kwargs,
+    )
+    patch_llama_cache_path(
+        model,
+        kv_format=kv_format,
+        layout=layout,
+        group_size=group_size,
+        residual_length=residual_length,
+        seed=seed,
     )
     model.to(device)
     model.eval()

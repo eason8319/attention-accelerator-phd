@@ -7,7 +7,7 @@ R1 实施细则：[`../../research/r1_kv_baseline/PLAN.md`](../../research/r1_kv
 | 深度 | 内容 | 产出 | 状态 |
 |------|------|------|------|
 | R0 | Survey + Learning 技能与证据基线 | `survey/`、`learning/`、本仓库计划与对比手册 | **已完成**（持续文献监视除外） |
-| R1 | 真实 KV cache-path、误差—流量模型、decode simulator 骨架 | 可复现测量 + 协议锁定 | **进行中**（M0–M3 完成；下一步 M4） |
+| R1 | 真实 KV cache-path、误差—流量模型、decode simulator 骨架 | 可复现测量 + 协议锁定 | **进行中**（M0–M4 完成；M5 WP1–WP3 已落地，下一步精度点） |
 | R2 | 静态 INT4（或 R1 选定主格式）流式通路；无完整 FP16 展开；关键 RTL | 架构主张 + 首版综合 | 未开始 |
 | R3 | 可规则化混合 / 结构感知比特分配 | 精度—硬件代价 Pareto | 未开始 |
 | R4 | 精度—布局—映射联合优化 | 映射方法与系统评估 | 未开始 |
@@ -41,8 +41,8 @@ R1 实施细则：[`../../research/r1_kv_baseline/PLAN.md`](../../research/r1_kv
 - [x] **M1** contiguous cache-path（FP16/INT8/INT4）：[`cache_path/`](../../research/r1_kv_baseline/cache_path/)；谱系对照见 [`experiments/codec_compare/REPORT.md`](../../research/r1_kv_baseline/experiments/codec_compare/REPORT.md)
 - [x] **M2** INT4+BDR：[`cache_path/`](../../research/r1_kv_baseline/cache_path/)（`Int4BdrCodec`）；同上 [`codec_compare`](../../research/r1_kv_baseline/experiments/codec_compare/REPORT.md)
 - [x] **M3** KIVI 编解码 + 阶段 B 表格：[`experiments/kivi_eval/`](../../research/r1_kv_baseline/experiments/kivi_eval/)（Table 3 / LongBench：fp16 / kivi2 / kivi4 全集已跑通；kivi4 $\approx$ 本仓库 fp16）
-- [ ] M4 paged 双报告（均匀 codec 与 `KiviKVCache` 两条后端）
-- [ ] M5 bytes/token Pareto + decode 压力点
+- [x] **M4** paged 双报告：[`cache_path/paged_cache.py`](../../research/r1_kv_baseline/cache_path/paged_cache.py) + [`experiments/paged_layout/REPORT.md`](../../research/r1_kv_baseline/experiments/paged_layout/REPORT.md)（阶段 A；C0–C5 双布局）
+- [ ] M5 bytes/token Pareto + decode 压力点（WP1–WP3：流量表 + 整模 C0–C5 cache-path；精度 y 轴未开始）
 - [ ] M6 误差—流量敏感性
 - [ ] M7 decode simulator 挂钩
 - [ ] M8 REPORT 与 R1→R2 验收

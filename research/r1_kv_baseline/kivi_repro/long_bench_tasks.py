@@ -1,7 +1,7 @@
 """LongBench 评测辅助：子组任务、prompt、预测与打分。
 
 提供四类长上下文子组的代表任务默认集；生成可接 ``hf_generate.generate_ids``
-（若模型已 KIVI patch，会在生成前清空 cache）。
+（cache-path 模型会在生成前清空 KV）。
 
 依赖：``datasets``；打分可选 ``rouge`` / ``fuzzywuzzy``
 （缺省时 code 相似度回退 ``difflib``，摘要 ROUGE 则提示安装）。
@@ -20,17 +20,18 @@ import json
 import re
 import string
 from collections import Counter
+from collections.abc import Callable, Iterable, Sequence
 from dataclasses import asdict, dataclass, field
 from difflib import SequenceMatcher
 from pathlib import Path
-from typing import Any, Callable, Iterable, Sequence
+from typing import Any
 
 import numpy as np
 import torch
 import torch.nn as nn
 
 from .hf_generate import generate_ids
-from .llama_kivi_attn import clear_llama_kivi_caches
+from .llama_kivi_attn import clear_llama_kivi_caches, is_cache_path_patched
 from .patch_llama import is_llama_kivi_patched
 
 __all__ = [
@@ -513,7 +514,7 @@ def predict_one(
     if attention_mask is not None:
         attention_mask = attention_mask.to(device)
 
-    if is_llama_kivi_patched(model):
+    if is_cache_path_patched(model):
         clear_llama_kivi_caches(model)
 
     gen_kwargs: dict[str, Any] = {
@@ -730,7 +731,9 @@ def evaluate_tasks(
     )
     note = kv_note
     if not note:
-        note = "kivi" if is_llama_kivi_patched(model) else "fp16"
+        note = str(getattr(getattr(model, "config", None), "cache_kv_format", "") or "")
+        if not note:
+            note = "kivi" if is_llama_kivi_patched(model) else "fp16"
 
     bundle = EvalBundle(
         max_length=max_length, model_name=name, kv_note=note

@@ -2,9 +2,37 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 import torch
 
-from kv_codecs import EncodedKV, KVCodec, KiviKeyCodec, KiviValueCodec
+from kv_codecs import EncodedKV, KiviKeyCodec, KiviValueCodec, KVCodec
+
+
+@dataclass(frozen=True)
+class BytesBreakdown:
+    """流量四项分解（``metrics.md`` §3.2 / §8.5），单位字节。"""
+
+    payload: int
+    scale: int = 0
+    zp: int = 0
+    page: int = 0
+
+    @property
+    def metadata(self) -> int:
+        """``bytes_stored`` 第二项：scale + zp + page。"""
+        return self.scale + self.zp + self.page
+
+
+def scale_zp_nbytes(encoded: EncodedKV) -> tuple[int, int]:
+    """返回 ``(scale_bytes, zp_bytes)``；缺省张量为 0。"""
+    scale = 0
+    zp = 0
+    if encoded.scale is not None:
+        scale = int(encoded.scale.numel() * encoded.scale.element_size())
+    if encoded.zero_point is not None:
+        zp = int(encoded.zero_point.numel() * encoded.zero_point.element_size())
+    return scale, zp
 
 
 def _validate_kv_append(
@@ -87,14 +115,22 @@ class ContiguousKVCache:
         self._v_chunks.clear()
         self._seq_len = 0
 
-    def bytes_stored(self) -> tuple[int, int]:
-        """返回 ``(payload_bytes, metadata_bytes)`` 合计。"""
+    def bytes_breakdown(self) -> BytesBreakdown:
+        """四项分解；contiguous 的 page 恒为 0。"""
         payload = 0
-        metadata = 0
+        scale = 0
+        zp = 0
         for chunk in (*self._k_chunks, *self._v_chunks):
             payload += self.codec.bytes_payload(chunk)
-            metadata += self.codec.bytes_metadata(chunk)
-        return payload, metadata
+            s, z = scale_zp_nbytes(chunk)
+            scale += s
+            zp += z
+        return BytesBreakdown(payload=payload, scale=scale, zp=zp, page=0)
+
+    def bytes_stored(self) -> tuple[int, int]:
+        """返回 ``(payload_bytes, metadata_bytes)`` 合计。"""
+        b = self.bytes_breakdown()
+        return b.payload, b.metadata
 
 
 class KiviKVCache:
@@ -237,21 +273,28 @@ class KiviKVCache:
         self._v_residual = None
         self._seq_len = 0
 
-    def bytes_stored(self) -> tuple[int, int]:
-        """返回 ``(payload_bytes, metadata_bytes)``。
-
-        残差窗按 FP16 计入 payload；量化段按对应 codec 记账。
-        """
+    def bytes_breakdown(self) -> BytesBreakdown:
+        """四项分解；contiguous 的 page 恒为 0。残差窗按 FP16 计入 payload。"""
         payload = 0
-        metadata = 0
+        scale = 0
+        zp = 0
         for chunk in self._k_quant:
             payload += self.k_codec.bytes_payload(chunk)
-            metadata += self.k_codec.bytes_metadata(chunk)
+            s, z = scale_zp_nbytes(chunk)
+            scale += s
+            zp += z
         for chunk in self._v_quant:
             payload += self.v_codec.bytes_payload(chunk)
-            metadata += self.v_codec.bytes_metadata(chunk)
+            s, z = scale_zp_nbytes(chunk)
+            scale += s
+            zp += z
         if self._k_residual is not None:
             payload += int(self._k_residual.numel() * self._k_residual.element_size())
         if self._v_residual is not None:
             payload += int(self._v_residual.numel() * self._v_residual.element_size())
-        return payload, metadata
+        return BytesBreakdown(payload=payload, scale=scale, zp=zp, page=0)
+
+    def bytes_stored(self) -> tuple[int, int]:
+        """返回 ``(payload_bytes, metadata_bytes)``。"""
+        b = self.bytes_breakdown()
+        return b.payload, b.metadata

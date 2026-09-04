@@ -4,6 +4,42 @@
 
 ---
 
+## 2026-09-04（M5 WP3：整模 C0–C3 cache-path）
+
+- `LlamaCachePathAttention` 把 C0–C5 接到 HF Llama / Mistral `generate`；C4/C5 仍是 `LlamaKiviAttention` 子类。默认 `layout=contiguous`。
+- `fp16` 保持原生 HF（M3 C0 精度上界）；M5 C0 用 `c0` / `fp16_codec`。`int8` / `int4` / `int4_bdr` 走均匀 codec。
+- 未跑 8B 精度；M5 仍缺 y 轴。
+
+## 2026-09-04（M5 WP2：8B 几何 bytes/token）
+
+- [`experiments/kv_pareto/REPORT.md`](../../research/r1_kv_baseline/experiments/kv_pareto/REPORT.md)：Llama-3.1-8B GQA 几何，4K–32K × C0–C5 × 双布局；C0 走 FP16 codec。$D(16384,1024)$ 已报全程均值与末步 $N{=}17407$。
+- 32K 相对 C0：C4 $\approx 19\%$，均匀 INT4 $\approx 28\%$，C5 $\approx 31\%$（残差窗使 C5 比 C2 更费带宽）。未加载权重、无 PPL。
+- 下一步：同一模型补精度 y 轴。
+
+## 2026-09-04（M5 WP1：`traffic_model.py`）
+
+- 新增 [`bytes_accounting/traffic_model.py`](../../research/r1_kv_baseline/bytes_accounting/traffic_model.py)：封装 `cache_path.bytes_breakdown`，输出四项分解、bytes/token、$b_{\mathrm{eff}}$、以及 $D(L_{\mathrm{in}},L_{\mathrm{out}})$ 全程 KV 读 / $L_{\mathrm{out}}$ 与末步。C0 拒绝原生 HF 别名。
+
+## 2026-09-04（M4：paged_layout 分列 C3 门禁）
+
+- [`paged_layout/REPORT.md`](../../research/r1_kv_baseline/experiments/paged_layout/REPORT.md)：布局对齐拆 prefill / decode；C3 decode 的 $V{=}1.81\times10^{-3}$ 标明为 1/30 行（$N{=}64$ seed 1），不当典型值。补 $N{=}128$ C0/C4/C5 刷窗字节。
+- 脚本门禁与报告一致：C3 prefill $10^{-5}$，decode K/V 允许 1 档（$5\times10^{-3}$）。`test_paged_cache.py` 增加 C3 逐步 decode 单测；metrics §8.3 写明「逐元素一致」绑定同一 append 粒度。
+
+## 2026-09-04（M4：paged_layout 阶段 A 双报告）
+
+- [`experiments/paged_layout/REPORT.md`](../../research/r1_kv_baseline/experiments/paged_layout/REPORT.md)：C0–C5 contiguous / paged 合成对照。payload/scale/zp 两列一致；$B_{\mathrm{page}}$ 与四池页数符合 metrics v1.1。C0–C2 / C4–C5 逐元素对齐；C3 逐步 decode 见 INT4 舍入。
+- M4 勾选完成。下一步 M5。
+
+## 2026-09-04（M4：`paged_cache.py` 落地）
+
+- 新增 [`cache_path/paged_cache.py`](../../research/r1_kv_baseline/cache_path/paged_cache.py)：`PagedUniformKVCache`（C0–C3）与 `PagedKiviKVCache`（C4/C5 四池）。`AttentionWithCache(layout="paged")`；`bytes_breakdown` 拆 payload/scale/zp/page。
+- [`protocols/metrics.md`](../../research/r1_kv_baseline/protocols/metrics.md) §8 口径未改，**v1.1 锁定**。M4 实验双报告仍待 `experiments/paged_layout/`。
+
+## 2026-09-04（M4：paged 切分规则写入 metrics 草稿）
+
+- [`protocols/metrics.md`](../../research/r1_kv_baseline/protocols/metrics.md) → **v1.1-draft**：新增 §8（$P_{\mathrm{size}}=16$；C0–C3 按页 encode；C4/C5 量化历史与 FP16 残差分池；Key group=2 页；$B_{\mathrm{pte}}=8\,\mathrm{B}$）。实现 `paged_cache.py` 后若口径未改则去掉 draft。
+- [`protocols/models_context.md`](../../research/r1_kv_baseline/protocols/models_context.md) §5.2 改为指向 metrics §8（版本仍为 v1.2）。
+
 ## 2026-09-04（R1 实施计划入库并按现状修订）
 
 - 将 Cursor 初稿写入 [`research/r1_kv_baseline/PLAN.md`](../../research/r1_kv_baseline/PLAN.md)；相对初稿的主要修订：官方 KIVI 表不阻塞、实验按语义目录、C4/C5 必做、M4 覆盖两条 cache 后端、M5 的 C0 须走 FP16 codec 记账。

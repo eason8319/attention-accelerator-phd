@@ -9,17 +9,17 @@
 
 | 项 | 状态 | 落点 |
 |----|------|------|
-| M0 协议锁定 | **完成** | [`protocols/`](protocols/)（模型阶梯 v1.2；指标 v1.0） |
+| M0 协议锁定 | **完成** | [`protocols/`](protocols/)（模型阶梯 v1.2；指标 v1.1） |
 | M1 contiguous C0–C2 | **完成** | [`cache_path/`](cache_path/)；对照 [`experiments/codec_compare/REPORT.md`](experiments/codec_compare/REPORT.md) |
 | M2 INT4+BDR（C3） | **完成** | `Int4BdrCodec`；同上 |
 | M3 KIVI C4/C5 + 阶段 B 任务表 | **完成** | [`kivi_repro/`](kivi_repro/) + [`experiments/kivi_eval/REPORT.md`](experiments/kivi_eval/REPORT.md) |
-| M4 paged 双报告 | 未开始 | 缺 `paged_cache.py`；Kivi 路径亦无 page |
-| M5 bytes/token Pareto + $D(16384,1024)$ | 未开始 | `bytes_accounting/` 仅占位；kivi_eval 未报流量 |
+| M4 paged 双报告 | **完成** | [`cache_path/paged_cache.py`](cache_path/paged_cache.py) + [`experiments/paged_layout/REPORT.md`](experiments/paged_layout/REPORT.md)（阶段 A） |
+| M5 bytes/token Pareto + $D(16384,1024)$ | **进行中（WP1–WP3）** | 流量表 [`experiments/kv_pareto/REPORT.md`](experiments/kv_pareto/REPORT.md)；整模 C0–C3 已接；精度点未开始 |
 | M6 误差—流量敏感性 | 未开始 | 同上 |
 | M7 decode simulator 挂钩 | 未开始 | [`research/r1_decode_sim/`](../r1_decode_sim/) 仅 stub |
 | M8 R1→R2 验收 | 未开始 | 无总 `REPORT.md`（按约定验收时再写） |
 
-下一步：**M4**。M3 已关闭 proxy 任务精度锚；进入 R2 仍缺 paged、Pareto、模拟器交叉核对。
+下一步：**M5 精度点**（8B 长上下文 PPL 或任务分，与 `kv_pareto` 流量画同一 Pareto）。WP1–WP3 已关闭；进入 R2 仍缺精度曲线、模拟器交叉核对。
 
 ## 相对初稿的修订（必读）
 
@@ -78,17 +78,18 @@ research/
       rotation.py              # BDR / Hadamard
       kv_cache.py              # ContiguousKVCache + KiviKVCache
       attention_with_cache.py  # 合成/单元 attention
-      paged_cache.py           # M4 待建；须同时服务均匀 codec 与 Kivi
-    kivi_repro/                # 库，不是实验目录
+      paged_cache.py           # M4：PagedUniformKVCache + PagedKiviKVCache
+    kivi_repro/                # 库：C0–C5 整模 patch / 任务（WP3 已把均匀格式接到 generate）
       llama_kivi_attn.py
       patch_llama.py / patch_mistral.py
       hf_generate.py
       lm_eval_tasks.py / long_bench_tasks.py
-    bytes_accounting/          # M5–M6 待建
+    bytes_accounting/          # M5：traffic_model（WP1 已落地）；敏感性属 M6
     experiments/
       codec_compare/           # C0–C5 合成对照（已完成）
       kivi_eval/               # 整模 Table 3 / LongBench（M3 已完成）
-      <pareto 等>/             # M5 起按语义命名
+      paged_layout/            # M4：contiguous / paged 双报告（阶段 A 已完成）
+      kv_pareto/               # M5 WP2：8B 几何 bytes/token + D(16384,1024)
   r1_decode_sim/               # M7；自包含，禁止 import learning/
 ```
 
@@ -112,19 +113,19 @@ research/
 - 结论要点（相对本仓库 FP16）：KIVI-4 同量级；KIVI-2 小幅掉点。合成路径上 C4 误差很大，**不能**用任务分反推 cache 重建误差小。
 - 未做（不阻塞 M3）：与论文官方表并排；PPL；bytes/token；paged。
 
-### M4｜Paged 布局（下一步）
+### M4｜Paged 布局 — 完成（阶段 A）
 
-- 新增 page/block 存储（建议 16 token/page）；量化载荷与 scale/zp 对齐 page 边界。
-- **两条后端都要有 paged**：均匀 C0–C3 的 contiguous 路径，以及 `KiviKVCache`（残差窗与已量化历史如何切 page 须在实现时写进 `metrics.md` 修订）。
-- 自 M4 起，正式流量表默认双列 contiguous / paged。禁止只报连续地址上界。
-- 阶段 A 可用合成张量 + 0.5B 冒烟；不必重跑 M3 全集。
+- 切分、四池与 $B_{\mathrm{page}}$ 以 [`protocols/metrics.md`](protocols/metrics.md) §8 为准（v1.1；$P_{\mathrm{size}}=16$）。
+- 实现：`PagedUniformKVCache` / `PagedKiviKVCache`；`AttentionWithCache(..., layout="paged")`。
+- 双报告：[`experiments/paged_layout/REPORT.md`](experiments/paged_layout/REPORT.md)。合成张量 C0–C5；占用 token 的 payload/scale/zp 两列一致；$B_{\mathrm{page}}$ 可复现。未跑 0.5B（不阻塞）。
+- 自 M4 起，正式流量表默认双列 contiguous / paged。
 
 ### M5｜Bytes/token + 主 Pareto
 
-- `bytes_accounting/traffic_model.py`：按 `metrics.md` 分解 $B_{\mathrm{payload}}+B_{\mathrm{scale}}+B_{\mathrm{zp}}+B_{\mathrm{page}}$。优先封装 `cache_path` 已有 `bytes_*`，不要另起一套口径。
-- 主曲线：`Llama-3.1-8B-Instruct`，4K–32K，C0–C5，**双布局**。C0 必须经 FP16 codec 记账。
-- 必报压力点 $D(16384,1024)$：全程 KV 读 / $L_{\mathrm{out}}$，以及末步单步 bytes/token。
-- 精度侧：至少一种长上下文设定下的任务分或 PPL，与流量画在同一 Pareto 上。M3 的 Table 3 不能替代这条曲线。
+- `bytes_accounting/traffic_model.py`：**WP1 已落地**。按 `metrics.md` 分解 $B_{\mathrm{payload}}+B_{\mathrm{scale}}+B_{\mathrm{zp}}+B_{\mathrm{page}}$，封装 `cache_path` 的 `bytes_breakdown`（不另起口径）。C0 只走 `fp16` codec。
+- 主曲线 **x 轴**：**WP2 已落地**，见 [`experiments/kv_pareto/REPORT.md`](experiments/kv_pareto/REPORT.md)。`Llama-3.1-8B-Instruct` 几何，4K–32K，C0–C5，**双布局**；C0 经 FP16 codec。未加载权重。
+- 必报压力点 $D(16384,1024)$：**WP2 已报**（全程 KV 读 / $L_{\mathrm{out}}$ + 末步 $N{=}17407$）。
+- 精度侧（y 轴）：至少一种长上下文设定下的任务分或 PPL，与流量画在同一 Pareto 上。**整模路径 WP3 已落地**（`LlamaCachePathAttention` / `fp16` 仍为原生 HF；M5 C0 用 `c0` / `fp16_codec`）。8B 评测未开始。M3 的 Table 3 不能替代这条曲线。
 - WikiText-2 PPL 若做，放本实验 `REPORT.md`，不另开 milestone。
 
 ### M6｜误差—流量敏感性

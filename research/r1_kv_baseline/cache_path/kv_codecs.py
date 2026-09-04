@@ -513,11 +513,17 @@ class KiviFormat:
         num_heads: int,
         head_dim: int,
         device: torch.device | None = None,
+        layout: str = "contiguous",
+        page_size: int = 16,
+        pte_bytes: int = 8,
     ):
-        """构造带残差窗的 ``KiviKVCache``（延迟导入以避免循环依赖）。"""
-        from kv_cache import KiviKVCache
+        """构造 ``KiviKVCache`` 或 paged 后端（延迟导入以避免循环依赖）。
 
-        return KiviKVCache(
+        参数
+            layout: ``contiguous``（默认）或 ``paged``（``metrics.md`` §8）。
+            page_size / pte_bytes: 仅 ``paged`` 使用；默认 16 / 8。
+        """
+        kwargs = dict(
             num_heads=num_heads,
             head_dim=head_dim,
             bits=self.bits,
@@ -527,6 +533,15 @@ class KiviFormat:
             residual_length=self.residual_length,
             device=device,
         )
+        if layout == "contiguous":
+            from kv_cache import KiviKVCache
+
+            return KiviKVCache(**kwargs)
+        if layout == "paged":
+            from paged_cache import PagedKiviKVCache
+
+            return PagedKiviKVCache(**kwargs, page_size=page_size, pte_bytes=pte_bytes)
+        raise ValueError(f"layout 须为 contiguous / paged，得到 {layout!r}")
 
 
 def get_codec(format_id: str, **kwargs) -> KVCodec | KiviFormat:

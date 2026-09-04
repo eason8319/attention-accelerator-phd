@@ -92,7 +92,7 @@
 | 布局 | 要求 |
 |------|------|
 | contiguous | 理想连续地址上界 |
-| paged | 规则 page/block（默认建议 16 tokens/page，实现时可在 metrics 中确认） |
+| paged | 规则 page/block；$P_{\mathrm{size}}=16$（切分、残差窗与 $B_{\mathrm{page}}$ 见 [`metrics.md`](metrics.md) §8，v1.1） |
 
 主声称不得只依赖 contiguous。
 
