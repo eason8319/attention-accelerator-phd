@@ -40,6 +40,12 @@ if str(_CACHE_PATH) not in sys.path:
 from kv_cache import KiviKVCache  # noqa: E402
 
 
+# prefill 分块计算的 query 块大小：控制 (B, H, chunk, T_kv) 打分矩阵的峰值显存
+# （8K 上下文整段物化 (32, 8K, 8K) fp16 scores + fp32 softmax 需 ~16 GiB，
+# 24 GB 卡放不下；逐块数学等价）
+_QUERY_CHUNK = 1024
+
+
 def _eager_attention(
     query: torch.Tensor,
     key: torch.Tensor,
@@ -48,16 +54,67 @@ def _eager_attention(
     *,
     scaling: float,
     dropout: float = 0.0,
-) -> tuple[torch.Tensor, torch.Tensor]:
-    """手动 SDPA；形状均为 ``(B, H, T, D)``。"""
-    scores = torch.matmul(query, key.transpose(-2, -1)) * scaling
-    if attention_mask is not None:
-        scores = scores + attention_mask
-    attn_weights = F.softmax(scores, dim=-1, dtype=torch.float32).to(query.dtype)
-    if dropout > 0.0:
-        attn_weights = F.dropout(attn_weights, p=dropout)
-    attn_output = torch.matmul(attn_weights, value)
-    return attn_output, attn_weights
+    return_weights: bool = False,
+) -> tuple[torch.Tensor, torch.Tensor | None]:
+    """手动 SDPA；输入形状 ``(B, H, T, D)``。
+
+    与 HF ``eager_attention_forward`` 对齐：``attn_output`` 在返回前
+    ``transpose(1, 2)`` 为 ``(B, T, H, D)``，供上层直接 reshape 成
+    ``(B, T, H*D)``；``attn_weights`` 为 ``(B, H, T_q, T_kv)``。
+
+    ``q_len > _QUERY_CHUNK`` 且不需要 ``attn_weights`` 时按 query 块分块
+    （softmax 沿 key 维、各 query 行独立，逐块与整段数学等价），此时
+    ``attn_weights`` 返回 ``None``。
+    """
+    q_len = int(query.shape[2])
+
+    def _attend(q: torch.Tensor, mask: torch.Tensor | None) -> tuple[torch.Tensor, torch.Tensor]:
+        scores = torch.matmul(q, key.transpose(-2, -1)) * scaling
+        if mask is not None:
+            scores += mask
+        weights = F.softmax(scores, dim=-1, dtype=torch.float32).to(q.dtype)
+        if dropout > 0.0:
+            weights = F.dropout(weights, p=dropout)
+        return torch.matmul(weights, value), weights
+
+    if return_weights or q_len <= _QUERY_CHUNK:
+        attn_output, attn_weights = _attend(query, attention_mask)
+        return attn_output.transpose(1, 2).contiguous(), attn_weights
+
+    chunks: list[torch.Tensor] = []
+    for start in range(0, q_len, _QUERY_CHUNK):
+        end = min(start + _QUERY_CHUNK, q_len)
+        mask = (
+            None
+            if attention_mask is None
+            else attention_mask[:, :, start:end, :]
+        )
+        out, _ = _attend(query[:, :, start:end, :], mask)
+        chunks.append(out)
+    attn_output = torch.cat(chunks, dim=2)
+    return attn_output.transpose(1, 2).contiguous(), None
+
+
+def _causal_mask_fallback(
+    q_len: int,
+    kv_len: int,
+    *,
+    dtype: torch.dtype,
+    device: torch.device,
+) -> torch.Tensor:
+    """batch=1 无 padding 时的加性因果 mask，形状 ``(1, 1, q_len, kv_len)``。
+
+    HF 在 sdpa/flash 实现下可能给各层传 ``attention_mask=None``（因果遮挡
+    交由 kernel 的 ``is_causal`` 完成）；本模块用显式 eager 计算，须自建。
+    query 第 ``i`` 行对应绝对位置 ``kv_len - q_len + i``，可看到所有 ``j <=
+    kv_len - q_len + i`` 的 key。
+    """
+    offset = kv_len - q_len
+    mask = torch.full(
+        (q_len, kv_len), torch.finfo(dtype).min, dtype=dtype, device=device
+    )
+    mask = torch.triu(mask, diagonal=offset + 1)
+    return mask[None, None, :, :]
 
 
 class LlamaKiviAttention(nn.Module):
@@ -108,34 +165,35 @@ class LlamaKiviAttention(nn.Module):
                 f"residual_length={residual_length} 须能被 group_size={group_size} 整除"
             )
 
+        attn_bias = bool(getattr(config, "attention_bias", False))
         self.q_proj = nn.Linear(
             config.hidden_size,
             config.num_attention_heads * self.head_dim,
-            bias=config.attention_bias,
+            bias=attn_bias,
         )
         self.k_proj = nn.Linear(
             config.hidden_size,
             config.num_key_value_heads * self.head_dim,
-            bias=config.attention_bias,
+            bias=attn_bias,
         )
         self.v_proj = nn.Linear(
             config.hidden_size,
             config.num_key_value_heads * self.head_dim,
-            bias=config.attention_bias,
+            bias=attn_bias,
         )
         self.o_proj = nn.Linear(
             config.num_attention_heads * self.head_dim,
             config.hidden_size,
-            bias=config.attention_bias,
+            bias=attn_bias,
         )
 
         # 延迟到首次 forward（绑定 device）
         self.kivi_cache: KiviKVCache | None = None
 
     @classmethod
-    def from_llama_attention(
+    def from_hf_attention(
         cls,
-        attn: LlamaAttention,
+        attn: nn.Module,
         *,
         bits: int = 2,
         k_bits: int | None = None,
@@ -143,7 +201,7 @@ class LlamaKiviAttention(nn.Module):
         group_size: int = 32,
         residual_length: int = 128,
     ) -> LlamaKiviAttention:
-        """从已有 ``LlamaAttention`` 拷贝权重，换成 KIVI 写/读路径。"""
+        """从已有 HF attention（Llama / Mistral 等）拷贝权重，换成 KIVI 写/读路径。"""
         new = cls(
             attn.config,
             attn.layer_idx,
@@ -158,6 +216,27 @@ class LlamaKiviAttention(nn.Module):
         new.v_proj = attn.v_proj
         new.o_proj = attn.o_proj
         return new
+
+    @classmethod
+    def from_llama_attention(
+        cls,
+        attn: LlamaAttention,
+        *,
+        bits: int = 2,
+        k_bits: int | None = None,
+        v_bits: int | None = None,
+        group_size: int = 32,
+        residual_length: int = 128,
+    ) -> LlamaKiviAttention:
+        """从已有 ``LlamaAttention`` 拷贝权重，换成 KIVI 写/读路径。"""
+        return cls.from_hf_attention(
+            attn,
+            bits=bits,
+            k_bits=k_bits,
+            v_bits=v_bits,
+            group_size=group_size,
+            residual_length=residual_length,
+        )
 
     def _ensure_cache(self, device: torch.device) -> KiviKVCache:
         if self.kivi_cache is None:
@@ -203,7 +282,8 @@ class LlamaKiviAttention(nn.Module):
         参数
             hidden_states: ``(batch, seq, hidden)``，当前仅支持 ``batch=1``。
             position_embeddings: ``(cos, sin)``，与 HF Llama 一致。
-            attention_mask: 加性 mask，或 ``None``（依赖外部 causal 构造）。
+            attention_mask: 加性 mask；``None`` 时（sdpa/flash 路径）在 prefill
+                阶段自建因果 mask（见 ``_causal_mask_fallback``）。
             past_key_values: HF Cache；用于序列长度簿记，attention 不用其 FP16 KV。
 
         返回
@@ -264,6 +344,17 @@ class LlamaKiviAttention(nn.Module):
         if past_key_values is not None:
             past_key_values.update(key_states, value_states, self.layer_idx)
 
+        # sdpa/flash 路径下 HF 可能传 None（因果遮挡交由 kernel 完成）；
+        # eager 计算必须显式补上，否则 prefill 退化为双向注意力
+        if attention_mask is None and q_len > 1:
+            attention_mask = _causal_mask_fallback(
+                q_len,
+                int(k_all.shape[-2]),
+                dtype=query_states.dtype,
+                device=query_states.device,
+            )
+
+        output_attentions = bool(kwargs.get("output_attentions", False))
         dropout = 0.0 if not self.training else self.attention_dropout
         attn_output, attn_weights = _eager_attention(
             query_states,
@@ -272,26 +363,79 @@ class LlamaKiviAttention(nn.Module):
             attention_mask,
             scaling=self.scaling,
             dropout=dropout,
+            return_weights=output_attentions,
         )
 
         attn_output = attn_output.reshape(*input_shape, -1).contiguous()
         attn_output = self.o_proj(attn_output)
 
-        output_attentions = bool(kwargs.get("output_attentions", False))
         if not output_attentions:
             attn_weights = None
         return attn_output, attn_weights
 
 
+class MistralKiviAttention(LlamaKiviAttention):
+    """Mistral 槽位的 KIVI attention。
+
+    数值路径与 ``LlamaKiviAttention`` 相同（q/k/v → RoPE → ``KiviKVCache`` →
+    eager SDPA → o_proj）。Mistral 的 sliding-window causal mask 由
+    ``MistralModel`` 在进入各层前构造并作为 ``attention_mask`` 传入，本模块
+    只把它加到 scores 上，不再单独实现窗口裁剪。
+    """
+
+    @classmethod
+    def from_mistral_attention(
+        cls,
+        attn: nn.Module,
+        *,
+        bits: int = 2,
+        k_bits: int | None = None,
+        v_bits: int | None = None,
+        group_size: int = 32,
+        residual_length: int = 128,
+    ) -> MistralKiviAttention:
+        """从已有 ``MistralAttention`` 拷贝权重，换成 KIVI 写/读路径。"""
+        return cls.from_hf_attention(
+            attn,
+            bits=bits,
+            k_bits=k_bits,
+            v_bits=v_bits,
+            group_size=group_size,
+            residual_length=residual_length,
+        )
+
+
+def _iter_decoder_layers(model: nn.Module) -> list[nn.Module]:
+    """取出 ``model.model.layers``（Llama / Mistral 因果 LM 的常见结构）。"""
+    inner = getattr(model, "model", None)
+    layers = getattr(inner, "layers", None) if inner is not None else None
+    if layers is None:
+        raise TypeError(
+            f"无法定位 decoder layers；期望含 model.layers 的因果 LM，得到 {type(model).__name__}"
+        )
+    return list(layers)
+
+
+def is_kivi_patched(model: nn.Module) -> bool:
+    """全部 decoder 层的 ``self_attn`` 是否已换成 KIVI attention。"""
+    try:
+        layers = _iter_decoder_layers(model)
+    except TypeError:
+        return False
+    if not layers:
+        return False
+    return all(isinstance(layer.self_attn, LlamaKiviAttention) for layer in layers)
+
+
 def clear_llama_kivi_caches(model: nn.Module) -> None:
-    """遍历模型，清空所有 ``LlamaKiviAttention`` 的 Kivi cache。"""
+    """遍历模型，清空所有 ``LlamaKiviAttention`` / ``MistralKiviAttention`` 的 Kivi cache。"""
     for mod in model.modules():
         if isinstance(mod, LlamaKiviAttention):
             mod.reset_cache()
 
 
 def bytes_stored_llama_kivi(model: nn.Module) -> tuple[int, int]:
-    """汇总全部 ``LlamaKiviAttention`` 的 ``(payload, metadata)`` bytes。"""
+    """汇总全部 KIVI attention 的 ``(payload, metadata)`` bytes。"""
     payload = 0
     meta = 0
     for mod in model.modules():
@@ -300,3 +444,8 @@ def bytes_stored_llama_kivi(model: nn.Module) -> tuple[int, int]:
             payload += p
             meta += m
     return payload, meta
+
+
+# 架构无关别名
+clear_kivi_caches = clear_llama_kivi_caches
+bytes_stored_kivi = bytes_stored_llama_kivi

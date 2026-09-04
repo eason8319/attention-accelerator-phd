@@ -337,11 +337,48 @@ def resolve_tasks(
 
 
 def load_longbench(dataset: str, *, longbench_e: bool = False):
-    """加载 ``THUDM/LongBench`` 的 ``test`` split。"""
-    from datasets import load_dataset
+    """加载 ``THUDM/LongBench`` 的 ``test`` split。
+
+    ``THUDM/LongBench``（v1）在 HF Hub 上仍是脚本式数据集（``LongBench.py``），
+    而该脚本已不可用：一是 ``datasets>=4.0`` 彻底移除了脚本式加载（见
+    https://github.com/huggingface/datasets/pull/7592）；二是脚本里
+    ``data.zip`` 的下载地址硬编码为 ``https://huggingface.co/...``，不经过
+    ``huggingface_hub`` 因此不受 ``HF_ENDPOINT`` 镜像站配置影响。同时 lm-eval
+    的部分任务（如 CoQA/TruthfulQA）依赖的数据集已用 ``datasets>=4.0`` 的新
+    ``List`` 特征类型重新导出，只能用 ``datasets>=4.0`` 读取——两边合起来意味着
+    **不存在同时满足两者的单一 ``datasets`` 版本**。
+
+    因此这里绕开 ``datasets.load_dataset`` 的脚本机制：直接用
+    ``huggingface_hub.hf_hub_download``（走 ``HF_ENDPOINT``）拉取
+    ``data.zip``，本地解压后按行读取目标子集的 ``.jsonl``，再用
+    ``Dataset.from_list`` 构造——不依赖任何远端 schema/脚本，在
+    ``datasets`` 任意版本（含 ``>=4.0``）下都能工作。
+    """
+    import zipfile
+
+    from datasets import Dataset
+    from huggingface_hub import hf_hub_download
 
     name = f"{dataset}_e" if longbench_e else dataset
-    return load_dataset("THUDM/LongBench", name, split="test")
+
+    zip_path = Path(
+        hf_hub_download(
+            repo_id="THUDM/LongBench", repo_type="dataset", filename="data.zip"
+        )
+    )
+    extract_dir = zip_path.parent / "longbench_data_extracted"
+    jsonl_path = extract_dir / "data" / f"{name}.jsonl"
+    if not jsonl_path.exists():
+        with zipfile.ZipFile(zip_path) as zf:
+            zf.extractall(extract_dir)
+
+    rows: list[dict[str, Any]] = []
+    with jsonl_path.open(encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line:
+                rows.append(json.loads(line))
+    return Dataset.from_list(rows)
 
 
 def format_prompt(dataset: str, example: dict[str, Any]) -> str:

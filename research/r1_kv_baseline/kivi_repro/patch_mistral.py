@@ -1,20 +1,22 @@
-"""将 HuggingFace Llama 的 attention 替换为本仓库 ``LlamaKiviAttention``。
+"""将 HuggingFace Mistral 的 attention 替换为本仓库 ``MistralKiviAttention``。
 
 提供：
-  - ``patch_llama_model``：就地替换已加载模型的各层 ``self_attn``
-  - ``build_llama_kivi``：``from_pretrained`` + 替换，一键得到可 ``generate`` 的模型
+  - ``patch_mistral_model``：就地替换已加载模型的各层 ``self_attn``
+  - ``build_mistral_kivi``：``from_pretrained`` + 替换，一键得到可 ``generate`` 的模型
 
 超参默认对齐协议：``group_size=32``，``residual_length=128``。
+数值路径与 Llama 相同（本仓库 ``KiviKVCache``）；sliding window 由 HF
+``MistralModel`` 的 mask 负责。
 
 用法：
 
-  from kivi_repro.patch_llama import build_llama_kivi, patch_llama_model
+  from kivi_repro.patch_mistral import build_mistral_kivi, patch_mistral_model
 
-  model, tokenizer = build_llama_kivi(
-      "NousResearch/Llama-2-7b-hf", bits=2, device="cuda",
+  model, tokenizer = build_mistral_kivi(
+      "mistralai/Mistral-7B-Instruct-v0.2", bits=2, device="cuda",
   )
   # 或
-  patch_llama_model(model, bits=4)
+  patch_mistral_model(model, bits=4)
 """
 
 from __future__ import annotations
@@ -24,48 +26,51 @@ from typing import Any
 import torch
 import torch.nn as nn
 from transformers import AutoModelForCausalLM, AutoTokenizer
-from transformers.models.llama.modeling_llama import LlamaAttention, LlamaForCausalLM
+from transformers.models.mistral.modeling_mistral import (
+    MistralAttention,
+    MistralForCausalLM,
+)
 
 from .llama_kivi_attn import (
-    LlamaKiviAttention,
+    MistralKiviAttention,
     bytes_stored_llama_kivi,
     clear_llama_kivi_caches,
-    is_kivi_patched,
 )
 
 __all__ = [
-    "patch_llama_model",
-    "build_llama_kivi",
-    "is_llama_kivi_patched",
+    "patch_mistral_model",
+    "build_mistral_kivi",
+    "is_mistral_kivi_patched",
     "clear_llama_kivi_caches",
     "bytes_stored_llama_kivi",
 ]
 
 
-def _iter_llama_layers(model: nn.Module) -> list[nn.Module]:
-    """取出 Llama 解码层列表（兼容 ``model.model.layers``）。"""
-    if isinstance(model, LlamaForCausalLM):
+def _iter_mistral_layers(model: nn.Module) -> list[nn.Module]:
+    """取出 Mistral 解码层列表（兼容 ``model.model.layers``）。"""
+    if isinstance(model, MistralForCausalLM):
         return list(model.model.layers)
-    # 部分包装：仍尝试常见路径
     inner = getattr(model, "model", None)
     layers = getattr(inner, "layers", None) if inner is not None else None
     if layers is None:
         raise TypeError(
-            f"无法定位 Llama layers；期望 LlamaForCausalLM，得到 {type(model).__name__}"
+            f"无法定位 Mistral layers；期望 MistralForCausalLM，得到 {type(model).__name__}"
         )
     return list(layers)
 
 
-def is_llama_kivi_patched(model: nn.Module) -> bool:
-    """是否已将全部 decoder 层的 ``self_attn`` 换成 KIVI attention。
+def is_mistral_kivi_patched(model: nn.Module) -> bool:
+    """是否已将全部 decoder 层的 ``self_attn`` 换成 ``MistralKiviAttention``。"""
+    try:
+        layers = _iter_mistral_layers(model)
+    except TypeError:
+        return False
+    if not layers:
+        return False
+    return all(isinstance(layer.self_attn, MistralKiviAttention) for layer in layers)
 
-    Llama 与 Mistral（``MistralKiviAttention`` 是 ``LlamaKiviAttention`` 子类）
-    都走这一判断，避免评测脚本只认 Llama。
-    """
-    return is_kivi_patched(model)
 
-
-def patch_llama_model(
+def patch_mistral_model(
     model: nn.Module,
     *,
     bits: int = 2,
@@ -75,29 +80,25 @@ def patch_llama_model(
     residual_length: int = 128,
     inplace: bool = True,
 ) -> nn.Module:
-    """就地将各层 ``LlamaAttention`` 替换为 ``LlamaKiviAttention``（拷贝权重）。
+    """就地将各层 ``MistralAttention`` 替换为 ``MistralKiviAttention``（拷贝权重）。
 
     参数
-        model: ``LlamaForCausalLM`` 或含 ``model.layers`` 的等价结构。
+        model: ``MistralForCausalLM`` 或含 ``model.layers`` 的等价结构。
         bits: K/V 默认比特（2 或 4）；可被 ``k_bits`` / ``v_bits`` 覆盖。
         group_size / residual_length: 对齐 KIVI / 本仓库协议。
         inplace: 必须为 True（当前只支持就地替换）。
 
     返回
         同一 ``model`` 引用（已 patch）。
-
-    异常
-        若某层不是 ``LlamaAttention`` / 已是 ``LlamaKiviAttention`` 则跳过或报错见下。
     """
     if not inplace:
         raise ValueError("当前仅支持 inplace=True 就地替换")
 
-    layers = _iter_llama_layers(model)
+    layers = _iter_mistral_layers(model)
     n_patched = 0
     for layer in layers:
         attn = layer.self_attn
-        if isinstance(attn, LlamaKiviAttention):
-            # 已 patch：更新超参并清空 cache，避免旧状态
+        if isinstance(attn, MistralKiviAttention):
             attn.bits = bits
             attn.k_bits = bits if k_bits is None else k_bits
             attn.v_bits = bits if v_bits is None else v_bits
@@ -106,12 +107,12 @@ def patch_llama_model(
             attn.kivi_cache = None
             n_patched += 1
             continue
-        if not isinstance(attn, LlamaAttention):
+        if not isinstance(attn, MistralAttention):
             raise TypeError(
                 f"layer.self_attn 类型为 {type(attn).__name__}，"
-                f"期望 LlamaAttention 或 LlamaKiviAttention"
+                f"期望 MistralAttention 或 MistralKiviAttention"
             )
-        layer.self_attn = LlamaKiviAttention.from_llama_attention(
+        layer.self_attn = MistralKiviAttention.from_mistral_attention(
             attn,
             bits=bits,
             k_bits=k_bits,
@@ -122,9 +123,8 @@ def patch_llama_model(
         n_patched += 1
 
     if n_patched == 0:
-        raise RuntimeError("未找到可 patch 的 Llama attention 层")
+        raise RuntimeError("未找到可 patch 的 Mistral attention 层")
 
-    # 挂到 config 上便于评测脚本读取
     cfg = getattr(model, "config", None)
     if cfg is not None:
         cfg.kivi_bits = bits
@@ -137,8 +137,8 @@ def patch_llama_model(
     return model
 
 
-def build_llama_kivi(
-    model_id: str = "NousResearch/Llama-2-7b-hf",
+def build_mistral_kivi(
+    model_id: str = "mistralai/Mistral-7B-Instruct-v0.2",
     *,
     bits: int = 2,
     k_bits: int | None = None,
@@ -149,12 +149,12 @@ def build_llama_kivi(
     dtype: torch.dtype | None = None,
     trust_remote_code: bool = False,
     **from_pretrained_kwargs: Any,
-) -> tuple[LlamaForCausalLM, Any]:
-    """加载 Llama 因果 LM，替换为 KIVI attention，并返回 ``(model, tokenizer)``。
+) -> tuple[MistralForCausalLM, Any]:
+    """加载 Mistral 因果 LM，替换为 KIVI attention，并返回 ``(model, tokenizer)``。
 
     参数
-        model_id: HF 模型 ID 或本地路径（协议锚：``NousResearch/Llama-2-7b-hf``）。
-        bits / group_size / residual_length: 见 ``patch_llama_model``。
+        model_id: HF 模型 ID 或本地路径（协议锚：``mistralai/Mistral-7B-Instruct-v0.2``）。
+        bits / group_size / residual_length: 见 ``patch_mistral_model``。
         device: 如 ``\"cuda\"`` / ``\"cpu\"``；``None`` 则保持 ``from_pretrained`` 默认。
         dtype: 权重 dtype；``None`` 时 GPU 用 ``float16``，CPU 用 ``float32``。
         trust_remote_code: 传给 tokenizer / model。
@@ -177,7 +177,8 @@ def build_llama_kivi(
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
 
-    # KIVI attention 是显式 eager 计算，需要 HF 构造加性因果 mask；
+    # KIVI attention 是显式 eager 计算，需要 HF 构造加性因果 mask
+    # （对 Mistral 同时保证 sliding-window mask 语义显式传入）；
     # sdpa/flash 实现下 HF 可能给各层传 attention_mask=None
     from_pretrained_kwargs.setdefault("attn_implementation", "eager")
     model = AutoModelForCausalLM.from_pretrained(
@@ -186,12 +187,12 @@ def build_llama_kivi(
         trust_remote_code=trust_remote_code,
         **from_pretrained_kwargs,
     )
-    if not isinstance(model, LlamaForCausalLM):
+    if not isinstance(model, MistralForCausalLM):
         raise TypeError(
-            f"build_llama_kivi 仅支持 LlamaForCausalLM，得到 {type(model).__name__}"
+            f"build_mistral_kivi 仅支持 MistralForCausalLM，得到 {type(model).__name__}"
         )
 
-    patch_llama_model(
+    patch_mistral_model(
         model,
         bits=bits,
         k_bits=k_bits,
