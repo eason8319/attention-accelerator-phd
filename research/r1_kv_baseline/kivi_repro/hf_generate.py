@@ -20,11 +20,11 @@ from typing import Any
 
 import torch
 import torch.nn as nn
-from transformers import AutoModelForCausalLM, AutoTokenizer
-from transformers.models.llama.modeling_llama import LlamaForCausalLM
+from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
 
 from .llama_kivi_attn import bytes_stored_llama_kivi, clear_llama_kivi_caches
 from .patch_llama import build_llama_kivi, is_llama_kivi_patched
+from .patch_mistral import build_mistral_kivi
 
 __all__ = [
     "GenerateInfo",
@@ -84,8 +84,8 @@ def load_llama_for_generate(
     dtype: torch.dtype | None = None,
     trust_remote_code: bool = False,
     **from_pretrained_kwargs: Any,
-) -> tuple[LlamaForCausalLM, Any]:
-    """加载 Llama，按 ``kv_format`` 选择 FP16 基线或 KIVI patch。
+) -> tuple[nn.Module, Any]:
+    """按 ``kv_format`` 选择 FP16 基线或 KIVI patch 加载模型。
 
     参数
         model_id: HF ID 或本地路径。
@@ -96,6 +96,12 @@ def load_llama_for_generate(
 
     返回
         ``(model, tokenizer)``，已 ``eval()``。
+
+    架构
+        FP16 基线不做 attention patch，支持任意 HF ``AutoModelForCausalLM``。
+        KIVI patch（``kivi2``/``kivi4``）按 ``config.model_type`` 分发：
+        ``llama`` → ``build_llama_kivi``，``mistral`` → ``build_mistral_kivi``。
+        其它架构仍会抛出 ``TypeError``。
     """
     resolved_bits = bits if bits is not None else kv_format_to_bits(kv_format)
 
@@ -119,17 +125,25 @@ def load_llama_for_generate(
             trust_remote_code=trust_remote_code,
             **from_pretrained_kwargs,
         )
-        if not isinstance(model, LlamaForCausalLM):
-            raise TypeError(
-                f"仅支持 LlamaForCausalLM，得到 {type(model).__name__}"
-            )
         model.to(device)
         model.eval()
         if getattr(model.config, "kivi_patched", False):
             model.config.kivi_patched = False
         return model, tokenizer
 
-    return build_llama_kivi(
+    cfg = AutoConfig.from_pretrained(model_id, trust_remote_code=trust_remote_code)
+    model_type = str(getattr(cfg, "model_type", "") or "").lower()
+    builder = {
+        "llama": build_llama_kivi,
+        "mistral": build_mistral_kivi,
+    }.get(model_type)
+    if builder is None:
+        raise TypeError(
+            f"KIVI patch 目前支持 llama / mistral，得到 model_type={model_type!r} "
+            f"（{type(cfg).__name__}）"
+        )
+
+    return builder(
         model_id,
         bits=resolved_bits,
         group_size=group_size,

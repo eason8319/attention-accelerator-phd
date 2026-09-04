@@ -32,6 +32,6 @@ Verilator 建议在 WSL2 下安装（`apt install verilator`，或源码编译�
 ## 阅读材料
 
 - FSA / SystolicAttention (arXiv 2507.11331) — 主线1架构基线，P4 的目标读物
-- PLENA (arXiv 2509.09505) — flattened array 与 ISA 设计
+- PLENA (ISCA 2026; arXiv 2509.09505) — flattened array 与 ISA 设计
 - Softermax (DAC 2021)、I-BERT (ICML 2021) — softmax/exp 硬件近似的经典做法
 - TPU v1 论文 (ISCA 2017) — weight-stationary systolic array 原型

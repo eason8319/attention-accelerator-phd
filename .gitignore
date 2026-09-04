@@ -75,3 +75,6 @@ research/**/outputs/
 
 # Local tool downloads
 .tools/
+
+# 具体机器/集群的环境备注 —— 仅本地，不同步云端（内容与研究结论无关）
+research/**/CLUSTER_NOTES.md

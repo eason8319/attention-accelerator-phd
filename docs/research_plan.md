@@ -113,22 +113,25 @@ flowchart TB
 
 ### R1｜真实 Cache-Path 基线：追平“可部署静态压缩”前沿
 
+实施细则（M0–M8 与现状）：[`research/r1_kv_baseline/PLAN.md`](../research/r1_kv_baseline/PLAN.md)。
+
 **目标**：关闭 proxy，建立与当前算法/系统基线可对话的测量平台。
 
 研究内容：
 
 1. 真实 token-wise KV：quantize → pack → store → load → dequant → attention；
-2. 对照谱：FP16；INT8；均匀 INT4；INT4+BDR（SAW-INT4 思想）；可选 KIVI 风格非对称 2/4-bit；
+2. 对照谱：FP16；INT8；均匀 INT4；INT4+BDR（SAW-INT4 思想）；**必做** KIVI 风格非对称 2/4-bit（C4/C5）；
 3. 布局：contiguous 与 **paged** 双报告；主声称不得只依赖理想连续地址；
 4. 指标：任务精度 / PPL、HBM bytes/token、解量化与元数据开销分解；
 5. 误差—通信模型：层 / 头 / token 位置敏感性；长上下文与多轮下的误差累积初探。
 
 **对齐前沿的标准**：在约定模型与上下文上，静态 INT4(+BDR) 精度—流量 Pareto 达到可复现的 SOTA 邻域（以公开实现或论文表格为锚），并文档化与 proxy 的差距。
 
-**进入 R2 的门槛**：
+**进入 R2 的门槛**（实施勾选见 [`research/r1_kv_baseline/PLAN.md`](../research/r1_kv_baseline/PLAN.md)）：
 
 - 真实 cache-path 可复现；
-- 至少一条长上下文设定下的 bytes/token–精度曲线；
+- 至少一条长上下文设定下的 bytes/token–精度曲线（含 paged 列）；
+- 专用 decode 模拟器与 Roofline / SCALE-Sim 在约定检查点趋势一致；
 - 锁定默认模型列表、硬件包络假设与评测协议。
 
 ### R2｜流式专用数据通路：追平“无完整 FP16 展开”的系统原则，并落到 ASIC
@@ -268,7 +271,7 @@ flowchart TB
 
 ## 八、执行约定
 
-1. 本文件为仓库**现行唯一研究计划**；按年排程的旧表述作废。
-2. `survey/`、`learning/` 归档为 R0；后续实验按 R1–R5 深度组织目录（实施时另建）。
+1. 本文件为仓库**长线研究计划**（R0–R5）；按年排程的旧表述作废。R1 实施细则（M0–M8）见 [`research/r1_kv_baseline/PLAN.md`](../research/r1_kv_baseline/PLAN.md)。
+2. `survey/`、`learning/` 归档为 R0；后续实验按 R1–R5 深度组织目录。
 3. 每完成一个深度，追加简短“验收状态”记录：通过 / 收缩后通过 / 未通过原因。
 4. 定量阈值与模型列表在 R1 协议锁定后写入修订记录，避免无基线倍数承诺。

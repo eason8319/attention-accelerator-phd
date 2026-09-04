@@ -1,6 +1,7 @@
 # R1 — 真实 KV Cache-Path 基线
 
-正式研究入口（自 R1 起）。现行计划：[`docs/research_plan.md`](../../docs/research_plan.md)。
+正式研究入口（自 R1 起）。长线计划：[`docs/research_plan.md`](../../docs/research_plan.md)。  
+R1 实施细则：[`PLAN.md`](PLAN.md)。
 
 ## 环境
 
@@ -21,10 +22,16 @@ mkdir -p "$HF_HOME"
 hf auth whoami
 ```
 
+上面步骤基于 WSL2 路径；在无 conda/GPU 于登录节点的集群上改用
+[`activate.sh`](activate.sh)（`source research/r1_kv_baseline/activate.sh`）。
+某台具体机器/集群特有的环境限制与踩坑记录见本地文件 `CLUSTER_NOTES.md`
+（不入库，见 `.gitignore`；若该文件不存在说明当前机器还没写过这类记录）。
+
 ## 目录
 
 ```text
 r1_kv_baseline/
+├── PLAN.md                 # R1 实施细则（M0–M8）
 ├── environment.yml
 ├── requirements.txt
 ├── protocols/              # M0 已锁定：models_context.md / metrics.md
@@ -40,5 +47,5 @@ r1_kv_baseline/
 
 - **M0 完成**：协议见 [`protocols/`](protocols/)。  
 - **M1–M2 完成**：C0–C3 contiguous cache-path。  
-- **M3（进行中）**：C4/C5 cache-path 已接入；合成对照 [`codec_compare`](experiments/codec_compare/)；[`kivi_eval`](experiments/kivi_eval/) **阶段 A 冒烟已通过**，Table 3 / LongBench 待阶段 B。  
-- 下一步：实现 `run_table3.py` / `run_longbench.py` 并在 ≥24 GB GPU 上复现。
+- **M3 完成**：C4/C5 cache-path + Llama / Mistral KIVI patch；[`kivi_eval`](experiments/kivi_eval/) 阶段 B Table 3 / LongBench（fp16 / kivi2 / kivi4 全集）已跑通，见该目录 `REPORT.md`。  
+- 下一步：M4 paged 双报告。

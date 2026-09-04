@@ -4,6 +4,29 @@
 
 ---
 
+## 2026-09-04（R1 实施计划入库并按现状修订）
+
+- 将 Cursor 初稿写入 [`research/r1_kv_baseline/PLAN.md`](../../research/r1_kv_baseline/PLAN.md)；相对初稿的主要修订：官方 KIVI 表不阻塞、实验按语义目录、C4/C5 必做、M4 覆盖两条 cache 后端、M5 的 C0 须走 FP16 codec 记账。
+- 核对进度：M0–M3 完成，下一步 M4。同步 `milestones.md`、`research/README.md`、协议 `models_context.md` → v1.2（阶段 B 已用于 M3）。
+
+## 2026-09-04（kivi_eval：按 codec_compare 口径重写 REPORT）
+
+- `experiments/kivi_eval/REPORT.md` 改为目的 / 方法 / 结果 / 权衡 / 局限 / 结论；Δ 只相对本仓库 FP16，不与论文官方表并排。
+
+## 2026-09-04（kivi_eval：阶段 B Table 3 / LongBench）
+
+- 修复 `LlamaKiviAttention` prefill：attention 输出补 `transpose(1, 2)`、`attention_mask=None` 时补因果 mask；8K eager 按 query 分块以免 24 GB OOM。
+- `build_*_kivi` 默认 `attn_implementation=eager`。阶段 B 全集重跑：kivi4 ≈ fp16，kivi2 小幅掉点。报告见 [`kivi_eval/REPORT.md`](../../research/r1_kv_baseline/experiments/kivi_eval/REPORT.md)。
+
+## 2026-09-03（academic-researcher 项目 skill）
+
+- 将 academic-researcher 迁入 [`.cursor/skills/academic-researcher/`](../../.cursor/skills/academic-researcher/)；规则改为相对仓库路径，不再依赖云端 `/root/.cursor/skills/`。
+
+## 2026-09-01（kivi_repro：Mistral KIVI patch）
+
+- 新增 `kivi_repro/patch_mistral.py` 与 `MistralKiviAttention`（数值路径复用 `LlamaKiviAttention` + `KiviKVCache`；sliding window 仍由 HF mask 负责）。
+- `load_llama_for_generate` 按 `config.model_type` 分发 `llama` / `mistral`；LongBench 协议锚点可跑 kivi2/kivi4。
+
 ## 2026-07-31（评测模块去论文数字、通用化）
 
 - `lm_eval_tasks.py`：删除 `PAPER_TABLE3` / `compare_to_paper`；改为 `evaluate_lm_eval` + 可选 `score_delta(reference=...)`。
