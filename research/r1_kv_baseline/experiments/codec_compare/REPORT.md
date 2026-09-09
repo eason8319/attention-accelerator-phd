@@ -1,15 +1,17 @@
 # 实验报告：真实 Cache-Path 上 C0–C5 编码对照
 
+**整理日期**：2026-09-08；**状态**：本报告所列批次已完成，本次未重跑。**证据来源**：results/raw_metrics.csv、summary_mean_std.csv、run_config.json。正式正文经阅读结果后整理，数据汇总不替代报告。
+
 **日期**：2026-07-28  
 **阶段**：R1 / M3 骨架（合并原 M1+M2，并纳入 KIVI 风格 C4/C5）  
 **性质**：合成张量、真实 cache-path（非投影 fake-quant；非 PPL）  
-**统计**：$n{=}20$ 配对种子；报告 mean ± 样本标准差  
+**统计**：$n{=}20$ 配对种子；原始汇总保存 mean 与样本标准差；下方主表为 mean。
 **实验目录**：[`experiments/codec_compare/`](.)（本报告入库；`results/` 仅本地）  
 **说明**：合并并取代原 `m1_codec_accuracy` / `m2_int4_bdr`（已删除）。
 
 ---
 
-## 1. 实验目的与问题
+## 1. 实验目的
 
 在同一真实路径
 
@@ -26,13 +28,13 @@ $$
 
 ---
 
-## 2. 方法
+## 2. 方法与设置
 
 ### 2.1 被测格式
 
 | ID | 入口 | Cache | 要点 |
 |----|------|-------|------|
-| C0 `fp16` | `"fp16"` | Contiguous | 精度下界；无 meta |
+| C0 `fp16` | `"fp16"` | Contiguous | 未量化参考；无 meta |
 | C1 `int8` | `"int8"` | Contiguous | 对称 token-wise INT8 |
 | C2 `int4` | `"int4"` | Contiguous | 对称、`group_size=32`；payload 按 0.5 B/元素记账 |
 | C3 `int4_bdr` | `"int4_bdr"` | Contiguous | BDR→INT4；旋转矩阵不计入 meta |
@@ -70,7 +72,7 @@ python experiments/codec_compare/run_codec_compare.py
 
 ---
 
-## 3. 结果
+## 3. 实验结果
 
 ### 3.1 Prefill attention（$S{=}256$）
 
@@ -108,7 +110,7 @@ KIVI 尚未刷窗时，K/V 全在 FP16 残差中：C4/C5 的 prefill rel-$\ell_2
 
 ---
 
-## 4. 编码优劣（本合成设定下）
+## 4. 分析与讨论
 
 | 编码 | 优势 | 劣势 / 适用边界 |
 |------|------|----------------|
@@ -129,7 +131,7 @@ KIVI 尚未刷窗时，K/V 全在 FP16 残差中：C4/C5 的 prefill rel-$\ell_2
 
 ---
 
-## 5. 局限
+## 5. 局限与有效性
 
 - 合成张量，非真实 LLM KV / 非 LM-Eval；KIVI 在真实模型上的优势可能被低估或高估。  
 - 无 causal mask；无 paged 布局（M4）。  
@@ -138,9 +140,9 @@ KIVI 尚未刷窗时，K/V 全在 FP16 残差中：C4/C5 的 prefill rel-$\ell_2
 
 ---
 
-## 6. 结论
+## 6. 结论与后续工作
 
 - 已在同一真实 cache-path 上跑通 **C0–C5** 配对对照，并合并原 M1/M2 口径。  
 - **BDR**：outlier 下相对 INT4 稳定增益，流量不变（复现 M2 结论）。  
 - **KIVI-4**：刷窗后精度 Pareto 上优于均匀 INT4，代价是更高 bytes 与窗语义；**KIVI-2** 在本合成设定误差过大。  
-- 下一步：阶段 B 在 Llama-2-7B / Mistral 上做 Table 3 / LongBench（计划 M3 评测段），勿用本合成表宣称 SOTA。
+- 后续整模阶段 B 已有独立 [KIVI 任务报告](../kivi_eval/REPORT.md)；本合成实验不代替真实模型评估，也不支持 SOTA 声称。

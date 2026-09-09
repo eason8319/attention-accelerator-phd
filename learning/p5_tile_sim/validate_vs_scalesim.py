@@ -9,8 +9,9 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from pathlib import Path
 
 from hw_config import HwConfig, default_hw_config
@@ -235,7 +236,7 @@ def run_checks(
     ]
 
 
-def write_report(
+def write_results(
     path: Path,
     *,
     scalesim: dict[tuple[str, int], ScaleSimAgg],
@@ -244,99 +245,19 @@ def write_report(
     scalesim_csv: Path,
     hw: HwConfig,
 ) -> None:
+    """导出实际检查状态和逐点数据，不写固定叙述或结论。"""
+    if path.suffix.lower() != ".json":
+        raise ValueError("结果导出必须使用 .json，禁止覆盖报告")
     path.parent.mkdir(parents=True, exist_ok=True)
-    n_pass = sum(1 for c in checks if c.passed)
-    verdict = "PASS" if n_pass == len(checks) else "FAIL"
+    rows = [{"mode": mode, "seq_len": seq,
+             "scalesim": asdict(scalesim[(mode, seq)]),
+             "p5": asdict(p5[(mode, seq)])}
+            for mode, seq in sorted(scalesim)]
+    data = {"source_csv": str(scalesim_csv), "hardware": asdict(hw),
+            "checks": [asdict(c) for c in checks], "rows": rows,
+            "all_checks_passed": bool(checks) and all(c.passed for c in checks)}
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
-    lines: list[str] = []
-    lines.append("# P5 vs SCALE-Sim 趋势交叉校验")
-    lines.append("")
-    lines.append(f"**结论**：{verdict}（{n_pass}/{len(checks)} 项趋势检查通过）。")
-    lines.append("")
-    lines.append("绝对值不必对齐；本报告只验相对趋势，与 P3 验收口径一致。")
-    lines.append("")
-    lines.append("## 1. 对照设置")
-    lines.append("")
-    lines.append("| 项 | SCALE-Sim (P3) | P5 tile_sim |")
-    lines.append("|---|---|---|")
-    lines.append(f"| 阵列 | 32×32 WS | {hw.pe_rows}×{hw.pe_cols} @ {hw.clock_hz / 1e9:.0f} GHz |")
-    lines.append(f"| SRAM | 16 MiB (6+6+4) | {hw.sram_bytes / (1024**2):.0f} MiB |")
-    lines.append(
-        f"| 带宽模型 | 工具内部 word BW | DRAM {hw.dram_bandwidth_bytes_per_s / 1e12:.0f} TB/s |"
-    )
-    lines.append(
-        "| Attention 范围 | CSV 中 `QK_T`+`PV` 聚合 | 融合 FA（外层 $B_r$ / 内层 $B_c$） |"
-    )
-    lines.append(
-        f"| 代表 tile | 固定 ≤256 × 重复 | prefill `{PREFILL_TILE.br}×{PREFILL_TILE.bc}`；"
-        f" decode `{DECODE_TILE.br}×{DECODE_TILE.bc}` |"
-    )
-    lines.append("| 简化差 | 无跨 tile 复用 / overlap | 有 DB overlap；无 skew/stationary |")
-    lines.append("")
-    lines.append(f"SCALE-Sim 数据：`{scalesim_csv}`")
-    lines.append("")
-
-    lines.append("## 2. 数值对照表（attention：QKᵀ+PV）")
-    lines.append("")
-    lines.append(
-        "| mode | S | SS util% | P5 pe_util | SS cycles | P5 cycles | "
-        "SS DRAM words | P5 DRAM bytes | SS DRAM share | P5 dma_frac |"
-    )
-    lines.append("|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|")
-    for mode in ("prefill", "decode"):
-        for seq in SEQ_LENS:
-            ss = scalesim[(mode, seq)]
-            pr = p5[(mode, seq)]
-            lines.append(
-                f"| {mode} | {seq} | {ss.util_pct:.3f} | {pr.pe_util:.4f} | "  # type: ignore[attr-defined]
-                f"{ss.total_cycles:.3e} | {pr.latency_cycles:.3e} | "  # type: ignore[attr-defined]
-                f"{ss.dram_words:.3e} | {pr.dram_traffic_bytes:.3e} | "  # type: ignore[attr-defined]
-                f"{ss.dram_share:.3f} | {pr.dma_cycle_fraction:.4f} |"  # type: ignore[attr-defined]
-            )
-    lines.append("")
-
-    lines.append("## 3. 趋势检查")
-    lines.append("")
-    lines.append("| 检查项 | 结果 | 说明 |")
-    lines.append("|---|---|---|")
-    for c in checks:
-        mark = "PASS" if c.passed else "FAIL"
-        lines.append(f"| `{c.name}` | **{mark}** | {c.detail} |")
-    lines.append("")
-
-    lines.append("## 4. 解读")
-    lines.append("")
-    lines.append(
-        "1. **Decode ≪ Prefill 利用率**：SCALE-Sim WS 约 $70\\times$；"
-        "P5 在 $B_r=1$ 瘦矩阵下对 PE 阵列做空间映射后同样出现数量级差距"
-        "（本跑约 $29\\times$，方向一致）。"
-    )
-    lines.append(
-        "2. **随 $S$ 放大**：prefill attention 接近 $S^2$（FA / 方阵 GEMM）；"
-        "decode 接近 $S$（扫 KV）。两工具增长倍数同阶。"
-    )
-    lines.append(
-        "3. **Decode 更偏存储**：SCALE-Sim 的 DRAM 词占比更高；"
-        "P5 的 `dma_cycle_fraction` 在 decode 更高——同一叙事，不同度量。"
-    )
-    lines.append(
-        "4. **绝对值偏差来源**：P5 把 softmax 融进同一代价模型并允许 DB 重叠；"
-        "SCALE-Sim 按固定 tile 重复且不计跨 tile 复用。论文/阶段 1 引用时只用比率与单调性。"
-    )
-    lines.append("")
-    lines.append("## 5. 简化假设（相对 SCALE-Sim）")
-    lines.append("")
-    lines.append("- 有跨 tile 语义上的 Q 驻留与 KV 重扫（外层 $B_r$），而非纯 GEMM tile 重复。")
-    lines.append(
-        "- Double buffering：当 $2\\cdot\\mathrm{Footprint}\\le\\mathrm{SRAM}$ 时 load∥compute。"
-    )
-    lines.append(
-        "- Softmax 用吞吐常数 `softmax_elems_per_cycle`；空间 MAC 按 $\\min(B_r,R)\\times\\min(B_c,C)$。"
-    )
-    lines.append("- 不建模 QKV / O 投影（本校验只对齐 attention 核心 `QK_T`+`PV`）。")
-    lines.append("")
-
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -351,7 +272,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "--out-dir",
         type=Path,
         default=DEFAULT_OUT_DIR,
-        help="写入 cross_check_vs_scalesim.md 的目录",
+        help="写入 cross_check_vs_scalesim_results.json 的目录",
     )
     parser.add_argument(
         "--dataflow",
@@ -366,9 +287,9 @@ def main(argv: Sequence[str] | None = None) -> int:
     p5 = run_p5_attention(hw)
     checks = run_checks(scalesim, p5)
 
-    out_md = args.out_dir / "cross_check_vs_scalesim.md"
-    write_report(
-        out_md,
+    out_json = args.out_dir / "cross_check_vs_scalesim_results.json"
+    write_results(
+        out_json,
         scalesim=scalesim,
         p5=p5,
         checks=checks,
@@ -379,7 +300,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     for c in checks:
         flag = "PASS" if c.passed else "FAIL"
         print(f"[{flag}] {c.name}: {c.detail}")
-    print(f"Wrote {out_md}")
+    print(f"Wrote {out_json}")
 
     return 0 if all(c.passed for c in checks) else 1
 

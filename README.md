@@ -18,6 +18,8 @@
 | [docs/recent_works_comparison.md](docs/recent_works_comparison.md) | 近年成果对比手册 |
 | [docs/lit_watch/](docs/lit_watch/) | 文献监视（queries / inbox / ledger） |
 | [research/](research/) | **正式研究入口**（自 R1 起） |
+| [docs/experiments.md](docs/experiments.md) | 实验报告与原始结果索引 |
+| [AGENTS.md](AGENTS.md) | 本地优先、结果回收及文档约束 |
 
 ### 学习项目（P1–P5，已归档为 R0）
 | 目录 | 说明 |
@@ -43,7 +45,7 @@ Python 依赖见 [requirements.txt](requirements.txt)。
 ### 研究进展
 | 文档 | 说明 |
 |------|------|
-| [docs/progress/README.md](docs/progress/README.md) | 进展目录说明 |
 | [docs/progress/milestones.md](docs/progress/milestones.md) | R0–R5 checklist |
 | [docs/progress/CHANGELOG.md](docs/progress/CHANGELOG.md) | 进展日志 |
-| [docs/progress/logs/](docs/progress/logs/) | 详细研究日志 |
+
+当前状态只在里程碑文件维护，根目录及各级 README 不重复记录。日常工作更新已有入口，不另建同步、核验、清理或交接文档；临时产物集中到 `tmp/`，正式实验分析放在各实验唯一的 `REPORT.md`。

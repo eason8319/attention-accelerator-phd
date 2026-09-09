@@ -1,88 +1,39 @@
-# P5 简易 tile-level 模拟器验收报告
+# 实验报告：P5 Tile 级模拟器
 
-日期：2026-07-22
+**实验日期**：2026-07-22；**整理日期**：2026-09-08。
+**状态**：历史实验完成；本次未重跑全部搜索。
+**证据**：outputs/search_results.csv、分负载搜索 CSV、outputs/cross_check_vs_scalesim_data.md；测试状态来自原验收记录。
 
-## 结论
+## 1. 实验目的
 
-P5 已完成验收。在独立环境 `p5-tile-sim` 下实现粗粒度 FlashAttention tile 性能模型（硬件抽象 / workload / 事件调度 / 网格搜索），复现 tile 两端劣化与 latency–traffic Pareto，并与 P3 SCALE-Sim **趋势一致**（6/6 检查通过）。
+检验粗粒度 tile 代价模型能否描述小 tile 的 DMA 暴露、大 tile 的 SRAM/双缓冲约束，并比较 prefill/decode 趋势是否与 P3 SCALE-Sim 一致。
 
-验证命令：
+## 2. 方法与设置
 
-```bash
-conda activate p5-tile-sim
-cd learning/p5_tile_sim
-python run_p5.py
-# 或分步：pytest -q && python search.py && python validate_vs_scalesim.py
-```
+假设 32×32@1 GHz、16 MiB SRAM、1 TB/s，以 LLaMA-7B attention 几何建模。外层 Q tile、内层 KV tile；decode 固定单行 Q；仅在双份工作集可驻留 SRAM 时允许双缓冲。搜索同时最小化周期与 DRAM 字节。
 
-验证结果（2026-07-22）：
+对比 P3 WS 的 QK_T+PV 聚合结果，仅验相对趋势。入口为 run_p5.py、search.py、validate_vs_scalesim.py。历史环境为 Python 3.11、numpy 1.26.4、matplotlib 3.11.0、pytest 8.3.5。
 
-```text
-pytest                          25 passed
-dual-end demo                   OK（小 tile DMA 暴露；过大超 SRAM / 失 DB）
-tile search                     Pareto PNG + search_results.csv
-validate_vs_scalesim            6/6 PASS
-```
+## 3. 实验结果
 
-交叉校验摘要（WS，`QK_T`+`PV`）：
+原记录为 25 项测试通过、6/6 趋势检查通过，搜索结果和 Pareto 图已保存。历史交叉对照为：
 
-```text
-util prefill/decode:  SCALE-Sim ≈69.5×；P5 ≈28.6×（同方向）
-traffic 32K/4K:       prefill ≈64× / 60.7×；decode 8× / 8×
-decode 更偏存储:      SS DRAM share 0.49>0.38；P5 dma_frac 0.031>0.004
-```
+| 指标 | SCALE-Sim | P5 |
+|---|---:|---:|
+| prefill/decode 利用率比 | 约 69.5 | 约 28.6 |
+| prefill 流量 32K/4K | 约 64 | 约 60.7 |
+| decode 流量 32K/4K | 8 | 8 |
 
-## 验收 Checklist
+比率来自历史摘录；原始搜索点见 outputs/search_results.csv。
 
-| PLAN.md 验收项 | 对应产出 | 状态 |
-|---|---|---|
-| 复现 tile 过小 / 过大两端劣化 | `run_p5.py` dual-end demo；`test_simulator.py` | 通过 |
-| tile 搜索输出 Pareto 前沿图 | `search.py` → `outputs/pareto_*.png`、`search_results.csv` | 通过 |
-| 与 SCALE-Sim 趋势一致性报告 | `validate_vs_scalesim.py` → [cross_check_vs_scalesim.md](outputs/cross_check_vs_scalesim.md) | 通过（6/6） |
-| 模块化 + 混合精度字节钩子 | `hw_config` / `workload` / `simulator` / `search`；`ElementBytes` | 通过 |
+## 4. 分析与讨论
 
-## 产出说明
+两模型支持相同方向，但利用率比差异明显，趋势通过不能代替绝对校准。小 tile 的传输成本、大 tile 的重用收益与 SRAM 上限共同约束搜索空间；双缓冲合法性是解释拐点的重要条件。
 
-| 路径 | 角色 |
-|------|------|
-| `hw_config.py` | 32×32 @ 1 GHz、16 MiB、1 TB/s（对齐 P3） |
-| `workload.py` | prefill/decode、LLaMA-7B 形状、`ElementBytes` |
-| `simulator.py` | FA $B_r\times B_c$ 事件链、串行 vs DB、空间 MAC |
-| `search.py` | 网格搜索 + Pareto CSV/PNG |
-| `validate_vs_scalesim.py` | 对照 P3 `scalesim_results.csv` |
-| `run_p5.py` | 一键：pytest → demo → search → validate |
-| `reading_notes.md` | Week 0：FA IO / Timeloop mapspace / PLENA ISA |
-| `outputs/` | Pareto 图、CSV、cross_check 报告 |
+## 5. 局限与有效性
 
-### 关键设计选择（摘要）
+模型无阵列 skew、bank conflict 和指令依赖停顿；softmax 仍为吞吐常数，未接入 P4 延迟。SCALE-Sim DRAM words、P5 DRAM bytes 和 DMA 周期比例不可混算。历史通过数本次未重新执行确认。
 
-- **数据流**：外层 $B_r$（Q）、内层 $B_c$（KV）；decode 强制 $B_r=1$。
-- **合法性**：$\mathrm{Footprint}\le\mathrm{SRAM}$；仅当 $2\cdot\mathrm{Footprint}\le\mathrm{SRAM}$ 启用 DB。
-- **空间 MAC**：有效吞吐 $\min(B_r,R)\times\min(B_c,C)$，使 decode 瘦矩阵 util 下跌并对齐 SCALE-Sim 叙事。
-- **Pareto**：同时最小化 `latency_cycles` 与 `dram_traffic_bytes`。
-- **校验口径**：只比趋势 / 比率，不要求绝对 cycle 对齐。
+## 6. 结论与后续工作
 
-## 已知局限（不影响学习验收）
-
-- 非 cycle-accurate：无阵列 skew、bank conflict、指令依赖 stall。
-- Softmax 吞吐为可调常数；未接 P4 RTL 延迟标定。
-- Prefill 在 1 TB/s 下多数点接近算力下界，Pareto 主要由 traffic（更大 $B_r$ → 更少 KV 重扫）拉开。
-- 不生成 PLENA_ISA 指令流（留给阶段 5 / 主线 4）。
-
-## 环境记录
-
-- Conda：`p5-tile-sim`（Python 3.11，numpy 1.26.4，matplotlib 3.11.0，pytest 8.3.5）
-- 定义：`environment.yml`
-- 对照只读：`learning/p3_arch_eval/outputs/scalesim_results.csv`（无需 SCALE-Sim 运行时）
-
-```bash
-conda env create -f learning/p5_tile_sim/environment.yml
-conda activate p5-tile-sim
-cd learning/p5_tile_sim && python run_p5.py
-```
-
-## 后续衔接
-
-- 主线 4 / 阶段 5：将本代价模型嵌入编译映射（多级缓冲、混合精度字节 sweep、ISA 下发）。
-- 可用 P4 的 exp/softmax/阵列延迟常数替换粗吞吐假设，提高相对 SCALE-Sim / RTL 的保真度。
-- 阶段 1 短文可并列引用 P3 `analysis.md` 与本仓库 `cross_check_vs_scalesim.md` 的趋势表。
+当前模型适合趋势探索和 tile 筛选。后续以 RTL 延迟和更细存储约束校准，再决定是否用于定量预测；脚本只保存数据与检查状态，正式分析由本报告承担。

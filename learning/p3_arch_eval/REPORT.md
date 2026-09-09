@@ -1,70 +1,33 @@
-# P3 架构评估工具链验收报告
+# 实验报告：P3 架构评估工具链
 
-日期：2026-07-15
+**实验日期**：2026-07-15；**整理日期**：2026-09-08。
+**状态**：历史实验完成；本次未重跑仿真。
+**证据**：outputs/ 下的 roofline_table.csv、scalesim_results.csv、timeloop_energy.csv、timeloop_area.csv、cross_joined.csv；历史摘录 cross_validation_data.md。
 
-## 结论
+## 1. 实验目的
 
-P3 已完成验收。建立独立环境 `p3-arch-eval`，实现 Roofline / SCALE-Sim v3 / Timeloop+Accelergy 工具链，完成 attention GEMM 的 cycle·utilization·traffic 与 energy·area 评估，并产出瓶颈分析短文。三方相对结论一致：**decode memory-bound、PE 利用率显著低于 prefill**。
+比较 attention prefill 与 decode 的算术强度、阵列利用率、流量与能量，检验三种工具的相对趋势是否一致，并辨明不同模型之间可比较的范围。
 
-验证命令：
+## 2. 方法与设置
 
-```bash
-conda run -n p3-arch-eval python learning/p3_arch_eval/roofline.py
-conda run -n p3-arch-eval python learning/p3_arch_eval/scale-sim/run_scalesim.py
-conda run -n p3-arch-eval python learning/p3_arch_eval/timeloop/run_timeloop.py
-conda run -n p3-arch-eval python learning/p3_arch_eval/collect_results.py
-```
+使用 LLaMA-7B 规模的单层 attention 几何，覆盖 4K/32K/128K。SCALE-Sim 采用 32×32 WS/OS 阵列，将 GEMM 分成不超过 256 的 tile 后重复；Timeloop/Accelergy 在对应 tile 上估计能量和面积；Roofline 使用独立解析峰值。
 
-关键数字（LLaMA-7B 规模单层 attention，32×32，WS）：
+历史环境为 Python 3.11、SCALE-Sim 3.0.0、numpy 1.26.4，以及 Timeloop/Accelergy Docker。入口为 roofline.py、scale-sim/run_scalesim.py、timeloop/run_timeloop.py；collect_results.py 合并数据与绘图。
 
-```text
-Roofline: decode QK_T/PV AI≈50.9 ops/byte (memory); prefill≈248 (compute)
-SCALE-Sim WS QK_T: prefill util≈73.15% vs decode≈1.05% (≈69×)
-SCALE-Sim decode DRAM share≈49% of (SRAM+DRAM) words
-Timeloop decode energy: SRAM≈89%, DRAM≈11% (PAT; 勿直接当 DRAM 主导结论)
-SRAM KV capacity (INT8 K+V, 16 MiB): S_tile≈2048 tokens
-```
+## 3. 实验结果
 
-## 验收 Checklist
+已有 SCALE-Sim CSV 为 48 行，Timeloop 能量 CSV 为 24 行。历史代表性 WS QK_T 利用率为 prefill 约 73.15%、decode 约 1.05%；算术强度约为 248 和 50.9 ops/byte。
 
-| PLAN.md 验收项 | 对应产出 | 状态 |
-|---|---|---|
-| SCALE-Sim 跑通 attention GEMM 序列，输出 cycle/utilization/traffic csv | `scale-sim/run_scalesim.py`, `outputs/scalesim_results.csv` | 通过（48 行 WS/OS） |
-| Timeloop 跑通同一 workload，输出 energy 分解 | `timeloop/run_timeloop.py`, `outputs/timeloop_energy.csv` | 通过（24 行 + area） |
-| 复现 decode PE 利用率显著低于 prefill，并有 roofline 解释 | `outputs/cross_validation.md`, `util_*.png`, `roofline_*.png` | 通过（WS ≈69×，OS ≈32×） |
-| 产出 `learning/p3_arch_eval/analysis.md` 瓶颈分析短文 | `learning/p3_arch_eval/analysis.md` | 完成 |
+历史 decode 动态能量汇总为 SRAM 约 89%、DRAM 约 11%，限于所用 PAT。逐项证据见上述 CSV，详细讨论见 [analysis.md](analysis.md)。
 
-## 产出说明
+## 4. 分析与讨论
 
-- `roofline.py`：4K/32K/128K × prefill/decode 的 AI 与 bound 表。
-- `scale-sim/run_scalesim.py`：32×32 WS/OS；固定 ≤256 tile × 重复；cycle/util/traffic。
-- `timeloop/run_timeloop.py`：同一 tile 的 mapper energy + Accelergy area（Docker）。
-- `collect_results.py`：三方合并、出图、偏差说明。
-- `analysis.md`：回答片外占比、decode util、16 MiB KV tile 容量。
-- `outputs/`：CSV、PNG、`cross_validation.md` 等可复现产物。
+瘦矩阵映射使 decode 利用率明显下降，与算术强度降低方向一致。流量比例、能量比例和周期比例含义不同；SCALE-Sim 的片外访问占比不能代替 Timeloop 的片外能量占比。
 
-## 已知局限（不影响学习验收）
+## 5. 局限与有效性
 
-- SCALE-Sim tile 重复不建模跨 tile 复用/overlap，绝对值偏保守。
-- Timeloop 捆绑 PAT 下大 SRAM 主导动态能量；不能据此宣称 DRAM energy 主导。
-- 分析峰 128 TOPS 与 32×32@1 GHz≈2 TOPS 不是同一尺度；交叉比较用相对趋势。
-- 官方 exercises 新版 v0.4 `example_designs` 与镜像前端有 schema 漂移；本项目用兼容 legacy schema，并已跑通 ISPASS 2020 exercise 00。
+固定 tile 重复忽略跨 tile 复用和重叠；PAT 未按目标工艺校准。解析 128 TOPS 与 32×32@1 GHz 约 2 TOPS 不在同一尺度，不能直接对齐绝对吞吐。历史 Docker 标签可变，复现仍需锁定镜像摘要。
 
-## 环境记录
+## 6. 结论与后续工作
 
-- Conda：`p3-arch-eval`（Python 3.11，SCALE-Sim 3.0.0，numpy 1.26.4）
-- Docker：`timeloopaccelergy/timeloop-accelergy-pytorch:latest-amd64`
-
-创建环境：
-
-```bash
-conda env create -f learning/p3_arch_eval/environment.yml
-conda activate p3-arch-eval
-docker pull timeloopaccelergy/timeloop-accelergy-pytorch:latest-amd64
-```
-
-## 后续衔接
-
-- 阶段 1 短文可直接引用 `analysis.md` 的三条结论与图。
-- P5 tile simulator 对照本仓库 SCALE-Sim **趋势**（util / traffic 随 $S$）。
-- 若写论文级 energy，需替换/标定 memory 能量模型后再谈 DRAM 占比。
+工具链可比较趋势、识别假设差异，但不足以支持未校准的芯片绝对能效。P5 继续用相对比例对照；正式能耗主张前须校准存储模型。

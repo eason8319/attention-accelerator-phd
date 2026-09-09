@@ -15,7 +15,7 @@
 | 2026-07-23 | 建立 `lit_watch/`；按 arXiv API + PMLR/ACL/DOI **核实**核心条目的题名/Venue/时间；修正 MiniKV 正式题名、综述 ACL’26 Findings、Don’t Waste Bits→CVPR’26（accepted）、Titanus→GLSVLSI’25 等；总览表增加「状态」列。 |
 | 2026-07-23 | 初版对比手册（后续以本表为准）。 |
 
-逐篇数字、基线、平台与限制见 [`lit_watch/AUDIT_2026-09-03.md`](lit_watch/AUDIT_2026-09-03.md)；元数据变更见 [`lit_watch/CHANGELOG.md`](lit_watch/CHANGELOG.md)；机器可读台账见 [`lit_watch/ledger.yaml`](lit_watch/ledger.yaml)。
+元数据变更见 [`lit_watch/CHANGELOG.md`](lit_watch/CHANGELOG.md)，机器可读台账见 [`lit_watch/ledger.yaml`](lit_watch/ledger.yaml)。旧记录引用的 `AUDIT_2026-09-03.md` 当前不在项目中；不能将缺失附件作为已核实定量细节的证据，引用时须回到原文核对。
 
 ## 检索截止
 
@@ -183,7 +183,7 @@ queries → inbox → 核实 venue/DOI → ledger.yaml → 改本手册表/卡�
 - **AATC**：预印本 [2608.14191](https://arxiv.org/abs/2608.14191)；Hannah Laus, Claudio Mayrink Verdun, Hao Wang, Flavio du Pin Calmon, Felix Krahmer。建立 attention-aware distortion 分解并用 reverse water-filling 分配比特。**学习重点**：如何把 KV 张量误差改写为 attention 输出误差，以及如何加入硬件代价项。对齐 R3–R4。
 - **Minima-KV**：预印本 [2608.23834](https://arxiv.org/abs/2608.23834)；Sergii Kozyrev, Davyd Maiboroda。FP8 recent/anchor pages 与 packed TQ3 历史页共存，分格式计算 partial attention state，再用全局 online-softmax 合并；摘要明确声明无 cache-sized dense shadow。**学习优先级最高**：它直接收窄 R2–R3 的新颖性空间，需逐项对照 paged layout、异构格式、partial $O$、格式转换与吞吐。
 - **PuzzleKV**：预印本 [2608.23843](https://arxiv.org/abs/2608.23843)；Zizhong Wang, Jieying Wang, Zhao Zhang, Jiajia Li。以 completed page 为独立低秩单元，并直接在 dense / factorized pages 上完成 attention。**学习重点**：page 粒度的增量压缩、直接计算和与量化组合；作为相邻路线，不替代低比特主线。
-- **核实边界**：4 篇截至 2026-09-03 均为预印本；定量结果已逐表复核，具体基线、平台和限制见 [`lit_watch/AUDIT_2026-09-03.md`](lit_watch/AUDIT_2026-09-03.md)。
+- **核实边界**：原记录称 4 篇截至 2026-09-03 均为预印本；所引用的定量审计附件当前缺失。具体基线、平台和限制引用前须重新核对原文，不以缺失附件宣称复核完成。
 
 ---
 

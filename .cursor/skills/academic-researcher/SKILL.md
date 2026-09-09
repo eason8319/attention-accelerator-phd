@@ -65,7 +65,7 @@ queries.md → inbox.md → 打开原文/会刊页核实 → ledger.yaml
 - `bucket`：`algo_gpu` / `hw_asic_fpga` / `survey` / `adjacent`
 - `venue_type`：`proceedings` | `journal` | `findings` | `preprint` | `workshop`
 - `arxiv_id` 或 `doi` 至少其一；`canonical_url` 指向最权威页
-- 定量细节可放 `notes`，并指向 table/section；完整审计另见 `AUDIT_*.md`
+- 定量细节放现有台账的 `notes` 并指向 table/section；正式分析更新现有对比手册。遵守根 AGENTS.md，不另建 `AUDIT_*.md`、核验报告或任务小结。
 
 ## Comparison handbook
 

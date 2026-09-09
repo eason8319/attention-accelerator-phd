@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import json
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -356,118 +357,19 @@ def energy_share_table(timeloop: list[dict[str, str]]) -> list[str]:
     return lines
 
 
-def write_cross_summary(
+def write_cross_results(
     scalesim: list[dict[str, str]],
     timeloop: list[dict[str, str]],
     joined: list[dict[str, object]],
     path: Path,
 ) -> None:
-    # 叙述用：decode 与 prefill 利用率极值
-    ws_qk = [r for r in scalesim if r["dataflow"] == "ws" and r["gemm"] == "QK_T"]
-    p_util = as_float(
-        next(r for r in ws_qk if r["mode"] == "prefill"),
-        "overall_util_pct",
-    )
-    d_util = as_float(
-        next(r for r in ws_qk if r["mode"] == "decode"),
-        "overall_util_pct",
-    )
+    """保存可追溯的数据与单位假设，不导出研究结论。"""
+    if path.suffix.lower() != ".json":
+        raise ValueError("结果导出必须使用 .json，禁止覆盖报告")
+    data = {"assumed_clock_hz": ASSUMED_FREQ_HZ, "scalesim": scalesim,
+            "timeloop": timeloop, "joined": joined}
+    path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
-    decode_ai = [
-        float(r["ai_ops_per_byte"])
-        for r in joined
-        if r["dataflow"] == "ws"
-        and r["mode"] == "decode"
-        and r["gemm"] in {"QK_T", "PV"}
-        and int(r["seq_len"]) == 4096
-    ][0]
-    prefill_ai = [
-        float(r["ai_ops_per_byte"])
-        for r in joined
-        if r["dataflow"] == "ws"
-        and r["mode"] == "prefill"
-        and r["gemm"] in {"QK_T", "PV"}
-        and int(r["seq_len"]) == 4096
-    ][0]
-
-    lines = [
-        "# P3 Cross-Validation Summary",
-        "",
-        "## Inputs",
-        "",
-        "- `roofline_table.csv`: analytical AI and compute/memory bound",
-        "- `scalesim_results.csv`: cycle / utilization / traffic",
-        "- `timeloop_energy.csv`: MAC / register / SRAM / DRAM energy",
-        "",
-        f"SCALE-Sim attained TOPS assumes a {ASSUMED_FREQ_HZ / 1e9:.0f} GHz "
-        "clock for unit conversion only.",
-        "",
-        "## Prefill vs decode utilization",
-        "",
-        *util_ratio_table(scalesim),
-        "",
-        f"WS `QK_T` utilization: prefill **{p_util:.2f}%** vs decode "
-        f"**{d_util:.2f}%** ({p_util / d_util:.1f}×).",
-        "",
-        "## Timeloop energy shares",
-        "",
-        *energy_share_table(timeloop),
-        "",
-        "## Figures",
-        "",
-        "- `util_prefill_vs_decode.png`",
-        "- `traffic_energy_stack.png`",
-        "- `roofline_points.png`",
-        "- `cross_joined.csv`: per-GEMM join of the three tools",
-        "",
-        "## Agreement (relative conclusions)",
-        "",
-        "1. **Decode is memory-bound / under-utilized.** Roofline places "
-        f"decode `QK_T`/`PV` at AI≈{decode_ai:.1f} ops/byte "
-        f"(below ridge {RIDGE_AI:.0f}), while prefill AI≈{prefill_ai:.0f}. "
-        "SCALE-Sim shows decode PE utilization one to two orders of "
-        "magnitude below prefill for both WS and OS.",
-        "2. **Longer context grows traffic and energy.** Both SCALE-Sim "
-        "DRAM/SRAM traffic and Timeloop total energy rise with seq_len; "
-        "decode projection GEMMs stay skinny while `QK_T`/`PV` grow with S.",
-        "3. **Dataflow modulates absolute util, not the decode gap.** OS "
-        "and WS differ in absolute percentages, but both preserve "
-        "decode ≪ prefill.",
-        "",
-        "## Discrepancy sources (expected)",
-        "",
-        "| Tool | What it answers | Why absolutes diverge |",
-        "|---|---|---|",
-        "| Roofline | Ideal AI and bound latency | Perfect bandwidth overlap; "
-        "no stalls, tiling waste, or PE mapping inefficiency |",
-        "| SCALE-Sim | Cycle-accurate systolic schedule + buffers | "
-        "Utilization driven by array mapping and tile shape; tile "
-        "repetition omits inter-tile reuse/overlap |",
-        "| Timeloop/Accelergy | Mapping search + energy/area model | "
-        "Cycle semantics differ from SCALE-Sim; bundled PAT makes "
-        "16 MiB SRAM dominate energy, so DRAM share is model-dependent |",
-        "",
-        "An extra scale gap appears on the roofline plot: the analytical "
-        f"peak is {PEAK_TOPS:.0f} TOPS, while a 32×32 array at 1 GHz peaks "
-        f"near {ARRAY_PEAK_TOPS:.2f} TOPS. Prefill points sit near that "
-        "array roof times utilization (~0.65 TOPS), not the 128 TOPS "
-        "system peak. Compare AI / bound class and util ratios, not "
-        "absolute TOPS across tools.",
-        "",
-        "Do **not** equate SCALE-Sim cycles with Timeloop cycles, or "
-        "Roofline microseconds with either simulator. Accept the shared "
-        "relative story: decode skinny GEMMs sit under the memory roof "
-        "and leave the array poorly utilized.",
-        "",
-        "## Caveats carried into `analysis.md`",
-        "",
-        "- Fixed 256-bounded tiles: per-tile util is seq-independent.",
-        "- Timeloop energy shares need tech-node calibration before "
-        "claiming DRAM energy dominance.",
-        "- Attained TOPS on the roofline plot inherit the 1 GHz assumption.",
-        "- Analytical 128 TOPS peak ≠ SCALE-Sim 32×32 microarchitecture peak.",
-    ]
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def validate(
@@ -534,13 +436,13 @@ def main() -> None:
     plot_traffic_energy(scalesim, timeloop, traffic_path)
     plot_roofline(joined, roof_path)
 
-    summary_path = output_dir / "cross_validation.md"
-    write_cross_summary(scalesim, timeloop, joined, summary_path)
+    summary_path = output_dir / "cross_validation_results.json"
+    write_cross_results(scalesim, timeloop, joined, summary_path)
 
     print(f"Wrote joined table to {joined_path}")
     print(f"Wrote {util_path.name}, {traffic_path.name}, {roof_path.name}")
     print(f"Wrote summary to {summary_path}")
-    print("Validation passed: decode util < prefill and decode is memory-bound.")
+    print("Numerical validation checks passed; write interpretation in REPORT.md after review.")
 
 
 if __name__ == "__main__":

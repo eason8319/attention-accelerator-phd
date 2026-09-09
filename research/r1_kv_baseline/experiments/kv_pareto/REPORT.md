@@ -1,5 +1,7 @@
 # 实验报告：Llama-3.1-8B 几何 bytes/token（双布局）
 
+**整理日期**：2026-09-09；**状态**：本报告所列批次已完成，本次未重跑。**证据来源**：results/summary.json。正式正文经阅读结果后整理，数据汇总不替代报告。
+
 **日期**：2026-09-04  
 **阶段**：R1 / M5 WP2  
 **性质**：8B **几何**上的真实 cache-path 流量；未加载权重；无 PPL / 任务分  
@@ -9,7 +11,7 @@
 
 ---
 
-## 1. 实验目的与问题
+## 1. 实验目的
 
 在协议主 Pareto 模型的 KV 几何上，为 C0–C5 × contiguous / paged 给出可引用的 **x 轴**（全模单步 bytes/token 与 $b_{\mathrm{eff}}$），并报正式压力点 $D(16384,1024)$。
 
@@ -19,11 +21,11 @@
 2. $D(16384,1024)$ 的全程 KV 读 / $L_{\mathrm{out}}$ 与末步 $N{=}17407$ 单步各是多少？  
 3. KIVI 残差窗如何把名义 2/4-bit 抬成有效比特？
 
-本实验 **不** 报精度，**不能**单独构成 Pareto。y 轴（PPL 或任务分）属后续整模评测。M3 Table 3 不能替代。
+本实验 **不** 报精度，**不能**单独构成 Pareto。y 轴见独立的 WikiText 整模评测报告，不能由本流量实验推断。M3 Table 3 不能替代。
 
 ---
 
-## 2. 方法
+## 2. 方法与设置
 
 ### 2.1 几何与对照谱
 
@@ -50,7 +52,7 @@ python experiments/kv_pareto/run_kv_pareto.py
 
 ---
 
-## 3. 结果
+## 3. 实验结果
 
 ### 3.1 全模单步 bytes/token（contiguous）
 
@@ -74,7 +76,7 @@ $b_{\mathrm{eff}}$（contiguous / paged）：C0 $16$ / $16.004$；C1 $8.125$ / $
 
 ### 3.2 $N{=}32768$ 四项分解（双列）
 
-占用 token 的 payload / scale / zp **两列相同**；$B_{\mathrm{page}}$ 仅 paged 非零。本长度 $N\mid 16$，全模 $B_{\mathrm{page}}{=}32N{=}1\,048\,576\,\mathrm{B}$（相对 C0 payload $0.024\%$）。
+占用 token 的 payload / scale / zp **两列相同**；$B_{\mathrm{page}}$ 仅 paged 非零。本长度 $16\mid N$，全模 $B_{\mathrm{page}}{=}32N{=}1\,048\,576\,\mathrm{B}$（相对 C0 payload $0.024\%$）。
 
 | 格式 | layout | payload | scale | zp | page | bytes/token |
 |------|--------|--------:|------:|---:|-----:|------------:|
@@ -91,7 +93,7 @@ $b_{\mathrm{eff}}$（contiguous / paged）：C0 $16$ / $16.004$；C1 $8.125$ / $
 | C5 | contiguous | 1080033280 | 133955584 | 133955584 | 0 | 1347944448 |
 | C5 | paged | 1080033280 | 133955584 | 133955584 | 1048576 | 1348993024 |
 
-4K / 8K / 16K 的四项见本地 `results/summary.json`。凡 $N\mid 16$，paged 相对 contiguous 只多 $32N$ 字节。
+4K / 8K / 16K 的四项见本地 `results/summary.json`。凡 $16\mid N$，paged 相对 contiguous 只多 $32N$ 字节。
 
 ### 3.3 压力点 $D(16384,1024)$
 
@@ -116,7 +118,7 @@ $b_{\mathrm{eff}}$（contiguous / paged）：C0 $16$ / $16.004$；C1 $8.125$ / $
 
 ---
 
-## 4. 流量权衡
+## 4. 分析与讨论
 
 | 格式 | 相对 C0（32K / $D$ 均值） | 说明 |
 |------|--------------------------|------|
@@ -130,17 +132,17 @@ Paged 在本几何下相对 payload 可忽略（32K 上约 $0.024\%$），正式
 
 ---
 
-## 5. 局限
+## 5. 局限与有效性
 
 - 只记账，不跑 8B 前向；数字依赖几何与 codec，不依赖权重。  
-- 无 PPL / 任务分，不能画完整 Pareto。  
+- 本实验自身不测 PPL / 任务分；组合 Pareto 需引用独立精度结果并核对模型与窗口。
 - INT4 / KIVI 载荷按名义比特，未 nibble-/bit-pack（与 M4 口径一致）。  
 - 未扫 $P_{\mathrm{size}}$；未报 $B_{\mathrm{pad}}$；128K 未做。
 
 ---
 
-## 6. 结论
+## 6. 结论与后续工作
 
 - Llama-3.1-8B GQA 几何下，C0–C5 双列流量与 $D(16384,1024)$ 已可作主 Pareto 的 **x 轴**。  
 - 32K 上 C4 约 C0 的 $19\%$；均匀 INT4 约 $28\%$；C5 约 $31\%$，比 C2 更费带宽。  
-- 下一步：同一模型上补长上下文精度（WikiText-2 PPL 或任务分），与本表画在同一 Pareto。
+- 精度证据见 [WikiText 报告](../wikitext_ppl/REPORT.md)：4K、8K、16K、32K 均已完成。组合分析须保留流量模型与实测 PPL 的来源区别。

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
@@ -15,7 +16,7 @@ from validate_vs_scalesim import (
     load_scalesim_attention,
     run_checks,
     run_p5_attention,
-    write_report,
+    write_results,
 )
 
 
@@ -46,8 +47,8 @@ def test_all_trend_checks_pass(tmp_path: Path) -> None:
     assert checks
     assert all(c.passed for c in checks), [c for c in checks if not c.passed]
 
-    out = tmp_path / "cross_check_vs_scalesim.md"
-    write_report(
+    out = tmp_path / "cross_check_vs_scalesim_results.json"
+    write_results(
         out,
         scalesim=scalesim,
         p5=p5,
@@ -55,9 +56,20 @@ def test_all_trend_checks_pass(tmp_path: Path) -> None:
         scalesim_csv=DEFAULT_SCALESIM_CSV,
         hw=hw,
     )
-    text = out.read_text(encoding="utf-8")
-    assert "**结论**：PASS" in text
-    assert "decode_util_ll_prefill" in text
+    data = json.loads(out.read_text(encoding="utf-8"))
+    assert data["all_checks_passed"] is True
+    assert any(c["name"] == "decode_util_ll_prefill" for c in data["checks"])
+    assert len(data["rows"]) == len(scalesim)
+
+
+def test_export_cannot_overwrite_formal_report(tmp_path: Path) -> None:
+    """报告保护必须在任何数据导出之前执行。"""
+    report = tmp_path / "REPORT.md"
+    report.write_text("已撰写的实验分析", encoding="utf-8")
+    with pytest.raises(ValueError, match="禁止覆盖报告"):
+        write_results(report, scalesim={}, p5={}, checks=[],
+                      scalesim_csv=tmp_path / "unused.csv", hw=default_hw_config())
+    assert report.read_text(encoding="utf-8") == "已撰写的实验分析"
 
 
 @pytest.mark.skipif(

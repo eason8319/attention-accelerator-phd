@@ -1,5 +1,7 @@
 # 实验报告：contiguous / paged 双布局（阶段 A）
 
+**整理日期**：2026-09-08；**状态**：本报告所列批次已完成，本次未重跑。**证据来源**：results/raw_rows.json、results/summary.json。正式正文经阅读结果后整理，数据汇总不替代报告。
+
 **日期**：2026-09-04  
 **阶段**：R1 / M4 阶段 A  
 **性质**：合成张量、真实 cache-path；对照 **布局** 而非 codec 精度（精度谱系见 [`../codec_compare/REPORT.md`](../codec_compare/REPORT.md)）  
@@ -8,7 +10,7 @@
 
 ---
 
-## 1. 实验目的与问题
+## 1. 实验目的
 
 在同一 encode→store→load→SDPA 路径上，为 **两条 cache 后端**（均匀 C0–C3 与 `KiviKVCache` C4/C5）同时给出 contiguous 与 paged 列，回答：
 
@@ -20,7 +22,7 @@
 
 ---
 
-## 2. 方法
+## 2. 方法与设置
 
 ### 2.1 被测格式与布局
 
@@ -61,7 +63,7 @@ python experiments/paged_layout/run_paged_layout.py
 
 ---
 
-## 3. 结果
+## 3. 实验结果
 
 ### 3.1 布局对齐（paged − contiguous）
 
@@ -144,7 +146,7 @@ $N{=}128$：Key 整窗量化 8 页，Value 仍 8 页 FP16 残差。$N{=}129$：K
 
 ---
 
-## 4. 布局权衡（本合成设定下）
+## 4. 分析与讨论
 
 | 布局 | 优势 | 劣势 / 适用边界 |
 |------|------|----------------|
@@ -160,7 +162,7 @@ $N{=}128$：Key 整窗量化 8 页，Value 仍 8 页 FP16 残差。$N{=}129$：K
 
 ---
 
-## 5. 局限
+## 5. 局限与有效性
 
 - 合成张量、无因果 mask、非真实 LLM KV；0.5B 冒烟未跑（不阻塞 M4）。  
 - 读侧仍全量 `load`，无 page-wise partial attention（§8 明确不要求）。  
@@ -169,8 +171,8 @@ $N{=}128$：Key 整窗量化 8 页，Value 仍 8 页 FP16 残差。$N{=}129$：K
 
 ---
 
-## 6. 结论
+## 6. 结论与后续工作
 
 - 两条后端的 paged 布局已在阶段 A 与 contiguous **双报**：页数、$B_{\mathrm{page}}$、占用 token 的 payload/scale/zp 均符合 metrics v1.1。  
 - C0–C2 / C4–C5 布局对齐到逐元素。C3 prefill 对齐到 float32 旋转容差；逐步 decode 允许 INT4 差 1 档（本实验 1/30 行），不否定切页规则。  
-- 下一步：**M5** bytes/token–精度 Pareto（Llama-3.1-8B，C0–C5，双布局；C0 须走 FP16 codec 记账）及 $D(16384,1024)$。
+- 后续 M5 的 [KV 流量](../kv_pareto/REPORT.md) 和 [WikiText 精度](../wikitext_ppl/REPORT.md) 已独立记录；本布局结果不替代整模精度或硬件性能测量。

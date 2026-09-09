@@ -1,5 +1,7 @@
 # 实验报告：整模路径上 C0 / C4 / C5 任务精度
 
+**整理日期**：2026-09-08；**状态**：本报告所列批次已完成，本次未重跑。**证据来源**：results/table3/table3_summary.json、results/longbench/longbench_summary.json 及逐项原始输出。正式正文经阅读结果后整理，数据汇总不替代报告。
+
 **日期**：2026-09-04（合并；kivi 为 2026-09-03 修复后重跑）  
 **阶段**：R1 / M3 阶段 B  
 **性质**：真实权重、整模 KV cache-path（非投影 fake-quant；非合成张量）  
@@ -11,7 +13,7 @@
 
 ---
 
-## 1. 实验目的与问题
+## 1. 实验目的
 
 在协议锚模型上走同一整模路径（HF 权重 → KIVI patch → `KiviKVCache` → generate / lm-eval），对照 C0 / C4 / C5，回答：
 
@@ -23,13 +25,13 @@
 
 ---
 
-## 2. 方法
+## 2. 方法与设置
 
 ### 2.1 被测格式
 
 | ID | 入口 | 路径 | 要点 |
 |----|------|------|------|
-| C0 `fp16` | `"fp16"` | 原生 HF attention | 精度上界；不经 `KiviKVCache` |
+| C0 `fp16` | `"fp16"` | 原生 HF attention | 未量化参考；不经 `KiviKVCache` |
 | C4 `kivi2` | `"kivi2"` | `LlamaKiviAttention` / `MistralKiviAttention` + `KiviKVCache` | K per-channel / V per-token 2-bit |
 | C5 `kivi4` | `"kivi4"` | 同上 | 4-bit |
 
@@ -62,7 +64,7 @@ python experiments/kivi_eval/run_longbench.py \
     --device cuda --stage B
 ```
 
-本地产物（不同步云端）：`results/table3/table3_summary.json`、`results/longbench/longbench_summary.json` 及分格式 `lm_eval_*.json` / `*.jsonl`。集群提交见 `slurm/`。
+本地产物（不同步云端）：`results/table3/table3_summary.json`、`results/longbench/longbench_summary.json` 及分格式 `lm_eval_*.json` / `*.jsonl`。任务提交在服务器管理，不属于结果同步范围。
 
 ### 2.3 正确性检查（不作精度主张）
 
@@ -75,7 +77,7 @@ python experiments/kivi_eval/run_longbench.py \
 
 ---
 
-## 3. 结果
+## 3. 实验结果
 
 ### 3.1 Table 3（Llama-2-7B，全集）
 
@@ -85,7 +87,7 @@ python experiments/kivi_eval/run_longbench.py \
 | C5 KIVI-4 | 65.08 | 29.66 | 13.87 | $+0.52$ | $-0.34$ | $+0.53$ | 7.8 h |
 | C4 KIVI-2 | 60.32 | 30.60 | 11.52 | $-4.25$ | $+0.60$ | $-1.82$ | 5.8 h |
 
-KIVI-4 与 FP16 同量级（差值在单次评测噪声内）。KIVI-2 在 CoQA / GSM8K 上小幅掉点，TruthfulQA 未掉。
+KIVI-4 与 FP16 分数接近；由于只有单次评测，不能判断差异是否处于统计噪声范围。KIVI-2 在 CoQA / GSM8K 上小幅掉点，TruthfulQA 未掉。
 
 ### 3.2 LongBench（Mistral-7B-Instruct，max length $8192$，全集）
 
@@ -95,7 +97,7 @@ KIVI-4 与 FP16 同量级（差值在单次评测噪声内）。KIVI-2 在 CoQA 
 | C5 KIVI-4 | 29.20 | 22.74 | 70.00 | 56.68 | $+0.15$ | $-0.24$ | $+0.50$ | $-0.16$ |
 | C4 KIVI-2 | 28.55 | 22.04 | 70.50 | 54.81 | $-0.50$ | $-0.94$ | $+1.00$ | $-2.03$ |
 
-KIVI-4 最大偏差为 qmsum $-0.24$。KIVI-2 主要掉在 lcc（$-2.03$）与 qmsum（$-0.94$）；trec 生成与 FP16 同型。kivi 墙钟各约 2.0 h。
+KIVI-4 最大绝对差为 trec $+0.50$ 个百分点，最大负向差为 qmsum $-0.24$ 个百分点。KIVI-2 主要掉在 lcc（$-2.03$）与 qmsum（$-0.94$）；trec 生成与 FP16 同型。kivi 墙钟各约 2.0 h。
 
 ### 3.3 与合成对照的关系
 
@@ -103,11 +105,11 @@ KIVI-4 最大偏差为 qmsum $-0.24$。KIVI-2 主要掉在 lcc（$-2.03$）与 q
 
 ---
 
-## 4. 格式优劣（本评测设定下）
+## 4. 分析与讨论
 
 | 格式 | 优势 | 劣势 / 适用边界 |
 |------|------|----------------|
-| **C0 FP16** | 任务分上界；实现简单 | 流量最大（本实验未测 bytes） |
+| **C0 FP16** | 未量化参考；实现简单 | 流量最大（本实验未测 bytes） |
 | **C5 KIVI-4** | 两套件上与 FP16 对齐；真实模型上可作协议主 4-bit 锚点 | 墙钟明显长于 FP16（eager + 量化核，未优化） |
 | **C4 KIVI-2** | 接口与 C5 相同；任务分未崩，可作极端压缩锚点 | CoQA $-4.25$、GSM8K $-1.82$、lcc $-2.03$；合成路径误差更大，不能用任务分反推 cache 重建误差小 |
 
@@ -115,25 +117,25 @@ KIVI-4 最大偏差为 qmsum $-0.24$。KIVI-2 主要掉在 lcc（$-2.03$）与 q
 
 1. **要对齐协议、尽量保任务分**：C5。  
 2. **要压到 2-bit 并接受数点掉分**：C4；不宜再把合成 rel-$\ell_2$ 写成「真实模型不可用」。  
-3. **精度优先、作对照上界**：C0。  
+3. **未量化参考**：C0。
 4. 未扫 `residual_length`；短于残差窗时 KIVI 仍可能「看起来无损」（见 `codec_compare` §3.3）。
 
 ---
 
-## 5. 局限
+## 5. 局限与有效性
 
 - 未核对 KIVI 论文 Table 3 / LongBench 官方数字；不得把本仓库 FP16 或 $\Delta$ 写成「复现了论文表」。  
 - 无 PPL、无 bytes/token、无 paged（M4 / M5）。  
 - LongBench 只跑四子组代表任务，不是全套件。  
 - 布局仅为 contiguous；`attn_implementation=eager`，墙钟不是吞吐上限。  
 - 单次评测、无多种子；TruthfulQA 主分是 `bleu_max`，与部分论文常用的 MC 指标不同。  
-- FP16 与 kivi 分日作业；FP16 不经 KIVI 核，日期差不影响 C0 对照，但软件栈微调未做 A/B。
+- FP16 与 kivi 分日作业；FP16 不经 KIVI 核，软件栈微调未做 A/B，跨日期环境差异仍是潜在混杂因素。
 
 ---
 
-## 6. 结论
+## 6. 结论与后续工作
 
 - 已在协议锚模型上跑通 **C0 / C4 / C5** 整模阶段 B：Table 3 与 LongBench 全集均 `ok`。  
 - **KIVI-4 ≈ 本仓库 FP16**；**KIVI-2 小幅掉点**，与合成 cache-path 上 C4 误差过大的图景不同。  
 - 整模路径（含 Mistral patch、因果 mask、8K 分块）已用等价性冒烟钉住，失效分数已清掉。  
-- 下一步：M4 paged 双报告；M5 bytes/token Pareto。若要与论文并表，须另备已核实的 `--reference-json`，勿把本节 $\Delta$ 改写成官方差距。
+- 后续已有 [Paged 布局](../paged_layout/REPORT.md)、[KV 流量](../kv_pareto/REPORT.md) 和 [WikiText PPL](../wikitext_ppl/REPORT.md) 独立报告。若要与论文并表，仍须核实参考来源，不能把本节 $\Delta$ 改写成官方差距。

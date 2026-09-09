@@ -91,7 +91,7 @@ conda run -n p3-arch-eval python learning/p3_arch_eval/collect_results.py
 - `outputs/util_prefill_vs_decode.png`：WS/OS 利用率对照
 - `outputs/traffic_energy_stack.png`：traffic 与 energy 堆叠
 - `outputs/roofline_points.png`：AI vs attained TOPS
-- `outputs/cross_validation.md`：相对结论与偏差来源说明
+- `outputs/cross_validation_results.json`：后续运行的交叉数据；历史摘录为 `cross_validation_data.md`，正式分析见 `REPORT.md` 与 `analysis.md`
 
 验收以相对趋势为准（decode ≪ prefill、memory-bound），不要求三方绝对值一致。
 

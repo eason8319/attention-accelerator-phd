@@ -21,8 +21,9 @@ queries.md 检索 → inbox.md 候选 → 人工核实 → ledger.yaml 入库
 | [`inbox.md`](inbox.md) | 未审候选（脚本或手工追加） |
 | [`CARD_TEMPLATE.md`](CARD_TEMPLATE.md) | 入库卡片模板（复制后填写） |
 | [`ledger.yaml`](ledger.yaml) | 已收录论文的**已核实**元数据台账（防重复） |
-| [`AUDIT_2026-09-03.md`](AUDIT_2026-09-03.md) | 全文定量复核：数字、基线、设置、正文位置与限制 |
 | [`CHANGELOG.md`](CHANGELOG.md) | 本监视目录与对比手册的修订记录 |
+
+不再按批次新增 `AUDIT_*.md`。核实后的数字、基线、正文位置和限制写入现有台账与对比手册；旧记录提及的 `AUDIT_2026-09-03.md` 当前缺失，不能作为现存证据引用。
 
 ## 更新步骤（每次）
 

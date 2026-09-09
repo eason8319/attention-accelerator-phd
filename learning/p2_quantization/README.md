@@ -26,7 +26,7 @@ p2_quantization/
 ├── kv_cache_ppl.py         # 小模型 KV cache 量化困惑度评估
 ├── offline_utils.py        # 离线 tiny 模型与合成语料（无 HF 网络时使用）
 ├── test_fakequant.py       # 与 torch.float8_* 及手算样例对拍
-└── outputs/                # 自动生成的报告与图表
+└── outputs/                # 原始数据、指标、图与历史数据摘录；不生成正式报告
 ```
 
 ## 从这里开始
@@ -51,4 +51,4 @@ python kv_cache_ppl.py --model Qwen/Qwen2.5-0.5B-Instruct
 - [x] fake-quant 库对拍测试通过
 - [x] 复现旋转降低 INT4 量化误差的现象（数据 + 直方图）
 - [x] KV cache INT4 + 旋转的困惑度退化 < 直接 INT4
-- [x] 自动生成的误差分析报告
+- [x] 核对结果后撰写的正式 REPORT.md；脚本只导出数据与图

@@ -1,7 +1,7 @@
 # FSA 映射思考：rescale 如何嵌入阵列
 
 > 阵列跑通后带着问题重读 [FSA / SystolicAttention](https://arxiv.org/abs/2507.11331)（§2–3、Alg.1、Fig.3/7）。  
-> 公式对照 P1：[online_softmax_rescale_notes.md](../p1_attention_numerics/online_softmax_rescale_notes.md)。  
+> 公式对照 P1：[online_softmax_rescale_notes.md](../../p1_attention_numerics/online_softmax_rescale_notes.md)。
 > 本稿只谈**映射与缺口**，不写新 RTL。
 
 ## 带着 4×4 阵列提出的问题

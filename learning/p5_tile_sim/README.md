@@ -36,7 +36,7 @@ tile_sim/
 ├── validate_vs_scalesim.py    # 对照 P3 scalesim_results.csv
 ├── run_p5.py                  # 一键入口
 ├── test_*.py
-└── outputs/                   # Pareto 图、CSV、cross_check_vs_scalesim.md
+└── outputs/                   # Pareto 图、CSV、cross_check_vs_scalesim_results.json
 ```
 
 ## 模块要点

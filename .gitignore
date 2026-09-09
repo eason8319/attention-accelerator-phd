@@ -40,12 +40,23 @@ Thumbs.db
 *.tmp
 *.log
 condaenv.*.requirements.txt
+/.ruff_cache/
+/tmp/
+/output/
+node_modules/
+/.hf-cache/
+
+# 本机凭据（可共享的示例不含真实凭据）
+.env
+.env.*
+!.env.example
+!.env.sample
 
 # ---------------------------------------------------------------------------
 # 学习项目（P1–P5）运行时产物 —— 本地可复现，不同步云端
 # ---------------------------------------------------------------------------
 
-# 通用：脚本写出的 outputs/（图、CSV、自动报告）
+# 通用：脚本写出的 outputs/（图、CSV、机器检查数据；不生成正式报告）
 learning/**/outputs/
 
 # P3：SCALE-Sim 运行时写出的 topology/layout
@@ -72,9 +83,13 @@ research/**/experiments/**/*
 !research/**/experiments/configs/**
 !research/**/experiments/**/REPORT.md
 research/**/outputs/
+research/**/results/
 
 # Local tool downloads
 .tools/
 
 # 具体机器/集群的环境备注 —— 仅本地，不同步云端（内容与研究结论无关）
 research/**/CLUSTER_NOTES.md
+
+# 服务器回收快照与冲突原件：本地保留，不自动发布
+/.server-sync/

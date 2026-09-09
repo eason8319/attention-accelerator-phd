@@ -1,55 +1,31 @@
-# P1 Attention 数值内核复现验收报告
+# 实验报告：P1 Attention 数值内核
 
-日期：2026-07-07
+**实验日期**：2026-07-07；**整理日期**：2026-09-08。
+**状态**：历史验收完成；本次未重跑。
+**证据**：test_numerics.py、原验收记录；22 项通过为历史记录，本次未发现独立原始 pytest 日志。
 
-## 结论
+## 1. 实验目的
 
-P1 已完成验收。当前实现覆盖标准 attention、两遍分块 attention、online softmax attention、RoPE、RMSNorm 与单 token decode attention，并已通过 pytest 数值对拍。
+检验标准、分块与 online softmax attention 是否保持相同数值语义，建立可供后续量化及 RTL 对拍使用的浮点参考。另检查 RoPE、RMSNorm 和单 token decode，避免基础算子误差传递到后续实验。
 
-验证命令：
+## 2. 方法与设置
 
-```bash
-conda run -n p1-attention pytest test_numerics.py -q --tb=short
-```
+以标准 scaled dot-product attention 为参考，对比两遍分块与单遍 online 实现。覆盖 causal/non-causal、不同块大小、FP16 online，以及 RoPE/RMSNorm 与 Transformers 的对照。FP32 最大绝对误差阈值为 $10^{-5}$。
 
-验证结果：
+历史环境为 p1-attention、PyTorch 2.12.1+cpu、Transformers 5.13.0。在本实验目录执行 `pytest test_numerics.py -q --tb=short`。
 
-```text
-22 passed
-```
+## 3. 实验结果
 
-## 验收 Checklist
+原验收记录为 **22 passed**：三种 attention 在阈值内一致；block_size=16/128 的 online 结果一致；RoPE/RMSNorm 与参考实现对齐；decode 与 prefill 最后一行对齐。逐项用例见 [test_numerics.py](test_numerics.py)。
 
-| PLAN.md 验收项 | 对应产出 | 状态 |
-|---|---|---|
-| 三种实现（标准/分块/online）对拍误差 fp32 下 max abs error < 1e-5 | `attention_naive.py`、`attention_tiled.py`、`attention_online.py`、`test_numerics.py` | 通过 |
-| online softmax 支持任意块大小且结果与块大小无关 | `test_online_block_size_independence` 覆盖 `block_size=16/128` | 通过 |
-| RoPE、RMSNorm 与 transformers 参考实现一致 | `ops.py`，对拍 `LlamaRotaryEmbedding`、`LlamaRMSNorm` | 通过 |
-| decode-step attention 与 prefill 全量计算结果一致 | `decode_step.py`，`test_decode_matches_prefill_last_token` | 通过 |
-| 写一页 online softmax 的 rescale 推导笔记 | `online_softmax_rescale_notes.md` | 完成 |
+## 4. 分析与讨论
 
-## 产出说明
+分块计算的关键是维持全局归一化。online 实现通过 running max、running sum 和输出累加器，在块间重新缩放旧状态；块大小对照支持该实现的归约语义。推导见 [online_softmax_rescale_notes.md](online_softmax_rescale_notes.md)。
 
-- `attention_naive.py`：标准 scaled dot-product attention，作为 P1 golden reference。
-- `attention_tiled.py`：按 KV block 扫描，先求全局 row-max/row-sum，再累加输出，用于理解分块 softmax 的全局归一化需求。
-- `attention_online.py`：FlashAttention-style 单遍 online softmax，维护 running max `m`、running sum `l` 和输出累加器 `o`，在块间通过 `alpha = exp(m - m_new)` rescale 旧状态。
-- `ops.py`：RoPE 与 RMSNorm，实现 decoder attention datapath 中 attention 前后的基础算子。
-- `decode_step.py`：单 query token 对 KV cache 的 decode-step attention，并与 prefill 最后一行对拍。
-- `test_numerics.py`：统一数值对拍测试，覆盖 causal/non-causal、不同 block size、fp16 online、RoPE/RMSNorm/decode。
-- `online_softmax_rescale_notes.md`：online softmax rescale 推导与硬件设计要点。
+## 5. 局限与有效性
 
-## 环境记录
+这是 CPU 数值验收，不包含 GPU 性能、整模任务精度或硬件综合。有限形状通过不能证明所有输入均等价。历史通过数未在本次重新确认。
 
-- Conda 环境：`p1-attention`
-- PyTorch：`2.12.1+cpu`
-- Transformers：`5.13.0`
+## 6. 结论与后续工作
 
-CPU 版 PyTorch 已满足 P1 数值内核复现与测试需求。
-
-## 后续衔接
-
-P1 产出的 attention golden model 可继续用于：
-
-- P2：低精度量化实验中评估 Q/K/V、softmax 与 KV cache 量化误差。
-- P4：RTL exp/softmax/attention 数据流模块的功能对拍。
-- P5：tile-level simulator 中校验 attention tile 数据流的数值语义。
+已有实现可作为学习阶段的浮点 golden model。后续应明确参考路径，在改动基础算子后重新运行对拍，不能沿用旧通过数。

@@ -5,21 +5,9 @@
 
 源起 Cursor 计划「R1 真实KV基线计划」（2026-07）；下文已按仓库现状修订，不再与那份 YAML 草稿逐字同步。
 
-## 当前状态（2026-09-04）
+## 进度入口
 
-| 项 | 状态 | 落点 |
-|----|------|------|
-| M0 协议锁定 | **完成** | [`protocols/`](protocols/)（模型阶梯 v1.2；指标 v1.1） |
-| M1 contiguous C0–C2 | **完成** | [`cache_path/`](cache_path/)；对照 [`experiments/codec_compare/REPORT.md`](experiments/codec_compare/REPORT.md) |
-| M2 INT4+BDR（C3） | **完成** | `Int4BdrCodec`；同上 |
-| M3 KIVI C4/C5 + 阶段 B 任务表 | **完成** | [`kivi_repro/`](kivi_repro/) + [`experiments/kivi_eval/REPORT.md`](experiments/kivi_eval/REPORT.md) |
-| M4 paged 双报告 | **完成** | [`cache_path/paged_cache.py`](cache_path/paged_cache.py) + [`experiments/paged_layout/REPORT.md`](experiments/paged_layout/REPORT.md)（阶段 A） |
-| M5 bytes/token Pareto + $D(16384,1024)$ | **进行中（WP1–WP3）** | 流量表 [`experiments/kv_pareto/REPORT.md`](experiments/kv_pareto/REPORT.md)；整模 C0–C3 已接；精度点未开始 |
-| M6 误差—流量敏感性 | 未开始 | 同上 |
-| M7 decode simulator 挂钩 | 未开始 | [`research/r1_decode_sim/`](../r1_decode_sim/) 仅 stub |
-| M8 R1→R2 验收 | 未开始 | 无总 `REPORT.md`（按约定验收时再写） |
-
-下一步：**M5 精度点**（8B 长上下文 PPL 或任务分，与 `kv_pareto` 流量画同一 Pareto）。WP1–WP3 已关闭；进入 R2 仍缺精度曲线、模拟器交叉核对。
+当前完成状态与待办只在 [研究里程碑](../../docs/progress/milestones.md) 维护；实验入口见 [实验索引](../../docs/experiments.md)。本文件维护实施和验收要求，不复制动态进度表。
 
 ## 相对初稿的修订（必读）
 
@@ -125,7 +113,7 @@ research/
 - `bytes_accounting/traffic_model.py`：**WP1 已落地**。按 `metrics.md` 分解 $B_{\mathrm{payload}}+B_{\mathrm{scale}}+B_{\mathrm{zp}}+B_{\mathrm{page}}$，封装 `cache_path` 的 `bytes_breakdown`（不另起口径）。C0 只走 `fp16` codec。
 - 主曲线 **x 轴**：**WP2 已落地**，见 [`experiments/kv_pareto/REPORT.md`](experiments/kv_pareto/REPORT.md)。`Llama-3.1-8B-Instruct` 几何，4K–32K，C0–C5，**双布局**；C0 经 FP16 codec。未加载权重。
 - 必报压力点 $D(16384,1024)$：**WP2 已报**（全程 KV 读 / $L_{\mathrm{out}}$ + 末步 $N{=}17407$）。
-- 精度侧（y 轴）：至少一种长上下文设定下的任务分或 PPL，与流量画在同一 Pareto 上。**整模路径 WP3 已落地**（`LlamaCachePathAttention` / `fp16` 仍为原生 HF；M5 C0 用 `c0` / `fp16_codec`）。8B 评测未开始。M3 的 Table 3 不能替代这条曲线。
+- 精度侧（y 轴）：至少一种长上下文设定下的任务分或 PPL，与流量画在同一 Pareto 上。**整模路径 WP3 已落地**（`LlamaCachePathAttention` / `fp16` 仍为原生 HF；M5 C0 用 `c0` / `fp16_codec`）。8B 的 4K/8K/16K/32K PPL 已完成，见 [WikiText 报告](experiments/wikitext_ppl/REPORT.md)。M3 的 Table 3 不能替代这条曲线。
 - WikiText-2 PPL 若做，放本实验 `REPORT.md`，不另开 milestone。
 
 ### M6｜误差—流量敏感性

@@ -1,6 +1,6 @@
 # softmax_unit 设计笔记（模块 B）
 
-> 实现笔记。公式推导见 P1 [online_softmax_rescale_notes.md](../p1_attention_numerics/online_softmax_rescale_notes.md)；`exp` 单元见 [exp_unit.md](exp_unit.md)。
+> 实现笔记。公式推导见 P1 [online_softmax_rescale_notes.md](../../p1_attention_numerics/online_softmax_rescale_notes.md)；`exp` 单元见 [exp_unit.md](exp_unit.md)。
 
 ## 范围
 

@@ -1,8 +1,9 @@
-"""激活分布与量化误差分析（自动生成报告）。"""
+"""激活分布与量化误差分析（仅输出数据与图）。"""
 
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 
@@ -221,77 +222,12 @@ def analyze_activations(
     return results
 
 
-def write_report(results: dict, path: Path) -> None:
-    outlier_note = (
-        "offline 模型上人工放大了部分 K 通道以演示 outlier"
-        if results.get("synthetic_outliers")
-        else "使用真实模型激活中的自然 outlier，未做人工放大"
-    )
-    lines = [
-        "# P2 量化误差分析报告",
-        "",
-        f"- Model: `{results.get('model_name', 'unknown')}`",
-        f"- Head dim: {results['head_dim']}",
-        f"- Outlier setup: {outlier_note}",
-        "",
-        "## K 量化相对误差",
-        "",
-        "| 方法 | 相对 L2 误差 |",
-        "|------|-------------|",
-        f"| 直接 INT4 per-group | {results['k_direct_err']:.4f} |",
-        f"| Hadamard + INT4 | {results['k_hadamard_err']:.4f} |",
-        f"| BDR + INT4 | {results['k_bdr_err']:.4f} |",
-        "",
-        "## Attention 输出相对误差",
-        "",
-        "| 方法 | 相对 L2 误差 |",
-        "|------|-------------|",
-        f"| 直接 INT4 K | {results['out_direct_err']:.4f} |",
-        f"| Hadamard + INT4 K | {results['out_hadamard_err']:.4f} |",
-        f"| BDR + INT4 K | {results['out_bdr_err']:.4f} |",
-        "",
-        "## 混合精度权衡",
-        "",
-        "| 配置 | 平均比特 | 输出误差 |",
-        "|------|---------|---------|",
-    ]
-    for label, bits, err in results["mixed_precision"]:
-        lines.append(f"| {label} | {bits} | {err:.4f} |")
+def write_results(results: dict, path: Path) -> None:
+    """只保存测量数据，正式分析在实验完成后独立撰写。"""
+    if path.suffix.lower() != ".json":
+        raise ValueError("结果导出必须使用 .json，禁止覆盖报告")
+    path.write_text(json.dumps(results, ensure_ascii=False, indent=2, default=float) + "\n", encoding="utf-8")
 
-    lines.extend(
-        [
-            "",
-            f"![error analysis plots]({Path(results['figure']).name})",
-            "",
-            "## 结论",
-            "",
-        ]
-    )
-    if results["k_hadamard_err"] < results["k_direct_err"]:
-        reduction = (1 - results["k_hadamard_err"] / results["k_direct_err"]) * 100
-        lines.append(
-            f"- Hadamard 旋转使 K 的 INT4 量化误差降低约 **{reduction:.1f}%**，"
-            "激活分布更接近高斯，outlier 被分散到各通道。"
-        )
-    if results["k_bdr_err"] < results["k_direct_err"]:
-        reduction = (1 - results["k_bdr_err"] / results["k_direct_err"]) * 100
-        lines.append(
-            f"- Block-Hadamard BDR（`block_diag(H) @ D`）使 K 的 INT4 量化误差降低约 "
-            f"**{reduction:.1f}%**。"
-        )
-    if results["out_hadamard_err"] < results["out_direct_err"]:
-        lines.append("- 旋转后 attention 输出误差低于直接 INT4，验证了旋转在数值上改善量化友好性。")
-    elif (
-        results["k_hadamard_err"] < results["k_direct_err"]
-        or results["k_bdr_err"] < results["k_direct_err"]
-    ):
-        lines.append(
-            "- 注意：单层 attention **输出**相对 L2 有时高于直接 INT4（旋转把量化噪声"
-            "各向同性地散开后，均值 L2 可能上升）。端到端应以 KV cache **困惑度**为主指标；"
-            "在 Qwen2.5-0.5B 上 Hadamard/BDR 的 PPL 均优于直接 INT4。"
-        )
-
-    path.write_text("\n".join(lines), encoding="utf-8")
 
 
 def main() -> None:
@@ -302,9 +238,9 @@ def main() -> None:
     args = parser.parse_args()
 
     results = analyze_activations(args.model, args.layer, args.seq_len)
-    report_path = OUTPUT_DIR / "error_analysis_report.md"
-    write_report(results, report_path)
-    print(f"Report written to {report_path}")
+    result_path = OUTPUT_DIR / "error_analysis_results.json"
+    write_results(results, result_path)
+    print(f"Results written to {result_path}")
     print(f"Figure saved to {results['figure']}")
 
 

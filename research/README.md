@@ -4,13 +4,7 @@
 > R1 实施细则：[`r1_kv_baseline/PLAN.md`](r1_kv_baseline/PLAN.md)。  
 > R0（`survey/` + `learning/`）已完成技能与文献地图；**本目录承接正式研究**。
 
-## 当前状态
-
-| 深度 | 状态 | 说明 |
-|------|------|------|
-| R0 | 完成 | 见 `survey/`、`learning/`、`docs/lit_watch/` |
-| R1 | **进行中** | M0–M4 完成；M5 WP1–WP3 已落地，下一步精度点 |
-| R2–R5 | 未开始 | 见研究计划验收门槛 |
+当前阶段与待办见 [研究里程碑](../docs/progress/milestones.md)，实验结果见 [实验索引](../docs/experiments.md)。本入口不重复维护进度。
 
 ## 布局
 
