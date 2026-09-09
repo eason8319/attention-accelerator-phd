@@ -83,6 +83,8 @@ research/**/experiments/**/*
 !research/**/experiments/configs/
 !research/**/experiments/configs/**
 !research/**/experiments/**/REPORT.md
+# 实验固定依赖只保留在本地/服务器；其中的历史报告副本也不发布。
+research/**/experiments/**/runtime/
 research/**/outputs/
 research/**/results/
 
