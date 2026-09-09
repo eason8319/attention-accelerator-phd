@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "experiment_id": "p3_arch_eval",
+  "project_path": "learning/p3_arch_eval",
+  "environment": {
+    "dependency_declarations": [
+      {
+        "path": "environment.yml",
+        "sha256": "4fe11ebdcb861900469dc217a78befc29b5238ff6d0e458110ec58aca82967c1"
+      }
+    ],
+    "actual_run_metadata": [],
+    "note": "依赖声明用于环境准备；实际运行版本以结果元数据为准，历史缺失字段不补造。"
+  },
+  "source": {
+    "entrypoints": [
+      "roofline.py",
+      "scale-sim/run_scalesim.py",
+      "timeloop/run_timeloop.py",
+      "collect_results.py"
+    ],
+    "files": [
+      {
+        "path": "collect_results.py",
+        "sha256": "6cdef4dc77cd9551e1e6105ddf1f4cb2c8a93ac573f4f9f3fdf9bfdbc0d97fe3"
+      },
+      {
+        "path": "environment.yml",
+        "sha256": "4fe11ebdcb861900469dc217a78befc29b5238ff6d0e458110ec58aca82967c1"
+      },
+      {
+        "path": "roofline.py",
+        "sha256": "ed1887084944c78ab591162abfa613d7d2c8e66ad5cabf6c54e211fc9e4a0e29"
+      },
+      {
+        "path": "scale-sim/arch_32x32_os.cfg",
+        "sha256": "36da0ae04cd58726a634913d6bffde896d4fab3f77062294b7bec0e4afad0096"
+      },
+      {
+        "path": "scale-sim/arch_32x32_ws.cfg",
+        "sha256": "aa7aa022afa7f7f6507b95d38121a0fc2e85e43be8bd55ba9c9033834fe1aa04"
+      },
+      {
+        "path": "scale-sim/run_scalesim.py",
+        "sha256": "0edb9d47077d405698ed3d4234e4b769b0e1b73f01c486002a3648e6883f6b00"
+      },
+      {
+        "path": "timeloop/arch.yaml",
+        "sha256": "44c98559d48df44c0243e24d1909d0b0882809f5847389aa45f42ae8848fd8a4"
+      },
+      {
+        "path": "timeloop/arch_accelergy.yaml",
+        "sha256": "3f61d770f4310504f6ccf6fcc9d39e01638ea4ee5d5cff7c23a93fab32b09ff3"
+      },
+      {
+        "path": "timeloop/constraints.yaml",
+        "sha256": "a59625a1dd6c7ff993cb96221c270a4578698459f24ab674c4b204ab1c2eff75"
+      },
+      {
+        "path": "timeloop/mapper.yaml",
+        "sha256": "78ceedc74931fd0c48fdd003687c00cb3641e32e5e73f0d3b0af5f9fcd546d97"
+      },
+      {
+        "path": "timeloop/problem.yaml",
+        "sha256": "f1e3ead2ee560acebe4cfb68f6b76eca086343ebc52d3045c77272f065b3a389"
+      },
+      {
+        "path": "timeloop/run_timeloop.py",
+        "sha256": "9687fc42be41609e96bea472d6777c36d85d7cc421e79a20a58e99518b4d44ec"
+      }
+    ],
+    "dependencies": []
+  },
+  "results": {
+    "directory": "results",
+    "files": [
+      {
+        "path": "results/cross_joined.csv",
+        "sha256": "2390397cfcb7db96c146dc9f353f627fc1747c42685b41bb6ab831a6e05d5a5d"
+      },
+      {
+        "path": "results/cross_validation_data.md",
+        "sha256": "9eb8ea7c79f7e0f58d56e165baf352c2944393854f7da697d1782ed7be451931"
+      },
+      {
+        "path": "results/roofline_points.png",
+        "sha256": "5f125494496744eb857e54141fb85e63dd1f334b1a66200b026fbca5edeedbf4"
+      },
+      {
+        "path": "results/roofline_table.csv",
+        "sha256": "8c598a4ca081f867e103905f7eda81a9d89c858e1f7035ecdd17abbf6aa8e46d"
+      },
+      {
+        "path": "results/roofline_table.md",
+        "sha256": "62c77bed16bf106537404d334148c9ff717309b8ddc9ba477b5f6a54dd10df88"
+      },
+      {
+        "path": "results/scalesim_raw/os/attention_32x32_os/BANDWIDTH_REPORT.csv",
+        "sha256": "cb220fb3cce21e829160e33d24bc08223749832852a9ff8061cd2ce620eed557"
+      },
+      {
+        "path": "results/scalesim_raw/os/attention_32x32_os/COMPUTE_REPORT.csv",
+        "sha256": "8565288a63a7d4562e12c6cd17a2f0aae43b050050dfc3353355241cd3b6836f"
+      },
+      {
+        "path": "results/scalesim_raw/os/attention_32x32_os/DETAILED_ACCESS_REPORT.csv",
+        "sha256": "ffed997915954d20d7dcaca1d597ee3f916605bb3c1208d825f2ec736ab57ed0"
+      },
+      {
+        "path": "results/scalesim_raw/ws/attention_32x32_ws/BANDWIDTH_REPORT.csv",
+        "sha256": "a403df47fd447c735133cf6cf709578578afdff878db47ab5f15b30b56bbbafc"
+      },
+      {
+        "path": "results/scalesim_raw/ws/attention_32x32_ws/COMPUTE_REPORT.csv",
+        "sha256": "856cb526d6f562d95c9c43139d7355a9601104620e67af1ee96bf0cb686213f1"
+      },
+      {
+        "path": "results/scalesim_raw/ws/attention_32x32_ws/DETAILED_ACCESS_REPORT.csv",
+        "sha256": "929dd3cb0004f9f9e1fe06a00dfefaeefdffb9d086b131d6cf2fad884a50926a"
+      },
+      {
+        "path": "results/scalesim_results.csv",
+        "sha256": "1b9431e1c55ade4012307bc30bb721ead99697737c35ea0a2e2a6f57f822fac6"
+      },
+      {
+        "path": "results/scalesim_summary.md",
+        "sha256": "020c6297a998c152775e1e9193029c4a34fa0944f127d4997c1eeced44a81f45"
+      },
+      {
+        "path": "results/timeloop_area.csv",
+        "sha256": "4250efdc0f5e1078c507031ad5288bfca77315809355b1b196e24599278c4820"
+      },
+      {
+        "path": "results/timeloop_energy.csv",
+        "sha256": "aa93e86b39b49ff5ca90ed2fc23b1e830c5b3a39e6dc2f185e70d70a8e4c20b8"
+      },
+      {
+        "path": "results/timeloop_summary.md",
+        "sha256": "b0ca177ae651ced388fa43981ce36c1067de1a6c5ba0bc11724077b735c5be7c"
+      },
+      {
+        "path": "results/traffic_energy_stack.png",
+        "sha256": "5ecce8a784688d9c53722b6d490c2a9c18743f5bfc055cd63f95d364a487971a"
+      },
+      {
+        "path": "results/util_prefill_vs_decode.png",
+        "sha256": "e53103b86dd461f18816166880da009e00d2e40e3d4036e7eed2c5c039ac80e8"
+      }
+    ],
+    "validation_status": "historical_evidence",
+    "scope": "参见 REPORT.md；文件齐全与哈希通过不等于全部实验指标通过。"
+  },
+  "report": {
+    "path": "REPORT.md",
+    "sha256": "698af49c5d9d734fc7356eded6b54551af7b000f012d82695c6ba0a031cf5690",
+    "sections": 6
+  }
+}

@@ -2,7 +2,7 @@
 
 **实验日期**：2026-07-22；**整理日期**：2026-09-08。
 **状态**：历史实验完成；本次未重跑全部搜索。
-**证据**：outputs/search_results.csv、分负载搜索 CSV、outputs/cross_check_vs_scalesim_data.md；测试状态来自原验收记录。
+**证据来源**：results/search_results.csv、分负载搜索 CSV、results/cross_check_vs_scalesim_data.md；测试状态来自原验收记录。
 
 ## 1. 实验目的
 
@@ -24,7 +24,7 @@
 | prefill 流量 32K/4K | 约 64 | 约 60.7 |
 | decode 流量 32K/4K | 8 | 8 |
 
-比率来自历史摘录；原始搜索点见 outputs/search_results.csv。
+比率来自历史摘录；原始搜索点见 results/search_results.csv。
 
 ## 4. 分析与讨论
 

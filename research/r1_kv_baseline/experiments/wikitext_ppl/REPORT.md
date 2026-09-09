@@ -6,7 +6,7 @@
 **阶段**：R1 / M5 精度点（阶段 B）  
 **性质**：真实权重、整模 cache-path；短序列冒烟 + WikiText-2 test 滑动窗口 PPL  
 **对照**：相对本仓库 **C0 FP16 codec**（`c0`），不是原生 HF `fp16`  
-**实验目录**：[`experiments/wikitext_ppl/`](.)（本报告入库；原始结果本地保留，执行及任务提交脚本留在服务器）。
+**实验目录**：[`experiments/wikitext_ppl/`](.)；源码入口为 `run_wikitext_ppl.py`、`run_smoke.py`，结果位于 `results/`。
 **协议**：[`protocols/models_context.md`](../../protocols/models_context.md) v1.2、[`metrics.md`](../../protocols/metrics.md) v1.1  
 **流量 x 轴**：[`../kv_pareto/REPORT.md`](../kv_pareto/REPORT.md)（本实验不重算 bytes/token）
 
@@ -48,9 +48,7 @@ M3 Table 3 / LongBench **不能**替代：模型不同，且 M3 的 C0 是原生
 
 墙钟平台：`node7`，NVIDIA GeForce RTX 4090（24 GB），`torch=2.5.1+cu121`。作业 19227（冒烟）→ 19228（PPL，`afterok`）。计算节点 `HF_HUB_OFFLINE=1`。
 
-本地保存 `results/smoke/smoke.json` 和各窗口原始 JSON。`results/ppl/ppl_summary.json` 与 `L4096/ppl_summary.json` 为相同的历史 4K 汇总，统计时只计一次。脚本、任务提交和环境管理保留在服务器。
-
-服务器执行版修复了 Llama-3.1 列表型 EOS 的 padding 处理；首次冒烟 19225 失败，19227 为修复后重跑。本地 `hf_generate.py` 没有被服务器版本覆盖，不能因结果已回收就声称本地代码可原样复现。
+本地保存实验源码、`results/smoke/smoke.json` 和各窗口原始 JSON。`results/ppl/ppl_summary.json` 与 `L4096/ppl_summary.json` 为相同的历史 4K 汇总，统计时只计一次。入口使用本地 M6 实验内共享的固定依赖版本，具体路径与源码哈希见 `experiment.json`；运行还需要依赖环境和模型权重。
 
 ---
 

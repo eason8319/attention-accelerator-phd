@@ -1,8 +1,9 @@
 # 实验报告：contiguous / paged 双布局（阶段 A）
 
-**整理日期**：2026-09-08；**状态**：本报告所列批次已完成，本次未重跑。**证据来源**：results/raw_rows.json、results/summary.json。正式正文经阅读结果后整理，数据汇总不替代报告。
+**实验日期**：2026-09-04；**整理日期**：2026-09-09。
+**状态**：本报告所列批次已完成；以保留的原始结果为依据。
+**证据来源**：results/raw_rows.json、results/summary.json。
 
-**日期**：2026-09-04  
 **阶段**：R1 / M4 阶段 A  
 **性质**：合成张量、真实 cache-path；对照 **布局** 而非 codec 精度（精度谱系见 [`../codec_compare/REPORT.md`](../codec_compare/REPORT.md)）  
 **协议**：[`protocols/metrics.md`](../../protocols/metrics.md) §8（v1.1，$P_{\mathrm{size}}=16$，$B_{\mathrm{pte}}=8\,\mathrm{B}$）  

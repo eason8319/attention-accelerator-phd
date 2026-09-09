@@ -7,7 +7,7 @@ R1 实施细则：[`../../research/r1_kv_baseline/PLAN.md`](../../research/r1_kv
 | 深度 | 内容 | 产出 | 状态 |
 |------|------|------|------|
 | R0 | Survey + Learning 技能与证据基线 | `survey/`、`learning/`、本仓库计划与对比手册 | **已完成**（持续文献监视除外） |
-| R1 | 真实 KV cache-path、误差—流量模型、decode simulator 骨架 | 可复现测量 + 协议锁定 | **进行中**（M0–M5 完成；M6 实验批次完成，余弦指标待复核） |
+| R1 | 真实 KV cache-path、误差—流量模型、decode simulator 骨架 | 可复现测量 + 协议锁定 | **进行中**（M0–M6 约定范围完成；M7 尚未实现；M8 待验收） |
 | R2 | 静态 INT4（或 R1 选定主格式）流式通路；无完整 FP16 展开；关键 RTL | 架构主张 + 首版综合 | 未开始 |
 | R3 | 可规则化混合 / 结构感知比特分配 | 精度—硬件代价 Pareto | 未开始 |
 | R4 | 精度—布局—映射联合优化 | 映射方法与系统评估 | 未开始 |
@@ -43,18 +43,18 @@ R1 实施细则：[`../../research/r1_kv_baseline/PLAN.md`](../../research/r1_kv
 - [x] **M3** KIVI 编解码 + 阶段 B 表格：[`experiments/kivi_eval/`](../../research/r1_kv_baseline/experiments/kivi_eval/)（Table 3 / LongBench：fp16 / kivi2 / kivi4 全集已跑通；kivi4 $\approx$ 本仓库 fp16）
 - [x] **M4** paged 双报告：[`cache_path/paged_cache.py`](../../research/r1_kv_baseline/cache_path/paged_cache.py) + [`experiments/paged_layout/REPORT.md`](../../research/r1_kv_baseline/experiments/paged_layout/REPORT.md)（阶段 A；C0–C5 双布局）
 - [x] **M5** bytes/token 与 decode 压力点、4K/8K/16K/32K PPL：四窗口六格式结果齐全，PPL 重算一致。
-- [x] **M6 实验批次**：Dev 三轴、8B 合成头/位置及四层抽样已完成，见 [报告](../../research/r1_kv_baseline/experiments/kv_sensitivity/REPORT.md)；8B 合成余弦指标未通过质量检查，需单独复核。
-- [ ] M7 decode simulator 挂钩
+- [x] **M6 实验与指标复核**：原网格及 float64 重测完成，余弦异常已定位并修复，相对 L2 已复核，PPL 溯源与重算通过；证据及适用范围见 [报告](../../research/r1_kv_baseline/experiments/kv_sensitivity/REPORT.md)。
+- [ ] **M7** decode simulator：输入完整性与 CPU 流量接口检查已通过，可开始实现；接入约束见 [实施计划](../../research/r1_kv_baseline/PLAN.md)。尚未实现，独立趋势验收待完成。
 - [ ] M8 REPORT 与 R1→R2 验收
 
 ## 学习阶段（P1–P5）— 已归档
 
-P1–P5 **已全部完成**，属 R0 技能建设；**不再定义课题主线**（旧「主线1–4」映射仅作历史说明）。  
+P1–P5 属 R0 技能建设，保留历史验收记录；P1 当前数值检查有一项未达阈值，详见对应报告。旧「主线1–4」映射仅作历史说明。
 详见 [`learning/README.md`](../../learning/README.md)。
 
 | 项目 | 状态 |
 |------|------|
-| P1 Attention 数值 | 已完成 |
+| P1 Attention 数值 | 21/22 检查通过，FP16 online 待核验 |
 | P2 量化（含 proxy 局限） | 已完成 |
 | P3 架构评估 | 已完成 |
 | P4 RTL 玩具模块 | 已完成 |

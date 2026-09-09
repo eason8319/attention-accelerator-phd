@@ -5,16 +5,16 @@
 ## 对拍数据流
 
 ```
-golden (P1/numpy) --gen_vecs_*.py--> build/vec_*/  --TB $fscanf--> DUT --$fwrite--> dut_*.txt
+golden (P1/numpy) --gen_vecs_*.py--> results/rtl/vec_*/  --TB $fscanf--> DUT --$fwrite--> dut_*.txt
                                           |                                        |
                                           +---------------- compare_*.py ---------+
 ```
 
 每个 `make sim-<mod>` 目标固定三步：
 
-1. `gen_vecs_<mod>.py --out build/vec_<mod>`：调 golden 生成输入 + 期望输出。
+1. `gen_vecs_<mod>.py --out results/rtl/vec_<mod>`：调 golden 生成输入 + 期望输出。
 2. Verilator 编译并运行 `tb_<mod>.sv`，TB 经 plusarg `+vec_dir=<dir>` 找到向量目录，读入输入、把 DUT 输出写回同目录。
-3. `compare_<mod>.py --vec build/vec_<mod>`：按各模块误差预算比对，失败以非零码退出。
+3. `compare_<mod>.py --vec results/rtl/vec_<mod>`：按各模块误差预算比对，失败以非零码退出。
 
 ## 向量文件格式（统一约定）
 

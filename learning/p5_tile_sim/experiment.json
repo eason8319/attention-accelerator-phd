@@ -1,0 +1,138 @@
+{
+  "schema_version": 1,
+  "experiment_id": "p5_tile_sim",
+  "project_path": "learning/p5_tile_sim",
+  "environment": {
+    "dependency_declarations": [
+      {
+        "path": "environment.yml",
+        "sha256": "a3b7c68c72f345c559596c2901b385a674e124809c63dd48c79519c54f3cc3ca"
+      }
+    ],
+    "actual_run_metadata": [
+      {
+        "path": "results/m7_preflight_20260909/run_config.json",
+        "sha256": "75df250a4a2d3ca39b23fe0590eecf3f2095f9dca3a7e5d21cc6dfc6ee950d96"
+      }
+    ],
+    "note": "依赖声明用于环境准备；实际运行版本以结果元数据为准，历史缺失字段不补造。"
+  },
+  "source": {
+    "entrypoints": [
+      "run_p5.py",
+      "validate_vs_scalesim.py"
+    ],
+    "files": [
+      {
+        "path": "environment.yml",
+        "sha256": "a3b7c68c72f345c559596c2901b385a674e124809c63dd48c79519c54f3cc3ca"
+      },
+      {
+        "path": "hw_config.py",
+        "sha256": "b18da5c14724cfaaaf98c23d938f6d203b17ae2b7bf62f499fcb1de3edb87380"
+      },
+      {
+        "path": "run_p5.py",
+        "sha256": "be8bcd69e273cb87c961bf57a899a323b06b990a11ca60eb04b68d2944b0f164"
+      },
+      {
+        "path": "search.py",
+        "sha256": "d61cb9a0e0cce7b47a93df610a28f4cc331e0c960007fc5abfa4f863bc2b486d"
+      },
+      {
+        "path": "simulator.py",
+        "sha256": "cfc6b29e3d14a3835721f3a319adfa54fd3fb16dee44fea47973898cc2d085a0"
+      },
+      {
+        "path": "test_hw_workload.py",
+        "sha256": "5a0101eb9359936fa9e9323106ef32d20f42d0689b37b8476d40a57e5eabd228"
+      },
+      {
+        "path": "test_search.py",
+        "sha256": "db9b4f74340625bb3f8552ce60477f824cb35ef0a4e5ed40e5853251ec1a8723"
+      },
+      {
+        "path": "test_simulator.py",
+        "sha256": "3fd34014e5e261ec178cbc09200b8d5f8af6d3008c6dd35e9f292bf2d6fd4701"
+      },
+      {
+        "path": "test_validate.py",
+        "sha256": "4c41355807ed6e834dbfb97bf024724745860e1d8463cd3547546fc52c504c37"
+      },
+      {
+        "path": "validate_vs_scalesim.py",
+        "sha256": "f4822a22e2f2764f0a0bc6beb20528828cc5a6139100154ae016158805693e0f"
+      },
+      {
+        "path": "workload.py",
+        "sha256": "6b222980a68de118f8c80b800b2e699496c37f4feb16e968f12d7e4055a6eca6"
+      }
+    ],
+    "dependencies": [
+      {
+        "path": "../p3_arch_eval/results/scalesim_results.csv",
+        "sha256": "1b9431e1c55ade4012307bc30bb721ead99697737c35ea0a2e2a6f57f822fac6"
+      }
+    ]
+  },
+  "results": {
+    "directory": "results",
+    "files": [
+      {
+        "path": "results/cross_check_vs_scalesim_data.md",
+        "sha256": "60e136cf75dede24bd7af1966f426a90195c12cd7d6ac5b14d4d7fde50138cbe"
+      },
+      {
+        "path": "results/m7_preflight_20260909/cross_check_vs_scalesim_results.json",
+        "sha256": "3281c61ddbf900427da39883768ca3e7c78a822dad9141a71ea96c0574b0c951"
+      },
+      {
+        "path": "results/m7_preflight_20260909/run_config.json",
+        "sha256": "75df250a4a2d3ca39b23fe0590eecf3f2095f9dca3a7e5d21cc6dfc6ee950d96"
+      },
+      {
+        "path": "results/pareto_decode_s32768.png",
+        "sha256": "a7713dfd4e3066f59cdbe9b4c64aed5c8a4c0f5faebf5dab4af2c9a8ddceebf1"
+      },
+      {
+        "path": "results/pareto_decode_s4096.png",
+        "sha256": "e7399e017aea191e922b654ceb236123e6375a119b259d111bf867d0e922a31b"
+      },
+      {
+        "path": "results/pareto_prefill_s32768.png",
+        "sha256": "4164608e91f5ab85a925ccdc9ea664baa132ef11d5f5d3575ce3ce6d138151f7"
+      },
+      {
+        "path": "results/pareto_prefill_s4096.png",
+        "sha256": "7c388e55532a74828a85d76beea3d9147e67de2408c1478632b2548110a668d2"
+      },
+      {
+        "path": "results/search_decode_s32768.csv",
+        "sha256": "f3948d4feed4f0ed00819d3212ce6b655203732b61d1044273a821e2c1726ba0"
+      },
+      {
+        "path": "results/search_decode_s4096.csv",
+        "sha256": "a1628e9b6307dfff7367f101730507886d4b374465836ef3417f413134786e89"
+      },
+      {
+        "path": "results/search_prefill_s32768.csv",
+        "sha256": "770c419cbe72f5e41ec505cbd1319c97debee15b416040f713b10a00186d01e8"
+      },
+      {
+        "path": "results/search_prefill_s4096.csv",
+        "sha256": "7bd484e0418c01f3684212ab4c898d09f8e40bc7000a528480feb788a52d563b"
+      },
+      {
+        "path": "results/search_results.csv",
+        "sha256": "03e9ce080212a55326d03078925c83a4ad8b52eab817e7f3cc0a43a1e98e5bb5"
+      }
+    ],
+    "validation_status": "historical_evidence",
+    "scope": "参见 REPORT.md；文件齐全与哈希通过不等于全部实验指标通过。"
+  },
+  "report": {
+    "path": "REPORT.md",
+    "sha256": "56d0bb6a8e7ec728f41a36555e830e5e79e87e3daef2e26941522e07b07bcce8",
+    "sections": 6
+  }
+}

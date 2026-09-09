@@ -29,7 +29,7 @@ from offline_utils import build_tiny_llama, build_tiny_tokenizer  # noqa: E402
 from rotation import BlockDiagonalRotation, RandomHadamardRotation  # noqa: E402
 
 DEFAULT_MODEL = "offline-tiny-llama"
-OUTPUT_DIR = Path(__file__).resolve().parent / "outputs"
+OUTPUT_DIR = Path(__file__).resolve().parent / "results"
 
 
 def _extract_qkv(

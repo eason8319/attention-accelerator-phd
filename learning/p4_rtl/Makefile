@@ -17,6 +17,7 @@
 VERILATOR    ?= verilator
 PYTHON       ?= conda run -n p4-rtl python
 BUILD_DIR    := build
+RESULTS_DIR  := results/rtl
 VFLAGS       := --binary -j 0 -Wall --trace --x-assign unique --x-initial unique \
                 -Wno-UNUSEDSIGNAL -Wno-SYNCASYNCNET -Wno-MULTIDRIVEN
 
@@ -39,26 +40,26 @@ $(BUILD_DIR)/smoke/Vtb_smoke: $(SMOKE_SRCS)
 # ---------------------------------------------------------------- 模块 A: exp
 sim-exp: $(EXP_SRCS)
 	mkdir -p $(BUILD_DIR)/exp
-	$(PYTHON) scripts/gen_vecs_exp.py --out $(BUILD_DIR)/vec_exp
+	$(PYTHON) scripts/gen_vecs_exp.py --out $(RESULTS_DIR)/vec_exp
 	$(VERILATOR) $(VFLAGS) --Mdir $(BUILD_DIR)/exp --top-module tb_exp $(EXP_SRCS)
-	cd $(BUILD_DIR)/exp && ./Vtb_exp +vec_dir=../vec_exp
-	$(PYTHON) scripts/compare_exp.py --vec $(BUILD_DIR)/vec_exp
+	cd $(BUILD_DIR)/exp && ./Vtb_exp +vec_dir=$(abspath $(RESULTS_DIR)/vec_exp)
+	$(PYTHON) scripts/compare_exp.py --vec $(RESULTS_DIR)/vec_exp
 
 # ---------------------------------------------------------------- 模块 B: softmax
 sim-softmax: $(SOFTMAX_SRCS)
 	mkdir -p $(BUILD_DIR)/softmax
-	$(PYTHON) scripts/gen_vecs_softmax.py --out $(BUILD_DIR)/vec_softmax --seq 64 --block-size 8
+	$(PYTHON) scripts/gen_vecs_softmax.py --out $(RESULTS_DIR)/vec_softmax --seq 64 --block-size 8
 	$(VERILATOR) $(VFLAGS) --Mdir $(BUILD_DIR)/softmax --top-module tb_softmax $(SOFTMAX_SRCS)
-	cd $(BUILD_DIR)/softmax && ./Vtb_softmax +vec_dir=../vec_softmax
-	$(PYTHON) scripts/compare_softmax.py --vec $(BUILD_DIR)/vec_softmax
+	cd $(BUILD_DIR)/softmax && ./Vtb_softmax +vec_dir=$(abspath $(RESULTS_DIR)/vec_softmax)
+	$(PYTHON) scripts/compare_softmax.py --vec $(RESULTS_DIR)/vec_softmax
 
 # ---------------------------------------------------------------- 模块 C: systolic array
 sim-sa: $(SA_SRCS)
 	mkdir -p $(BUILD_DIR)/sa
-	$(PYTHON) scripts/gen_vecs_sa.py --out $(BUILD_DIR)/vec_sa
+	$(PYTHON) scripts/gen_vecs_sa.py --out $(RESULTS_DIR)/vec_sa
 	$(VERILATOR) $(VFLAGS) --Mdir $(BUILD_DIR)/sa --top-module tb_systolic $(SA_SRCS)
-	cd $(BUILD_DIR)/sa && ./Vtb_systolic +vec_dir=../vec_sa
-	$(PYTHON) scripts/compare_sa.py --vec $(BUILD_DIR)/vec_sa
+	cd $(BUILD_DIR)/sa && ./Vtb_systolic +vec_dir=$(abspath $(RESULTS_DIR)/vec_sa)
+	$(PYTHON) scripts/compare_sa.py --vec $(RESULTS_DIR)/vec_sa
 
 sim-all: sim-exp sim-softmax sim-sa
 

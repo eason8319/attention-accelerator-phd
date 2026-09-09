@@ -19,8 +19,8 @@ from simulator import TileConfig, simulate
 from workload import llama7b_attention
 
 LEARNING_ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_SCALESIM_CSV = LEARNING_ROOT / "p3_arch_eval" / "outputs" / "scalesim_results.csv"
-DEFAULT_OUT_DIR = Path(__file__).resolve().parent / "outputs"
+DEFAULT_SCALESIM_CSV = LEARNING_ROOT / "p3_arch_eval" / "results" / "scalesim_results.csv"
+DEFAULT_OUT_DIR = Path(__file__).resolve().parent / "results"
 
 # 与 P3 ≤256 固定 attention tile 对齐的代表尺寸。
 PREFILL_TILE = TileConfig(br=256, bc=256)

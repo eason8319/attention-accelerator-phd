@@ -246,7 +246,7 @@ def run_sweep(
 ) -> list[SearchRow]:
     """对每个 mode×seq 做网格搜索；写出 CSV 与 Pareto PNG。"""
     hw = default_hw_config() if hw is None else hw
-    out = Path(__file__).resolve().parent / "outputs" if out_dir is None else out_dir
+    out = Path(__file__).resolve().parent / "results" if out_dir is None else out_dir
     out.mkdir(parents=True, exist_ok=True)
 
     all_rows: list[SearchRow] = []
@@ -311,7 +311,7 @@ def main(argv: Sequence[str] | None = None) -> None:
         "--out",
         type=Path,
         default=None,
-        help="输出目录（默认：learning/p5_tile_sim/outputs）",
+        help="输出目录（默认：learning/p5_tile_sim/results）",
     )
     args = parser.parse_args(argv)
     run_sweep(modes=args.modes, seq_lens=args.seq, out_dir=args.out)

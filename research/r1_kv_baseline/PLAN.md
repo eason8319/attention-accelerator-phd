@@ -23,7 +23,7 @@
 
 - 默认不新增子目录 `README.md`、`*_NOTES.md`；用户点名再写。
 - 日常进度只改 `docs/progress/milestones.md`、`CHANGELOG.md` 与已有协议。
-- 实验：`research/**/experiments/<name>/` = `run_*.py` + 本地 `results/` + `REPORT.md`。云端只同步 `REPORT.md`。
+- 实验：`research/**/experiments/<name>/` 保有源码、`results/`、`REPORT.md` 和 `experiment.json`，遵守根目录 AGENTS.md；云端范围仍仅正式报告与共享配置。
 - 无独立 `quant/` 包；量化与旋转在 `cache_path/`。
 - M8 顶层总报告仅验收时一份；禁止每个 milestone 再写收尾 NOTES。
 
@@ -78,6 +78,8 @@ research/
       kivi_eval/               # 整模 Table 3 / LongBench（M3 已完成）
       paged_layout/            # M4：contiguous / paged 双报告（阶段 A 已完成）
       kv_pareto/               # M5 WP2：8B 几何 bytes/token + D(16384,1024)
+      wikitext_ppl/            # M5：四窗口六格式整模精度
+      kv_sensitivity/          # M6：敏感性、固定运行依赖与指标检查
   r1_decode_sim/               # M7；自包含，禁止 import learning/
 ```
 
@@ -127,6 +129,15 @@ research/
 - 在 `research/r1_decode_sim/` 自包含实现；用 M5 有效比特（含元数据）驱动 `ElementBytes` 或等价接口。
 - 与 Roofline / SCALE-Sim **趋势**交叉核对（decode 更偏存储；流量随 $N$ 近似线性；降低 $b_{\mathrm{eff}}$ 后面 bytes 下降方向一致）。不要求绝对值相等。
 - 可对照 `learning/p5_tile_sim` 重写/抄入，运行时不依赖 `learning/`。
+
+#### 输入与验收约束
+
+- 权威流量输入为 `experiments/kv_pareto/results/summary.json`：以 `(n, protocol_id, layout)` 唯一定位 48 个单步点，以 `(l_in, l_out, protocol_id, layout)` 定位 12 个压力点。模型、KV heads、head dim、层数、page size 和 PTE bytes 必须与协议匹配。
+- `bytes_per_token` 是全模型 32 层的单步 KV 读流量；`b_eff` 是单层有效比特，`n_elem=2*n_kv*head_dim=2048`。接入单层时用 `bytes_per_token / num_layers`，接入元素时用 `b_eff / 8`；不得再次重复乘层数，也不能把名义 2/4-bit 代替有效比特。
+- `payload + scale + zp + page` 已包含在总量中，paged 元数据不得重复追加。压力点的 `total_kv_read / l_out` 与 `last_bytes_per_token` 分别表示全程均值和末步流量，不能互换。名义字节模型不代表实测 HBM 时间；解码、旋转及未打包载荷的实现代价须在模拟器中明确建模或列为局限。
+- 精度输入为 WikiText 的四个 `ppl_summary.json`（24 个结果）；按模型、窗口、格式关联。其精度评测为 contiguous，不能写成独立测过 paged PPL。M6 的合成误差与抽样层消融按各自范围解释，不替代完整 8B decode 精度。
+- 独立参照使用 P3 的 SCALE-Sim CSV 与 P5 的既有趋势检查作为设计参考；M7 的正式检查需使用相同负载和硬件参数重新建立参照。历史学习结果不直接充当 R1 模拟器验收结果。
+- 代码实现放 `research/r1_decode_sim/`，实验入口、冒烟测试与运行产物放其 `experiments/<name>/`。先完成 CPU 小规模接口和趋势检查，正式运行后保存参数、输入及源码哈希，再依据结果人工撰写唯一报告。
 
 ### M8｜验收
 

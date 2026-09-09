@@ -1,0 +1,203 @@
+{
+  "schema_version": 1,
+  "experiment_id": "p4_rtl",
+  "project_path": "learning/p4_rtl",
+  "environment": {
+    "dependency_declarations": [
+      {
+        "path": "environment.yml",
+        "sha256": "2ee3b7d88ec019fdbf939ae14c47791d1779a70e11eefd53c3472e01ca2be8a6"
+      }
+    ],
+    "actual_run_metadata": [
+      {
+        "path": "results/rtl/run_config.json",
+        "sha256": "cd3576a21d09d8549fcf1d5d813995eef7dcedc9f28f5fb0d7dbd36599727955"
+      }
+    ],
+    "note": "依赖声明用于环境准备；实际运行版本以结果元数据为准，历史缺失字段不补造。"
+  },
+  "source": {
+    "entrypoints": [
+      "Makefile",
+      "scripts/compare_exp.py",
+      "scripts/compare_softmax.py",
+      "scripts/compare_sa.py"
+    ],
+    "files": [
+      {
+        "path": "Makefile",
+        "sha256": "d11224d9b64c8552ebabd67bfa3f42a078e785fa4ce167938a7cbcdeb35646ba"
+      },
+      {
+        "path": "environment.yml",
+        "sha256": "2ee3b7d88ec019fdbf939ae14c47791d1779a70e11eefd53c3472e01ca2be8a6"
+      },
+      {
+        "path": "exp_unit/exp_approx.sv",
+        "sha256": "56c0f925691ca1047273753f257b1108ea04d5efe19e37093e48b19279a5ec6c"
+      },
+      {
+        "path": "scripts/compare_exp.py",
+        "sha256": "204caeaeb24f7f74271580c5b8bda33994bc868e94923bf99534b813e58bec73"
+      },
+      {
+        "path": "scripts/compare_sa.py",
+        "sha256": "b3c0a0b41330cf147faf3087c376318f15a9a22b01315ca0dd100e3fbe165d2a"
+      },
+      {
+        "path": "scripts/compare_softmax.py",
+        "sha256": "be32c030e172a898fde7921a2134f168d004b34219f206a3597bbe7bba339cf9"
+      },
+      {
+        "path": "scripts/exp_approx.py",
+        "sha256": "8d4f907fb04ad0541a84c21f96dd1b88649bd00932cad33f57ab74499d7feb7d"
+      },
+      {
+        "path": "scripts/exp_rtl_model.py",
+        "sha256": "6a8c75ff0fd2e4127b1b079d6f534786c26cac5d3daa87431a8126e1169a7d20"
+      },
+      {
+        "path": "scripts/fixedpoint.py",
+        "sha256": "1c2b0577a571060107234a0dd1339fb032d265f5025269276920d32916a41f3d"
+      },
+      {
+        "path": "scripts/gen_vecs_exp.py",
+        "sha256": "e8e6098bfe637f489672686cf9a669e85d3022a18fcd4cce1e9b0eeae7a18194"
+      },
+      {
+        "path": "scripts/gen_vecs_sa.py",
+        "sha256": "fc14cd921d27a8db12ce211852584e0fca48cc6e12c8a6b6e194a7f19fbb3517"
+      },
+      {
+        "path": "scripts/gen_vecs_softmax.py",
+        "sha256": "d1eb4aca22ecfeab37782c9823b2b6c8922be6b5f1cc746deac84110d97669fb"
+      },
+      {
+        "path": "scripts/online_softmax_golden.py",
+        "sha256": "3961a8b4008da9d7c0f64b83c47b2946e15672867cafbe47f4bf90dc0de471a5"
+      },
+      {
+        "path": "scripts/softmax_rtl_model.py",
+        "sha256": "bf87a8684d858302a1b512f58e6745d8678afea79ab37426c7aa1fab65d54954"
+      },
+      {
+        "path": "scripts/systolic_rtl_model.py",
+        "sha256": "2acaf63d2181ede8174523a539eb643744d78befd53c168d3dffb9223c16e5dd"
+      },
+      {
+        "path": "softmax_unit/online_softmax.sv",
+        "sha256": "012069ea5c67b5d2063ea2b91511153f117d7f9a00af0f4e6f07de8fa837fe1e"
+      },
+      {
+        "path": "systolic_array/pe.sv",
+        "sha256": "74e0bf2b70381c44860ac0af9dbe8e320dd9b93a1d1260659ef8376ecbc27b47"
+      },
+      {
+        "path": "systolic_array/systolic_array.sv",
+        "sha256": "29d8cad0ab878cdc989b814335345b2d76eff99a0769d48c158925378c28c613"
+      },
+      {
+        "path": "tb/tb_exp.sv",
+        "sha256": "069fb7705d497460c55c8103f237613b4e06bf7ab26247d581148e40aed9e5e5"
+      },
+      {
+        "path": "tb/tb_smoke.sv",
+        "sha256": "4a4c82984e187337560ffa703ebe9cf0fca1043bd1c8414d891ed0f868820c7e"
+      },
+      {
+        "path": "tb/tb_softmax.sv",
+        "sha256": "d5e827c1e9bfd71331dd1439006995663eab7e39e45d6de255e2ae2751ca0139"
+      },
+      {
+        "path": "tb/tb_systolic.sv",
+        "sha256": "c319ce5cfeaea23b5a9f913dcc228b31ec855cecfeaee0afb15c92af5885fbbb"
+      }
+    ],
+    "dependencies": []
+  },
+  "results": {
+    "directory": "results",
+    "files": [
+      {
+        "path": "results/rtl/check.log",
+        "sha256": "3cbfef5d76e86923f74c53843433bf530c1ee5d0d8820c647d20b6045493efda"
+      },
+      {
+        "path": "results/rtl/compare_exp_local_missing_dependency.log",
+        "sha256": "bd68d34809dbc92a33c8358d5dd8be5652a1c8ac72a9ddfbd430b0860324141c"
+      },
+      {
+        "path": "results/rtl/run_config.json",
+        "sha256": "cd3576a21d09d8549fcf1d5d813995eef7dcedc9f28f5fb0d7dbd36599727955"
+      },
+      {
+        "path": "results/rtl/vec_exp/dut_out.txt",
+        "sha256": "d5128716f6c844eb8a50dbfa7fc40df3b38384f7f4b997636a0d882f266606f1"
+      },
+      {
+        "path": "results/rtl/vec_exp/expected.txt",
+        "sha256": "d5128716f6c844eb8a50dbfa7fc40df3b38384f7f4b997636a0d882f266606f1"
+      },
+      {
+        "path": "results/rtl/vec_exp/meta.txt",
+        "sha256": "f456b49827cb030f06fc5bf388ba77a3c809e234e1a92468a7bbdeceed19f72d"
+      },
+      {
+        "path": "results/rtl/vec_exp/x.txt",
+        "sha256": "e1ce4134af98e431a57eb90616babbd2d1929e4bde9ad697eb90b06c90c0d29f"
+      },
+      {
+        "path": "results/rtl/vec_sa/a.txt",
+        "sha256": "4114ef05c6ccd9388f89e414e22ba48fb6222f845570e5c918fb8f39eda25c80"
+      },
+      {
+        "path": "results/rtl/vec_sa/dut_c.txt",
+        "sha256": "17143e1567fa44ff9f4a6e9978a86d8ae94edd955aedb4c37f14d42492a26447"
+      },
+      {
+        "path": "results/rtl/vec_sa/expected_c.txt",
+        "sha256": "17143e1567fa44ff9f4a6e9978a86d8ae94edd955aedb4c37f14d42492a26447"
+      },
+      {
+        "path": "results/rtl/vec_sa/meta.txt",
+        "sha256": "4c579b6cff19736817b5e15a161354002a4b81e64243f2a7d3c4986628ca1612"
+      },
+      {
+        "path": "results/rtl/vec_sa/w.txt",
+        "sha256": "70a662c67289c366ecd19d77a30f1bf8ad167cd5325b0f93c38384a1118667f2"
+      },
+      {
+        "path": "results/rtl/vec_softmax/dut_l.txt",
+        "sha256": "a6e7e5640579187ece796fc7daa13a6c914de6b8f7db86288fc78befcb162ae9"
+      },
+      {
+        "path": "results/rtl/vec_softmax/dut_m.txt",
+        "sha256": "4f5e055e2bfdbe0c3fb22e7a3e58911e2c53adb5d2561a7d428705d8142ce5ea"
+      },
+      {
+        "path": "results/rtl/vec_softmax/expected_l.txt",
+        "sha256": "a6e7e5640579187ece796fc7daa13a6c914de6b8f7db86288fc78befcb162ae9"
+      },
+      {
+        "path": "results/rtl/vec_softmax/expected_m.txt",
+        "sha256": "4f5e055e2bfdbe0c3fb22e7a3e58911e2c53adb5d2561a7d428705d8142ce5ea"
+      },
+      {
+        "path": "results/rtl/vec_softmax/meta.txt",
+        "sha256": "add2c8e2aba9bac03723a96b33f5dffa2f3303c22e6e679202debb3b89f04e76"
+      },
+      {
+        "path": "results/rtl/vec_softmax/scores.txt",
+        "sha256": "a5bd20453029f8b83e4442f42b440a0f0e1f8ea39d8611666b8b4a9f28f0670c"
+      }
+    ],
+    "validation_status": "validated_existing_outputs",
+    "scope": "参见 REPORT.md；文件齐全与哈希通过不等于全部实验指标通过。"
+  },
+  "report": {
+    "path": "REPORT.md",
+    "sha256": "9a7314d682d23dc77e5d9317846b4bbec63c73ce5d5e65bcde8e0f8e9acd0529",
+    "sections": 6
+  }
+}

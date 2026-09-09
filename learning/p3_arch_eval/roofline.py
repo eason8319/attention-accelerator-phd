@@ -278,7 +278,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=Path(__file__).resolve().parent / "outputs",
+        default=Path(__file__).resolve().parent / "results",
     )
     parser.add_argument(
         "--seq-lens",

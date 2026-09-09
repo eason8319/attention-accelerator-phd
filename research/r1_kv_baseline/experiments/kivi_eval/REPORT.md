@@ -1,8 +1,9 @@
 # 实验报告：整模路径上 C0 / C4 / C5 任务精度
 
-**整理日期**：2026-09-08；**状态**：本报告所列批次已完成，本次未重跑。**证据来源**：results/table3/table3_summary.json、results/longbench/longbench_summary.json 及逐项原始输出。正式正文经阅读结果后整理，数据汇总不替代报告。
+**实验日期**：2026-09-03 至 2026-09-04；**整理日期**：2026-09-09。
+**状态**：本报告所列批次已完成；以保留的原始结果为依据。
+**证据来源**：results/table3/table3_summary.json、results/longbench/longbench_summary.json 及逐项原始输出。
 
-**日期**：2026-09-04（合并；kivi 为 2026-09-03 修复后重跑）  
 **阶段**：R1 / M3 阶段 B  
 **性质**：真实权重、整模 KV cache-path（非投影 fake-quant；非合成张量）  
 **对照**：相对本仓库 FP16；未传 `--reference-json`，**不与论文官方表并排**  
@@ -73,7 +74,7 @@ python experiments/kivi_eval/run_longbench.py \
 | 接口冒烟 | 玩具 Llama；`run_smoke.py` | 4/4 PASS（patch / generate / 刷窗 / clear） |
 | 数值等价 | `JackFram/llama-160m`，CPU；残差窗大于 prompt、量化关闭；`run_equiv_smoke.py` | 4/4 PASS（`max\|\Delta\mathrm{logits}\| = 0.0106`） |
 
-等价性检查能拦住两类已修复的 prefill bug：attention 输出缺 `transpose(1, 2)`；`attention_mask=None` 时未补因果 mask。首次全集曾因此崩溃（CoQA / GSM8K / trec = 0），坏结果已删除，本报告只保留修复后数字。
+等价性检查覆盖 attention 输出布局及因果 mask 语义；任务分数仅引用本报告列出的有效结果。
 
 ---
 

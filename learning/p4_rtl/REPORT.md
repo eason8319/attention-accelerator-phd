@@ -1,8 +1,8 @@
 # 实验报告：P4 RTL 关键模块
 
-**实验日期**：2026-07-22；**整理日期**：2026-09-08。
-**状态**：历史功能验收完成；本次未重跑 Verilator。
-**证据**：原验收记录、notes/ 下的 exp_unit.md、softmax_unit.md、systolic_array.md 和 scripts/ 对拍程序。
+**实验日期**：2026-07-22；**整理日期**：2026-09-09。
+**状态**：历史 RTL 原始输出已于 2026-09-09 复核，三个模块对拍通过；未重新生成 DUT 输出。
+**证据来源**：`results/rtl/vec_exp/`、`vec_softmax/`、`vec_sa/` 的输入、golden 和 DUT 文本；[check.log](results/rtl/check.log)、[run_config.json](results/rtl/run_config.json)。
 
 ## 1. 实验目的
 
@@ -22,7 +22,7 @@ exp 采用 16 段 PWL，Q6.10 输入、UQ0.24 输出、3 级流水，目标域�
 | online softmax | 同一分块下与定点 golden 比特一致；跨块大小归约和相对偏差小于 1% |
 | systolic GEMM | 32 个输出中 mismatch 为 0 |
 
-这些数值来自历史记录，本次没有重新测得以上通过数。
+对保留的原始输出重新执行 `scripts/compare_*.py`：exp 的 8186 项和 GEMM 的 32 项均无不一致，exp 最大相对误差为 $3.324\times10^{-4}$；softmax 的 running max 与归约和分别为 2574、150765425，均与定点参考一致。该复核验证已有输出，不代表一次新的 RTL 仿真。
 
 ## 4. 分析与讨论
 

@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "experiment_id": "p2_quantization",
+  "project_path": "learning/p2_quantization",
+  "environment": {
+    "dependency_declarations": [
+      {
+        "path": "../../research/r1_kv_baseline/requirements.txt",
+        "sha256": "4e05a5f837ae814e189ec1ae8ea6be977720b0c9bc8ee3476a9f0c44e9042f06"
+      }
+    ],
+    "actual_run_metadata": [],
+    "note": "依赖声明用于环境准备；实际运行版本以结果元数据为准，历史缺失字段不补造。"
+  },
+  "source": {
+    "entrypoints": [
+      "kv_cache_ppl.py",
+      "error_analysis.py",
+      "test_fakequant.py"
+    ],
+    "files": [
+      {
+        "path": "error_analysis.py",
+        "sha256": "e1c83de83e5ba235765b40637fda8bad464d62d8d08f758130259c03e9a6ac4e"
+      },
+      {
+        "path": "fakequant.py",
+        "sha256": "72e5439a63b86afa0d003ee2e31dda8ee1047b6bd8c2a696a06457a22a7fce98"
+      },
+      {
+        "path": "kv_cache_ppl.py",
+        "sha256": "8ddd412bf14b8a2a3559e25c127fbc2c379dbcacead66433b57a92032302f895"
+      },
+      {
+        "path": "offline_utils.py",
+        "sha256": "86fed03dff57f11609d02f557157353b637fc79ee9d525d4e7cd6a9aefae42e2"
+      },
+      {
+        "path": "rotation.py",
+        "sha256": "c0bfc69d350fc2b97fbcf0b514c2c1acafd7b56cd00e3d2d9a9c60a7ca8c149e"
+      },
+      {
+        "path": "test_fakequant.py",
+        "sha256": "41efc47186096b70b81be5815379d1061691e70682e95af11b8abbde626e3d37"
+      }
+    ],
+    "dependencies": []
+  },
+  "results": {
+    "directory": "results",
+    "files": [
+      {
+        "path": "results/error_analysis.png",
+        "sha256": "e4ac48c3a05b8980b4ef6810d5a39eb9cea764ded14ff6486a264a897ef36445"
+      },
+      {
+        "path": "results/error_analysis_data.md",
+        "sha256": "9e9f0491ec75507b88d55452127596640827fe8af0bf1e5e848f2eeef31bb66e"
+      },
+      {
+        "path": "results/kv_cache_ppl.txt",
+        "sha256": "634a868ac313bbb27f990cec72a43ec3f786b7d2c21243e7b89f1a7c86b1b65b"
+      }
+    ],
+    "validation_status": "historical_evidence",
+    "scope": "参见 REPORT.md；文件齐全与哈希通过不等于全部实验指标通过。"
+  },
+  "report": {
+    "path": "REPORT.md",
+    "sha256": "e86519b97f72fbe5ade4542f06645e9b02cd9c4efe74f73752f9a7836c7fbfe2",
+    "sections": 6
+  }
+}

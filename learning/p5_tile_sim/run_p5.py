@@ -101,7 +101,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--out",
         type=Path,
-        default=HERE / "outputs",
+        default=HERE / "results",
         help="输出目录",
     )
     args = parser.parse_args(argv)

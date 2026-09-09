@@ -17,7 +17,7 @@ from pathlib import Path
 from scalesim.scale_sim import scalesim
 
 ROOT = Path(__file__).resolve().parent
-OUTPUT_ROOT = ROOT.parent / "outputs"
+OUTPUT_ROOT = ROOT.parent / "results"
 SEQ_LENS = (4_096, 32_768, 131_072)
 DATAFLOWS = ("ws", "os")
 TILE_LIMIT = 256
@@ -356,7 +356,7 @@ def write_summary(rows: list[dict[str, object]]) -> Path:
                 "traffic."
             ),
             "",
-            "Raw reports are under `outputs/scalesim_raw/`; aggregated cycle, "
+            "Raw reports are under `results/scalesim_raw/`; aggregated cycle, "
             "utilization and SRAM/DRAM traffic are in `scalesim_results.csv`.",
         ]
     )

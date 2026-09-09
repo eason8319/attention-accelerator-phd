@@ -1,7 +1,8 @@
 # R1 协议：指标、流量记账与报告分层
 
 > **状态**：已锁定（2026-07-24；2026-09-04 增补 §8 paged 切分并随 `paged_cache.py` 落地）。  
-> **版本**：v1.1  
+> **版本**：v1.2（2026-09-09：误差归约与 PPL 溯源）
+>
 > 模型与上下文：[`models_context.md`](models_context.md)
 
 ---
@@ -26,10 +27,18 @@
 - Attention 输出相对 FP16 golden：cosine similarity、相对 $\ell_2$
 - Cache round-trip：quantize→pack→store→load→dequant 后与直通 FP16 的误差上界（实现时在测试中钉数值阈值）
 
+误差归约使用 [`tensor_metrics.py`](../bytes_accounting/tensor_metrics.py) 的 `tensor-error-f64-v1`：仅在计算指标时将预测、参考转为 float64，再计算差值、点积和范数。模型、Q/K/V、量化与反量化、attention 和 logits 的生成精度保持实验原设置；合成 M6 的参考是未量化 float SDPA，整模 M6 的参考是 C0 codec，必须分别注明。
+
+相对 L2 为 `norm(pred64-gold64)/norm(gold64)`；余弦为 `dot(pred64,gold64)/(norm(pred64)*norm(gold64))`，两者共用同一参考范数。不得添加 epsilon 改写非零小范数。参考范数为零时相对 L2 未定义，任一范数为零时余弦未定义，JSON 写 `null`，不能写 0、1 或 NaN；空张量按零范数处理。非有限输入、归约溢出或余弦绝对值大于 `1+1e-12` 必须报错；不裁剪余弦。聚合时明确未定义值数目，不能把它们当作零参与均值。
+
+正确性检查覆盖自身、相反、正交、零/空向量、小范数、大尺寸张量、不同输入精度和异常值。更换指标实现后，新结果独立保存，按原参数与原行标识比较；必要时对同一张量并行计算旧/新指标以定位归约误差，不覆盖历史证据。
+
 ### 2.2 困惑度
 
 - WikiText-2（或协议注明的子集）：报告 FP16 与各 KV 格式 PPL
 - 主叙事以 **真实 cache-path** 为准；若保留投影假量化对照，须单独标注，不得合并进主表
+- 每次评测保存 `nll_sum`、实际计分 `n_tokens`、`mean_nll`、`ppl` 和逐窗口边界/NLL/token 数；独立检查 `ppl=exp(nll_sum/n_tokens)`、窗口合计及计分覆盖范围，零计分 token 不得形成有效 PPL。
+- 记录完整命令参数、实际模型配置和 dtype、逐层格式、窗口/stride/语料截断、模型标识、数据集配置/切分/指纹、输入 token 哈希、软件版本和设备、实际执行源码 SHA-256。Git HEAD 仅作上下文，不能替代未提交源码标识。记录增强不改变既有前向或交叉熵计分精度；历史缺失信息不得反推后填冒充原记录。
 
 ### 2.3 任务精度（阶段 B）
 
@@ -246,6 +255,7 @@ C0–C3 对 K、V 两池求和；C4/C5 对上表四池求和。$B_{\mathrm{paylo
 
 | 版本 | 日期 | 变更 |
 |------|------|------|
+| v1.2 | 2026-09-09 | 仅误差归约升为 float64，定义零范数/越界处理与检查范围；PPL 保存 NLL、计分 token、窗口和参数/源码溯源 |
 | v1.0 | 2026-07-24 | 锁定指标分层、bytes/token 公式、必报字段 |
 | v1.1-draft | 2026-09-04 | 新增 §8 paged 切分（$P_{\mathrm{size}}=16$、均匀 / KIVI 两后端、四池、$B_{\mathrm{pte}}=8\,\mathrm{B}$）；§3.2 / §4 交叉引用 |
 | v1.1 | 2026-09-04 | `paged_cache.py` 落地，口径未改；去掉 draft 并锁定 |

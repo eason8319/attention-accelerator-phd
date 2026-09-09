@@ -165,7 +165,7 @@ def main() -> None:
     for mode, ppl in results.items():
         print(f"{mode:16s}: {ppl:.2f}")
 
-    out_path = Path(__file__).resolve().parent / "outputs" / "kv_cache_ppl.txt"
+    out_path = Path(__file__).resolve().parent / "results" / "kv_cache_ppl.txt"
     out_path.parent.mkdir(parents=True, exist_ok=True)
     lines = [f"{mode}: {ppl:.4f}" for mode, ppl in results.items()]
     out_path.write_text("\n".join(lines) + "\n", encoding="utf-8")

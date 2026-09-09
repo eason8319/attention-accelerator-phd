@@ -26,7 +26,7 @@ p2_quantization/
 ├── kv_cache_ppl.py         # 小模型 KV cache 量化困惑度评估
 ├── offline_utils.py        # 离线 tiny 模型与合成语料（无 HF 网络时使用）
 ├── test_fakequant.py       # 与 torch.float8_* 及手算样例对拍
-└── outputs/                # 原始数据、指标、图与历史数据摘录；不生成正式报告
+└── results/                # 原始数据、指标、图与历史数据摘录；不生成正式报告
 ```
 
 ## 从这里开始

@@ -11,7 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
 ARCH_EVAL = ROOT.parent
-OUTPUTS = ARCH_EVAL / "outputs"
+OUTPUTS = ARCH_EVAL / "results"
 SCALESIM_RESULTS = OUTPUTS / "scalesim_results.csv"
 IMAGE = "timeloopaccelergy/timeloop-accelergy-pytorch:latest-amd64"
 

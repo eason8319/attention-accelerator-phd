@@ -1,13 +1,13 @@
 # 实验报告：真实 Cache-Path 上 C0–C5 编码对照
 
-**整理日期**：2026-09-08；**状态**：本报告所列批次已完成，本次未重跑。**证据来源**：results/raw_metrics.csv、summary_mean_std.csv、run_config.json。正式正文经阅读结果后整理，数据汇总不替代报告。
+**实验日期**：2026-07-28；**整理日期**：2026-09-09。
+**状态**：本报告所列批次已完成；以保留的原始结果为依据。
+**证据来源**：results/raw_metrics.csv、summary_mean_std.csv、run_config.json。
 
-**日期**：2026-07-28  
 **阶段**：R1 / M3 骨架（合并原 M1+M2，并纳入 KIVI 风格 C4/C5）  
 **性质**：合成张量、真实 cache-path（非投影 fake-quant；非 PPL）  
 **统计**：$n{=}20$ 配对种子；原始汇总保存 mean 与样本标准差；下方主表为 mean。
 **实验目录**：[`experiments/codec_compare/`](.)（本报告入库；`results/` 仅本地）  
-**说明**：合并并取代原 `m1_codec_accuracy` / `m2_int4_bdr`（已删除）。
 
 ---
 

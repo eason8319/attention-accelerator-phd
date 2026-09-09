@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "experiment_id": "p1_attention_numerics",
+  "project_path": "learning/p1_attention_numerics",
+  "environment": {
+    "dependency_declarations": [
+      {
+        "path": "../../research/r1_kv_baseline/requirements.txt",
+        "sha256": "4e05a5f837ae814e189ec1ae8ea6be977720b0c9bc8ee3476a9f0c44e9042f06"
+      }
+    ],
+    "actual_run_metadata": [
+      {
+        "path": "results/20260909_completeness/run_config.json",
+        "sha256": "75013892ef05fc336552d46b7dc8072880a51798044932c9e12ad600f0bc02e6"
+      }
+    ],
+    "note": "依赖声明用于环境准备；实际运行版本以结果元数据为准，历史缺失字段不补造。"
+  },
+  "source": {
+    "entrypoints": [
+      "test_numerics.py"
+    ],
+    "files": [
+      {
+        "path": "attention_naive.py",
+        "sha256": "8d0c478388e87911802ccda9938eda4ebb994d07800f11bcc4c1ca5b1cc5cca5"
+      },
+      {
+        "path": "attention_online.py",
+        "sha256": "b36a7245b4c3c77da96053862286cb0db0caae0de8722fce6aa006462e82d721"
+      },
+      {
+        "path": "attention_tiled.py",
+        "sha256": "23cc7ac88b02bdd9a48422e469f77a4408622aff18bb16ad86d06e73576961cc"
+      },
+      {
+        "path": "decode_step.py",
+        "sha256": "a98bc855bba13c1addb7cdd3bab5e18fe3e7bcc244d3497c41f800b3f04f5b03"
+      },
+      {
+        "path": "ops.py",
+        "sha256": "2a6bf787cb6b53b61b984af80199a7455aa61d96b3494093ba047eb94164ab3f"
+      },
+      {
+        "path": "test_numerics.py",
+        "sha256": "90187e7b97a25a8f378b31b9c2f6352b240f078ee542f0bb243adb1dc917084f"
+      }
+    ],
+    "dependencies": []
+  },
+  "results": {
+    "directory": "results",
+    "files": [
+      {
+        "path": "results/20260909_completeness/junit.xml",
+        "sha256": "2f86dfbf6ca929ced754e60edf3499287644d1e67be255455dcd2d7a8c932b8c"
+      },
+      {
+        "path": "results/20260909_completeness/pytest.log",
+        "sha256": "fa874a421fa4b0a16344c4d15eb59be7e8e07b42a96ae1d3174e8412e5089962"
+      },
+      {
+        "path": "results/20260909_completeness/run_config.json",
+        "sha256": "75013892ef05fc336552d46b7dc8072880a51798044932c9e12ad600f0bc02e6"
+      }
+    ],
+    "validation_status": "needs_attention",
+    "scope": "参见 REPORT.md；文件齐全与哈希通过不等于全部实验指标通过。"
+  },
+  "report": {
+    "path": "REPORT.md",
+    "sha256": "7813dced9ede93cb3c7bf461353a121f2f8d561713d2665ce5aa0e9ba4ebf8c8",
+    "sections": 6
+  }
+}

@@ -4,7 +4,7 @@
 对象：LLaMA-7B 规模单层 attention（`hidden=4096`，`heads=32`，`head_dim=128`）  
 硬件假设：128 TOPS INT8、1 TB/s HBM、16 MiB 片上 SRAM；微架构对照为 32×32 systolic array（WS / OS）
 
-本文汇总 Roofline、SCALE-Sim v3 与 Timeloop/Accelergy 的交叉结果，回答三个阶段 1 相关问题：长上下文下片外访存占比、decode 利用率跌幅，以及 16 MiB SRAM 能容纳多长的 KV tile。图与表来自 `outputs/`；正式实验分析见 `REPORT.md`；历史交叉数据见 `outputs/cross_validation_data.md`。
+本文汇总 Roofline、SCALE-Sim v3 与 Timeloop/Accelergy 的交叉结果，回答三个阶段 1 相关问题：长上下文下片外访存占比、decode 利用率跌幅，以及 16 MiB SRAM 能容纳多长的 KV tile。图与表来自 `results/`；正式实验分析见 `REPORT.md`；历史交叉数据见 `results/cross_validation_data.md`。
 
 ## 1. 方法与假设
 
@@ -36,7 +36,7 @@ $$
 
 Decode 投影几乎是读权重写结果（AI≈2），远低于脊点；`QK^T`/`PV` 虽因 KV 复用略高，仍低于 128。Prefill 同算子 AI 更高，落在 compute 侧。层汇总亦如此：decode 4K/32K/128K 均为 memory-bound；prefill 均为 compute-bound。
 
-图：`outputs/roofline_points.png`（WS attained TOPS vs AI；另标 32×32@1 GHz 阵列峰 ≈2.05 TOPS，勿与 128 TOPS 系统峰混读）。
+图：`results/roofline_points.png`（WS attained TOPS vs AI；另标 32×32@1 GHz 阵列峰 ≈2.05 TOPS，勿与 128 TOPS 系统峰混读）。
 
 ## 3. SCALE-Sim：decode 利用率掉到约 1%–2.5%
 
@@ -49,7 +49,7 @@ Decode 投影几乎是读权重写结果（AI≈2），远低于脊点；`QK^T`/
 | WS | ≈73.1% | ≈1.05% | ≈69× |
 | OS | ≈67%–81% | ≈2.1%–2.5% | ≈32× |
 
-图：`outputs/util_prefill_vs_decode.png`。
+图：`results/util_prefill_vs_decode.png`。
 
 **结论（问题 2）**：在本配置下，decode PE 利用率掉到约 **1%（WS）/ 2%–2.5%（OS）**，相对 prefill 低 **一到两个数量级**。根因是 decode 保留单行 query（`M=1` 级瘦矩阵），阵列空间维难以铺满；OS/WS 改变绝对 util，但不改变 decode ≪ prefill。
 
@@ -67,7 +67,7 @@ Decode 投影几乎是读权重写结果（AI≈2），远低于脊点；`QK^T`/
 | prefill | 4K | ≈37.4% |
 | prefill | 128K | ≈38.1% |
 
-图：`outputs/traffic_energy_stack.png`（左）。
+图：`results/traffic_energy_stack.png`（左）。
 
 **结论（问题 1）**：在本 SCALE-Sim 分层与 tile 假设下，decode 片外（DRAM）访存约占 **总 words 流量的一半（≈49%）**；prefill 约 **37%–38%**。decode 的 DRAM 与 SRAM 流量量级接近，且随 $S$ 近似线性放大——长上下文放大的是 **绝对片外流量**，而不只是占比。注意：这是 simulator traffic，不是端到端 HBM 实测；tile 重复会重复计跨 tile 本可复用的数据。
 
@@ -80,7 +80,7 @@ Decode 投影几乎是读权重写结果（AI≈2），远低于脊点；`QK^T`/
 | decode | 4K–128K | ≈0.03% | ≈89.2% | ≈10.7% |
 | prefill | 4K–128K | ≈0.06% | ≈99.3% | ≈0.3%–0.4% |
 
-图：`outputs/traffic_energy_stack.png`（右）。Area：GlobalBuffer（16 MiB）≈100 mm²（CACTI），占主导。
+图：`results/traffic_energy_stack.png`（右）。Area：GlobalBuffer（16 MiB）≈100 mm²（CACTI），占主导。
 
 **解读**：当前工具链下 **片上大 SRAM 动态能量主导**，不能据此宣称「DRAM energy 主导」。与 SCALE-Sim/Roofline 一致的稳健结论是：**带宽压力 + decode 低利用率**。绝对能量份额需工艺与 memory 模型标定后再用于论文。
 
@@ -127,14 +127,14 @@ $$
 | SCALE-Sim tile 重复 | 无跨 tile 复用 → traffic/cycle 偏保守（偏大） |
 | Timeloop PAT | 大 SRAM 能量占比高 → 勿直接当「DRAM 能耗结论」 |
 
-历史数据见 `outputs/cross_validation_data.md`，正式结论见 `REPORT.md`。
+历史数据见 `results/cross_validation_data.md`，正式结论见 `REPORT.md`。
 
 ## 7. 对阶段 1 / 后续工作的含义
 
 1. **瓶颈定位**：长上下文 inference 的关键矛盾是 decode 侧 **低算术强度 + 低阵列利用率 + KV 流量随 $S$ 增长**；单纯加大 PE 阵列收益有限，除非同时改善数据复用与带宽。
 2. **SRAM 规划**：16 MiB 量级更适合 **KV tile + 工作缓冲**，而非整段 128K KV；需与分块 attention（P1/P5）和 KV 量化/旋转（P2）协同。
 3. **架构方向**：FlashAttention-native 数据流、片上 KV tile 调度、以及 decode 友好的映射（避免 $M=1$ 饿死阵列）是阶段 1–2 的直接动机。
-4. **工具链**：本仓库 `outputs/` 命名稳定，可供 P5 tile simulator 做 **趋势** 对照（util、traffic 随 $S$），而非绝对值对拍。
+4. **工具链**：本仓库 `results/` 命名稳定，可供 P5 tile simulator 做 **趋势** 对照（util、traffic 随 $S$），而非绝对值对拍。
 
 ## 8. 可复现命令
 

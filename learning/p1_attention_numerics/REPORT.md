@@ -1,8 +1,8 @@
 # 实验报告：P1 Attention 数值内核
 
-**实验日期**：2026-07-07；**整理日期**：2026-09-08。
-**状态**：历史验收完成；本次未重跑。
-**证据**：test_numerics.py、原验收记录；22 项通过为历史记录，本次未发现独立原始 pytest 日志。
+**实验日期**：2026-09-09；**整理日期**：2026-09-09。
+**状态**：22 项数值检查已执行，21 项通过，1 项未达到阈值。
+**证据来源**：[pytest.log](results/20260909_completeness/pytest.log)、[junit.xml](results/20260909_completeness/junit.xml)；源码与结果清单见 [experiment.json](experiment.json)。
 
 ## 1. 实验目的
 
@@ -12,11 +12,11 @@
 
 以标准 scaled dot-product attention 为参考，对比两遍分块与单遍 online 实现。覆盖 causal/non-causal、不同块大小、FP16 online，以及 RoPE/RMSNorm 与 Transformers 的对照。FP32 最大绝对误差阈值为 $10^{-5}$。
 
-历史环境为 p1-attention、PyTorch 2.12.1+cpu、Transformers 5.13.0。在本实验目录执行 `pytest test_numerics.py -q --tb=short`。
+本次在服务器 CPU 环境执行既有 `test_numerics.py`，使用 PyTorch 2.5.1+cu121 的 CPU 路径。在本实验目录执行 `python -m pytest test_numerics.py -q -p no:cacheprovider --junitxml=results/20260909_completeness/junit.xml`；原始日志与逐项检查状态完整保存。
 
 ## 3. 实验结果
 
-原验收记录为 **22 passed**：三种 attention 在阈值内一致；block_size=16/128 的 online 结果一致；RoPE/RMSNorm 与参考实现对齐；decode 与 prefill 最后一行对齐。逐项用例见 [test_numerics.py](test_numerics.py)。
+本次结果为 **21 passed、1 failed**。FP32 attention 对拍、块大小对照、RoPE、RMSNorm 及 decode 检查通过。`test_online_fp16` 的最大绝对误差为 **0.001953125**，未满足严格小于 **0.001** 的阈值。逐项用例见 [test_numerics.py](test_numerics.py)，失败输入的参数和断言见原始日志。
 
 ## 4. 分析与讨论
 
@@ -24,8 +24,8 @@
 
 ## 5. 局限与有效性
 
-这是 CPU 数值验收，不包含 GPU 性能、整模任务精度或硬件综合。有限形状通过不能证明所有输入均等价。历史通过数未在本次重新确认。
+这是 CPU 数值验收，不包含 GPU 性能、整模任务精度或硬件综合。有限形状通过不能证明所有输入均等价。FP16 用例未通过，不能声称全部精度路径均达标；历史环境与当前环境不同，历史通过数不替代当前结果。
 
 ## 6. 结论与后续工作
 
-已有实现可作为学习阶段的浮点 golden model。后续应明确参考路径，在改动基础算子后重新运行对拍，不能沿用旧通过数。
+已检查的 FP32 路径可作为学习阶段的浮点参考；FP16 online 路径需进一步分析误差及参考实现差异，达到既定阈值后才能纳入同等验收范围。

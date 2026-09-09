@@ -9,7 +9,7 @@ English IEEE conference-style short paper synthesizing the completed learning pr
 | [`attention_learning_pipeline.tex`](attention_learning_pipeline.tex) | Main paper |
 | [`references.bib`](references.bib) | BibTeX source of truth (verified subset) |
 | [`IEEEtran.cls`](IEEEtran.cls) | IEEE class (from `templates/latex/ieee/`) |
-| [`figures/`](figures/) | Staged plots from P2/P3/P5 `outputs/` |
+| [`figures/`](figures/) | Staged plots from P2/P3/P5 `results/` |
 
 ## Build
 
@@ -28,12 +28,12 @@ To switch to BibTeX later: replace the `thebibliography` block with `\bibliograp
 
 | Paper figure | Source |
 | --- | --- |
-| `figures/error_analysis.png` | `learning/p2_quantization/outputs/error_analysis.png` |
-| `figures/roofline_points.png` | `learning/p3_arch_eval/outputs/roofline_points.png` |
-| `figures/util_prefill_vs_decode.png` | `learning/p3_arch_eval/outputs/util_prefill_vs_decode.png` |
-| `figures/traffic_energy_stack.png` | `learning/p3_arch_eval/outputs/traffic_energy_stack.png` |
-| `figures/pareto_prefill.png` | `learning/p5_tile_sim/outputs/pareto_prefill_s4096.png` |
-| `figures/pareto_decode.png` | `learning/p5_tile_sim/outputs/pareto_decode_s4096.png` (available; optional) |
+| `figures/error_analysis.png` | `learning/p2_quantization/results/error_analysis.png` |
+| `figures/roofline_points.png` | `learning/p3_arch_eval/results/roofline_points.png` |
+| `figures/util_prefill_vs_decode.png` | `learning/p3_arch_eval/results/util_prefill_vs_decode.png` |
+| `figures/traffic_energy_stack.png` | `learning/p3_arch_eval/results/traffic_energy_stack.png` |
+| `figures/pareto_prefill.png` | `learning/p5_tile_sim/results/pareto_prefill_s4096.png` |
+| `figures/pareto_decode.png` | `learning/p5_tile_sim/results/pareto_decode_s4096.png` (available; optional) |
 
 Regenerate P5 figures if missing:
 

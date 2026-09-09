@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 ROOT = Path(__file__).resolve().parent
-OUTPUTS = ROOT / "outputs"
+OUTPUTS = ROOT / "results"
 
 # 假定时钟频率，用于将 SCALE-Sim 周期换算为 attained TOPS。
 # 绝对 TOPS 仅作示意；prefill/decode 相对趋势更重要。

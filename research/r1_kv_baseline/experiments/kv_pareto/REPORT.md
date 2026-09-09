@@ -1,8 +1,9 @@
 # 实验报告：Llama-3.1-8B 几何 bytes/token（双布局）
 
-**整理日期**：2026-09-09；**状态**：本报告所列批次已完成，本次未重跑。**证据来源**：results/summary.json。正式正文经阅读结果后整理，数据汇总不替代报告。
+**实验日期**：2026-09-04；**整理日期**：2026-09-09。
+**状态**：本报告所列批次已完成；以保留的原始结果为依据。
+**证据来源**：results/summary.json。
 
-**日期**：2026-09-04  
 **阶段**：R1 / M5 WP2  
 **性质**：8B **几何**上的真实 cache-path 流量；未加载权重；无 PPL / 任务分  
 **协议**：[`protocols/metrics.md`](../../protocols/metrics.md) v1.1；模型阶梯 [`models_context.md`](../../protocols/models_context.md) v1.2  

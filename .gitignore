@@ -58,6 +58,7 @@ node_modules/
 
 # 通用：脚本写出的 outputs/（图、CSV、机器检查数据；不生成正式报告）
 learning/**/outputs/
+learning/**/results/
 
 # P3：SCALE-Sim 运行时写出的 topology/layout
 learning/p3_arch_eval/scale-sim/attention_tiles.csv

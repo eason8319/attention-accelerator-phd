@@ -2,7 +2,7 @@
 
 **实验日期**：2026-07-08 至 2026-07-14；**整理日期**：2026-09-08。
 **状态**：历史实验完成；本次核对已有数据，未重跑模型。
-**证据**：outputs/kv_cache_ppl.txt、outputs/error_analysis_data.md；测试通过数来自原验收记录。
+**证据来源**：results/kv_cache_ppl.txt、results/error_analysis_data.md；测试通过数来自原验收记录。
 
 ## 1. 实验目的
 
