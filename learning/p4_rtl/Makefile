@@ -29,7 +29,7 @@ SMOKE_SRCS   := tb/tb_smoke.sv
 
 .PHONY: check sim-exp sim-softmax sim-sa sim-all clean
 
-# ---------------------------------------------------------------- smoke
+# ---------------------------------------------------------------- 冒烟测试
 check: $(BUILD_DIR)/smoke/Vtb_smoke
 	$(BUILD_DIR)/smoke/Vtb_smoke
 

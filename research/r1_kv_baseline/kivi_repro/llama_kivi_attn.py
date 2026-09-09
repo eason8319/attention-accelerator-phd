@@ -1,4 +1,4 @@
-"""Llama / Mistral Attention：本仓库真实 cache-path（C0–C5）。
+"""Llama / Mistral / Qwen2 Attention：本仓库真实 cache-path（C0–C5）。
 
 将 ``q/k/v_proj → RoPE → cache.append/load → SDPA → o_proj`` 接到
 HuggingFace attention 槽位，供 ``generate`` / LM-Eval 使用。
@@ -7,8 +7,9 @@ HuggingFace attention 槽位，供 ``generate`` / LM-Eval 使用。
   - 当前仅 ``batch=1``（与 R1 协议一致）
   - 数值路径使用 cache ``load()`` 的反量化 K/V（非投影 fake-quant）
   - 仍调用 HF ``past_key_values.update`` 以维护 generate 的序列长度簿记
-  - ``LlamaKiviAttention`` 是 C4/C5 子类，保持 M3 patch API
-  - 整模默认 ``layout=contiguous``；paged 精度由 M4 对齐，主 Pareto 不双跑
+  - ``LlamaKiviAttention`` 是 C4/C5 子类，保持 KIVI 评估 patch API
+  - 整模默认 ``layout=contiguous``；paged 精度由 分页布局 对齐，主 Pareto 不双跑
+  - 敏感性 层消融：``set_kv_format`` / ``set_layer_kv_formats``（不必整模重载）
 
 用法概要：
 
@@ -19,6 +20,7 @@ HuggingFace attention 槽位，供 ``generate`` / LM-Eval 使用。
 from __future__ import annotations
 
 import sys
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
@@ -281,7 +283,7 @@ class LlamaCachePathAttention(nn.Module):
 
     @property
     def kivi_cache(self) -> CacheBackend | None:
-        """兼容 M3：KIVI 路径曾用这个名字。"""
+        """兼容 KIVI 评估：KIVI 路径曾用这个名字。"""
         return self.cache
 
     @kivi_cache.setter
@@ -323,8 +325,39 @@ class LlamaCachePathAttention(nn.Module):
         new.o_proj = attn.o_proj
         return new
 
+    def reset_cache(self) -> None:
+        """清空本层 cache（新样本开始时调用）。"""
+        if self.cache is not None:
+            self.cache.clear()
+
+    def set_kv_format(self, kv_format: str) -> None:
+        """改本层 KV 格式并丢弃 cache（敏感性 层消融；下一轮 ``_ensure_cache`` 重建）。"""
+        name = canonical_cache_format(kv_format)
+        self.kv_format = name
+        if name == "kivi2":
+            self.k_bits = 2
+            self.v_bits = 2
+            if hasattr(self, "bits"):
+                self.bits = 2
+        elif name == "kivi4":
+            self.k_bits = 4
+            self.v_bits = 4
+            if hasattr(self, "bits"):
+                self.bits = 4
+        else:
+            self.k_bits = None
+            self.v_bits = None
+        self.cache = None
+        self._cache_kv_format = None
+
     def _ensure_cache(self, device: torch.device) -> CacheBackend:
-        if self.cache is None or self.cache.device != device:
+        stale = (
+            self.cache is None
+            or self.cache.device != device
+            or getattr(self, "_cache_kv_format", None) != self.kv_format
+            or getattr(self, "_cache_layout", None) != self.layout
+        )
+        if stale:
             self.cache = _make_cache_backend(
                 self.kv_format,
                 num_heads=self.num_key_value_heads,
@@ -339,12 +372,9 @@ class LlamaCachePathAttention(nn.Module):
                 page_size=self.page_size,
                 pte_bytes=self.pte_bytes,
             )
+            self._cache_kv_format = self.kv_format
+            self._cache_layout = self.layout
         return self.cache
-
-    def reset_cache(self) -> None:
-        """清空本层 cache（新样本开始时调用）。"""
-        if self.cache is not None:
-            self.cache.clear()
 
     def forward(
         self,
@@ -432,7 +462,7 @@ class LlamaCachePathAttention(nn.Module):
 
 
 class LlamaKiviAttention(LlamaCachePathAttention):
-    """C4/C5：``KiviKVCache`` 路径，保持 M3 ``bits=`` API。"""
+    """C4/C5：``KiviKVCache`` 路径，保持 KIVI 评估 ``bits=`` API。"""
 
     def __init__(
         self,
@@ -594,6 +624,62 @@ class MistralKiviAttention(LlamaKiviAttention):
         )
 
 
+class Qwen2CachePathAttention(LlamaCachePathAttention):
+    """Qwen2 / Qwen2.5 槽位的 C0–C5 cache-path（敏感性 Dev 模型）。"""
+
+    @classmethod
+    def from_qwen_attention(
+        cls,
+        attn: nn.Module,
+        *,
+        kv_format: str,
+        layout: str = "contiguous",
+        group_size: int = 32,
+        residual_length: int = 128,
+        seed: int = 0,
+        k_bits: int | None = None,
+        v_bits: int | None = None,
+    ) -> Qwen2CachePathAttention:
+        """从已有 ``Qwen2Attention`` 拷贝权重。"""
+        return cls.from_hf_attention(
+            attn,
+            kv_format=kv_format,
+            layout=layout,
+            group_size=group_size,
+            residual_length=residual_length,
+            seed=seed,
+            k_bits=k_bits,
+            v_bits=v_bits,
+        )
+
+
+class Qwen2KiviAttention(LlamaKiviAttention):
+    """Qwen2 槽位的 KIVI attention；数值路径与 Llama 相同。"""
+
+    @classmethod
+    def from_qwen_attention(
+        cls,
+        attn: nn.Module,
+        *,
+        bits: int = 2,
+        k_bits: int | None = None,
+        v_bits: int | None = None,
+        group_size: int = 32,
+        residual_length: int = 128,
+        layout: str = "contiguous",
+    ) -> Qwen2KiviAttention:
+        """从已有 ``Qwen2Attention`` 拷贝权重。"""
+        return cls.from_hf_attention(
+            attn,
+            bits=bits,
+            k_bits=k_bits,
+            v_bits=v_bits,
+            group_size=group_size,
+            residual_length=residual_length,
+            layout=layout,
+        )
+
+
 def _iter_decoder_layers(model: nn.Module) -> list[nn.Module]:
     """取出 ``model.model.layers``（Llama / Mistral 因果 LM 的常见结构）。"""
     inner = getattr(model, "model", None)
@@ -625,6 +711,64 @@ def is_kivi_patched(model: nn.Module) -> bool:
     if not layers:
         return False
     return all(isinstance(layer.self_attn, LlamaKiviAttention) for layer in layers)
+
+
+def cache_path_attns(model: nn.Module) -> list[LlamaCachePathAttention]:
+    """按 decoder 层序返回 cache-path attention；未 patch 则报错。"""
+    layers = _iter_decoder_layers(model)
+    attns: list[LlamaCachePathAttention] = []
+    for layer in layers:
+        attn = layer.self_attn
+        if not isinstance(attn, LlamaCachePathAttention):
+            raise TypeError(
+                f"layer.self_attn 类型为 {type(attn).__name__}，期望 LlamaCachePathAttention"
+            )
+        attns.append(attn)
+    return attns
+
+
+def layer_kv_formats(model: nn.Module) -> list[str]:
+    """各层当前 ``kv_format``（规范短名）。"""
+    return [attn.kv_format for attn in cache_path_attns(model)]
+
+
+def set_layer_kv_formats(
+    model: nn.Module,
+    formats: Sequence[str] | dict[int, str],
+    *,
+    base: str | None = None,
+) -> list[str]:
+    """按层设置 KV 格式（敏感性 层消融）。
+
+    ``formats`` 为与层数等长的列表，或 ``{layer_idx: format}`` 覆盖。
+    覆盖模式默认保留各层现有格式；若给 ``base`` 则先全体设为 ``base``。
+    """
+    attns = cache_path_attns(model)
+    n = len(attns)
+    if isinstance(formats, dict):
+        resolved = (
+            [canonical_cache_format(base)] * n
+            if base is not None
+            else [attn.kv_format for attn in attns]
+        )
+        for idx, fmt in formats.items():
+            if idx < 0 or idx >= n:
+                raise IndexError(f"layer_idx={idx} 超出范围 [0, {n})")
+            resolved[idx] = canonical_cache_format(fmt)
+    else:
+        if len(formats) != n:
+            raise ValueError(f"formats 长度 {len(formats)} 与层数 {n} 不一致")
+        resolved = [canonical_cache_format(fmt) for fmt in formats]
+    for attn, fmt in zip(attns, resolved, strict=False):
+        attn.set_kv_format(fmt)
+    cfg = getattr(model, "config", None)
+    if cfg is not None:
+        uniq = set(resolved)
+        cfg.cache_layer_formats = list(resolved)
+        cfg.cache_kv_format = resolved[0] if len(uniq) == 1 else "mix"
+        cfg.cache_path_patched = True
+        cfg.kivi_patched = all(is_kivi_format(fmt) for fmt in resolved)
+    return resolved
 
 
 def clear_llama_kivi_caches(model: nn.Module) -> None:

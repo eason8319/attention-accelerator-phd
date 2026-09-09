@@ -258,7 +258,6 @@ def run_sweep(
             all_rows.extend(rows)
 
             stem = f"{mode}_s{seq}"
-            write_search_csv(rows, out / f"search_{stem}.csv")
             plot_pareto(
                 rows,
                 out / f"pareto_{stem}.png",
@@ -288,7 +287,7 @@ def run_sweep(
                 )
 
     write_search_csv(all_rows, out / "search_results.csv")
-    print(f"Wrote {out / 'search_results.csv'} and per-config CSV/PNG under {out}")
+    print(f"Wrote {out / 'search_results.csv'} and per-config PNG under {out}")
     return all_rows
 
 

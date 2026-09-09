@@ -74,7 +74,7 @@ def build_joined_table(
         cycles = as_float(s, "total_cycles")
         attained_tops = ops / cycles * ASSUMED_FREQ_HZ / 1e12 if cycles > 0 else 0.0
         ai = as_float(r, "ai_ops_per_byte")
-        # peak=128 TOPS，ridge=128 ops/byte → roof_tops = min(peak, AI)
+        # 峰值为 128 TOPS，拐点为 128 ops/byte：roof_tops = min(peak, AI)
         roof_tops = min(PEAK_TOPS, ai * (PEAK_TOPS / RIDGE_AI))
         rows.append(
             {
@@ -366,10 +366,13 @@ def write_cross_results(
     """保存可追溯的数据与单位假设，不导出研究结论。"""
     if path.suffix.lower() != ".json":
         raise ValueError("结果导出必须使用 .json，禁止覆盖报告")
-    data = {"assumed_clock_hz": ASSUMED_FREQ_HZ, "scalesim": scalesim,
-            "timeloop": timeloop, "joined": joined}
+    data = {
+        "assumed_clock_hz": ASSUMED_FREQ_HZ,
+        "scalesim": scalesim,
+        "timeloop": timeloop,
+        "joined": joined,
+    }
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-
 
 
 def validate(

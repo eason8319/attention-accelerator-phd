@@ -4,7 +4,7 @@
 **状态**：本报告所列批次已完成；以保留的原始结果为依据。
 **证据来源**：results/table3/table3_summary.json、results/longbench/longbench_summary.json 及逐项原始输出。
 
-**阶段**：R1 / M3 阶段 B  
+**研究内容**：R1 / KIVI 整模任务评估  
 **性质**：真实权重、整模 KV cache-path（非投影 fake-quant；非合成张量）  
 **对照**：相对本仓库 FP16；未传 `--reference-json`，**不与论文官方表并排**  
 **实验目录**：[`experiments/kivi_eval/`](.)（本报告入库；`results/` 与 `run_*.py` 仅本地）  
@@ -22,7 +22,7 @@
 2. 合成 cache-path 上 C4 误差很大（见 `codec_compare`），下游任务是否同样崩？  
 3. 路径是否可复现：patch 后与原生 HF 在「量化关闭 + 残差窗盖住 prompt」时数值等价？
 
-本实验只报**算法层**任务分。bytes/token、paged 布局属 M5 / M4，此处不主张流量或架构结论。
+本实验只报**算法层**任务分。bytes/token、paged 布局属流量与精度 / 分页布局，此处不主张流量或架构结论。
 
 ---
 
@@ -126,7 +126,7 @@ KIVI-4 最大绝对差为 trec $+0.50$ 个百分点，最大负向差为 qmsum $
 ## 5. 局限与有效性
 
 - 未核对 KIVI 论文 Table 3 / LongBench 官方数字；不得把本仓库 FP16 或 $\Delta$ 写成「复现了论文表」。  
-- 无 PPL、无 bytes/token、无 paged（M4 / M5）。  
+- 无 PPL、无 bytes/token、无 paged（分页布局 / 流量与精度）。  
 - LongBench 只跑四子组代表任务，不是全套件。  
 - 布局仅为 contiguous；`attn_implementation=eager`，墙钟不是吞吐上限。  
 - 单次评测、无多种子；TruthfulQA 主分是 `bleu_max`，与部分论文常用的 MC 指标不同。  

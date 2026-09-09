@@ -121,5 +121,5 @@ def test_run_sweep_writes_outputs(tmp_path: Path) -> None:
     )
     assert rows
     assert (tmp_path / "search_results.csv").is_file()
-    assert (tmp_path / "search_prefill_s256.csv").is_file()
+    assert list(tmp_path.glob("*.csv")) == [tmp_path / "search_results.csv"]
     assert (tmp_path / "pareto_prefill_s256.png").is_file()

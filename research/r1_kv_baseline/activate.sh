@@ -1,5 +1,5 @@
 # 集群环境激活脚本（source 使用，不要直接执行）
-#   source research/r1_kv_baseline/activate.sh
+# 使用方式：source research/r1_kv_baseline/activate.sh
 #
 # 背景与踩坑细节见本地文件 CLUSTER_NOTES.md（不入库）。
 

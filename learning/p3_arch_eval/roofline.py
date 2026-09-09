@@ -175,91 +175,6 @@ def write_csv(rows: Sequence[RooflineRow], path: Path) -> None:
             )
 
 
-def grouped_rows(
-    rows: Sequence[RooflineRow],
-) -> dict[tuple[str, int], list[RooflineRow]]:
-    groups: dict[tuple[str, int], list[RooflineRow]] = {}
-    for row in rows:
-        groups.setdefault((row.mode, row.seq_len), []).append(row)
-    return groups
-
-
-def write_markdown(
-    rows: Sequence[RooflineRow],
-    hardware: HardwareConfig,
-    path: Path,
-) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    lines = [
-        "# Roofline table (LLaMA-7B-scale attention layer)",
-        "",
-        "## Assumption",
-        "",
-        "Each GEMM reads A/B once from HBM and writes C once; ops count uses $2MNK$.",
-        "",
-        "## Hardware",
-        "",
-        f"- Peak compute: **{hardware.peak_ops_per_s / 1e12:g} TOPS** INT8",
-        f"- HBM bandwidth: **{hardware.memory_bytes_per_s / 1e12:g} TB/s**",
-        f"- SRAM (reference): **{hardware.sram_bytes / 1024**2:g} MB**",
-        f"- Element size: **{hardware.element_bytes} byte** (INT8)",
-        f"- Ridge AI: **{hardware.ridge_ai:g} ops/byte**",
-        "",
-        "## Per-GEMM",
-        "",
-        "| mode | seq | gemm | M | N | K | AI | bound | t_bound (us) |",
-        "|---|---:|---|---:|---:|---:|---:|---|---:|",
-    ]
-    for row in rows:
-        lines.append(
-            f"| {row.mode} | {row.seq_len} | {row.gemm.name} | "
-            f"{row.gemm.m} | {row.gemm.n} | {row.gemm.k} | "
-            f"{row.ai:.4g} | {row.bound} | {row.bound_s * 1e6:.3f} |"
-        )
-
-    lines.extend(
-        [
-            "",
-            "## Layer summary (sum of per-GEMM bound latencies)",
-            "",
-            "| mode | seq | AI | bound | t_layer (us) |",
-            "|---|---:|---:|---|---:|",
-        ]
-    )
-    groups = grouped_rows(rows)
-    for (mode, seq_len), group in sorted(groups.items()):
-        total_ops = sum(row.ops for row in group)
-        total_bytes = sum(row.bytes_moved for row in group)
-        ai = total_ops / total_bytes
-        bound = "compute" if ai >= hardware.ridge_ai else "memory"
-        latency_us = sum(row.bound_s for row in group) * 1e6
-        lines.append(f"| {mode} | {seq_len} | {ai:.4g} | {bound} | {latency_us:.3f} |")
-
-    lines.extend(
-        [
-            "",
-            "## Sanity check (decode vs prefill on QK_T / PV)",
-            "",
-            "Decode `QK_T`/`PV` AI should be below prefill and below the "
-            "ridge, hence memory-bound.",
-            "",
-        ]
-    )
-    lookup = {(row.mode, row.seq_len, row.gemm.name): row for row in rows}
-    seq_lens = sorted({row.seq_len for row in rows})
-    for seq_len in seq_lens:
-        for name in ("QK_T", "PV"):
-            prefill = lookup[("prefill", seq_len, name)]
-            decode = lookup[("decode", seq_len, name)]
-            lines.append(
-                f"- seq={seq_len}: {name} prefill AI={prefill.ai:.4g} "
-                f"({prefill.bound}) vs decode AI={decode.ai:.4g} "
-                f"({decode.bound}); ratio={prefill.ai / decode.ai:.2f}x"
-            )
-
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
-
-
 def validate_expected_trend(rows: Sequence[RooflineRow]) -> None:
     """若 P3 Roofline 核心结论未复现则显式失败。"""
     lookup = {(row.mode, row.seq_len, row.gemm.name): row for row in rows}
@@ -304,11 +219,8 @@ def main() -> None:
     validate_expected_trend(rows)
 
     csv_path = args.output_dir / "roofline_table.csv"
-    md_path = args.output_dir / "roofline_table.md"
     write_csv(rows, csv_path)
-    write_markdown(rows, hardware, md_path)
     print(f"Wrote {len(rows)} rows to {csv_path}")
-    print(f"Wrote summary to {md_path}")
     print("Sanity check passed: decode QK_T/PV are memory-bound and have lower AI than prefill.")
 
 

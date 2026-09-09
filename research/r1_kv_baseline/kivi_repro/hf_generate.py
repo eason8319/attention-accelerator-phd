@@ -4,8 +4,8 @@
 默认 ``batch=1``、贪心解码。
 
 ``kv_format``：
-  - ``fp16`` / ``hf`` / ``baseline``：原生 HF attention（M3 C0 精度上界）
-  - ``c0`` / ``fp16_codec``：FP16 **codec** cache-path（M5 Pareto C0）
+  - ``fp16`` / ``hf`` / ``baseline``：原生 HF attention（KIVI 评估 C0 精度上界）
+  - ``c0`` / ``fp16_codec``：FP16 **codec** cache-path（traffic/PPL Pareto C0）
   - ``int8`` / ``int4`` / ``int4_bdr``：均匀 C1–C3
   - ``kivi2`` / ``kivi4``：C4/C5
 """
@@ -32,6 +32,7 @@ from .patch_llama import (
     is_llama_kivi_patched,
 )
 from .patch_mistral import build_mistral_cache_path, build_mistral_kivi
+from .patch_qwen import build_qwen_cache_path, build_qwen_kivi
 
 __all__ = [
     "GenerateInfo",
@@ -43,6 +44,42 @@ __all__ = [
 ]
 
 _NATIVE_ALIASES = frozenset({"fp16", "hf", "baseline", "16bit"})
+
+
+def _as_token_id_list(value: Any) -> list[int]:
+    """``eos_token_id`` 在 Llama-3.1 上是 list；统一成 int 列表。"""
+    if value is None:
+        return []
+    if isinstance(value, (list, tuple)):
+        return [int(x) for x in value]
+    return [int(value)]
+
+
+def _scalar_token_id(value: Any) -> int | None:
+    """取单个 token id。列表时用最后一个（Llama-3.1 的 ``<|eot_id|>``）。"""
+    ids = _as_token_id_list(value)
+    return ids[-1] if ids else None
+
+
+def _ensure_scalar_pad(model: nn.Module, tokenizer: Any | None = None) -> int | None:
+    """给 ``config`` / ``generation_config`` 写标量 ``pad_token_id``。
+
+    Transformers 会做 ``pad_token_id < 0``；若 pad 回落到 list 型 eos 会 TypeError。
+    """
+    pad = _scalar_token_id(getattr(getattr(model, "config", None), "pad_token_id", None))
+    if pad is None and tokenizer is not None:
+        pad = _scalar_token_id(getattr(tokenizer, "pad_token_id", None))
+    if pad is None:
+        pad = _scalar_token_id(getattr(getattr(model, "config", None), "eos_token_id", None))
+    if pad is None:
+        return None
+    cfg = getattr(model, "config", None)
+    if cfg is not None:
+        cfg.pad_token_id = pad
+    gen_cfg = getattr(model, "generation_config", None)
+    if gen_cfg is not None:
+        gen_cfg.pad_token_id = pad
+    return pad
 
 
 def resolve_kv_load_format(kv_format: str) -> str | None:
@@ -85,7 +122,7 @@ def _native_hf_causal_lm(
     trust_remote_code: bool,
     from_pretrained_kwargs: dict[str, Any],
 ) -> tuple[nn.Module, Any]:
-    """加载未 patch 的 HF 因果 LM（M3 C0 精度上界）。"""
+    """加载未 patch 的 HF 因果 LM（KIVI 评估 C0 精度上界）。"""
     tokenizer = AutoTokenizer.from_pretrained(model_id, trust_remote_code=trust_remote_code)
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
@@ -133,7 +170,7 @@ def load_llama_for_generate(
 
     架构
         原生 FP16 不做 attention patch，支持任意 HF ``AutoModelForCausalLM``。
-        cache-path / KIVI 按 ``config.model_type`` 分发 llama / mistral。
+        cache-path / KIVI 按 ``config.model_type`` 分发 llama / mistral / qwen2。
     """
     if device is None:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -152,19 +189,21 @@ def load_llama_for_generate(
         resolved_bits = kv_format_to_bits(kv_format)
 
     if loaded is None:
-        return _native_hf_causal_lm(
+        model, tokenizer = _native_hf_causal_lm(
             model_id,
             device=device,
             dtype=dtype,
             trust_remote_code=trust_remote_code,
             from_pretrained_kwargs=from_pretrained_kwargs,
         )
+        _ensure_scalar_pad(model, tokenizer)
+        return model, tokenizer
 
     cfg = AutoConfig.from_pretrained(model_id, trust_remote_code=trust_remote_code)
     model_type = str(getattr(cfg, "model_type", "") or "").lower()
-    if model_type not in {"llama", "mistral"}:
+    if model_type not in {"llama", "mistral", "qwen2"}:
         raise TypeError(
-            f"cache-path 目前支持 llama / mistral，得到 model_type={model_type!r} "
+            f"cache-path 目前支持 llama / mistral / qwen2，得到 model_type={model_type!r} "
             f"（{type(cfg).__name__}）"
         )
 
@@ -173,8 +212,9 @@ def load_llama_for_generate(
         kivi_builder = {
             "llama": build_llama_kivi,
             "mistral": build_mistral_kivi,
+            "qwen2": build_qwen_kivi,
         }[model_type]
-        return kivi_builder(
+        model, tokenizer = kivi_builder(
             model_id,
             bits=kivi_bits,
             group_size=group_size,
@@ -185,12 +225,15 @@ def load_llama_for_generate(
             trust_remote_code=trust_remote_code,
             **from_pretrained_kwargs,
         )
+        _ensure_scalar_pad(model, tokenizer)
+        return model, tokenizer
 
     cache_builder = {
         "llama": build_llama_cache_path,
         "mistral": build_mistral_cache_path,
+        "qwen2": build_qwen_cache_path,
     }[model_type]
-    return cache_builder(
+    model, tokenizer = cache_builder(
         model_id,
         kv_format=loaded,
         layout=layout,
@@ -201,6 +244,8 @@ def load_llama_for_generate(
         trust_remote_code=trust_remote_code,
         **from_pretrained_kwargs,
     )
+    _ensure_scalar_pad(model, tokenizer)
+    return model, tokenizer
 
 
 @torch.inference_mode()
@@ -237,12 +282,13 @@ def generate_ids(
         attention_mask = attention_mask.to(device)
 
     prompt_len = int(input_ids.shape[1])
+    eos_ids = _as_token_id_list(getattr(model.config, "eos_token_id", None))
+    pad_id = _ensure_scalar_pad(model)
     gen_kwargs: dict[str, Any] = {
         "max_new_tokens": max_new_tokens,
         "do_sample": do_sample,
-        "pad_token_id": getattr(model.config, "pad_token_id", None)
-        or getattr(model.config, "eos_token_id", None),
-        "eos_token_id": getattr(model.config, "eos_token_id", None),
+        "pad_token_id": pad_id,
+        "eos_token_id": eos_ids if eos_ids else None,
     }
     if do_sample:
         gen_kwargs["temperature"] = temperature
@@ -265,10 +311,8 @@ def generate_ids(
     if not kv_format:
         kv_format = "fp16"
 
-    # 粗略结束原因
     finish = "length"
-    eos_id = getattr(model.config, "eos_token_id", None)
-    if eos_id is not None and new_tokens > 0 and int(out[0, -1]) == int(eos_id):
+    if eos_ids and new_tokens > 0 and int(out[0, -1]) in eos_ids:
         finish = "eos"
 
     info = GenerateInfo(

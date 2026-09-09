@@ -11,7 +11,7 @@
     ],
     "actual_run_metadata": [
       {
-        "path": "results/20260909_completeness/run_config.json",
+        "path": "results/numerics_check/run_config.json",
         "sha256": "75013892ef05fc336552d46b7dc8072880a51798044932c9e12ad600f0bc02e6"
       }
     ],
@@ -53,24 +53,53 @@
     "directory": "results",
     "files": [
       {
-        "path": "results/20260909_completeness/junit.xml",
+        "path": "results/numerics_check/junit.xml",
         "sha256": "2f86dfbf6ca929ced754e60edf3499287644d1e67be255455dcd2d7a8c932b8c"
       },
       {
-        "path": "results/20260909_completeness/pytest.log",
+        "path": "results/numerics_check/pytest.log",
         "sha256": "fa874a421fa4b0a16344c4d15eb59be7e8e07b42a96ae1d3174e8412e5089962"
       },
       {
-        "path": "results/20260909_completeness/run_config.json",
+        "path": "results/numerics_check/run_config.json",
         "sha256": "75013892ef05fc336552d46b7dc8072880a51798044932c9e12ad600f0bc02e6"
       }
     ],
     "validation_status": "needs_attention",
-    "scope": "参见 REPORT.md；文件齐全与哈希通过不等于全部实验指标通过。"
+    "scope": "参见 REPORT.md；文件齐全与哈希通过不等于全部实验指标通过。",
+    "retired_files": [
+      {
+        "original_path": "results/20260909_completeness/junit.xml",
+        "original_sha256": "2f86dfbf6ca929ced754e60edf3499287644d1e67be255455dcd2d7a8c932b8c",
+        "reason": "renamed_by_experiment_purpose",
+        "preserved_in": {
+          "path": "results/numerics_check/junit.xml",
+          "sha256": "2f86dfbf6ca929ced754e60edf3499287644d1e67be255455dcd2d7a8c932b8c"
+        }
+      },
+      {
+        "original_path": "results/20260909_completeness/pytest.log",
+        "original_sha256": "fa874a421fa4b0a16344c4d15eb59be7e8e07b42a96ae1d3174e8412e5089962",
+        "reason": "renamed_by_experiment_purpose",
+        "preserved_in": {
+          "path": "results/numerics_check/pytest.log",
+          "sha256": "fa874a421fa4b0a16344c4d15eb59be7e8e07b42a96ae1d3174e8412e5089962"
+        }
+      },
+      {
+        "original_path": "results/20260909_completeness/run_config.json",
+        "original_sha256": "75013892ef05fc336552d46b7dc8072880a51798044932c9e12ad600f0bc02e6",
+        "reason": "renamed_by_experiment_purpose",
+        "preserved_in": {
+          "path": "results/numerics_check/run_config.json",
+          "sha256": "75013892ef05fc336552d46b7dc8072880a51798044932c9e12ad600f0bc02e6"
+        }
+      }
+    ]
   },
   "report": {
     "path": "REPORT.md",
-    "sha256": "7813dced9ede93cb3c7bf461353a121f2f8d561713d2665ce5aa0e9ba4ebf8c8",
+    "sha256": "d7b18f4900db45c047ead6c1d76a9fa24be7f45531e993c218cdca07a7231bca",
     "sections": 6
   }
 }

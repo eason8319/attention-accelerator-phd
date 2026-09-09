@@ -12,8 +12,10 @@ FP16 无 meta 时 ``b_eff = 16``。
 from __future__ import annotations
 
 import sys
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 import torch
 
@@ -65,14 +67,18 @@ __all__ = [
     "FORMATS",
     "LAYOUTS",
     "LLAMA_31_8B",
-    "M4_SYNTH",
+    "PAGED_SYNTH_GEOMETRY",
+    "QWEN25_05B",
     "LayerGeometry",
+    "MixedLayerTraffic",
     "PressureTraffic",
     "StepTraffic",
     "breakdown_total",
     "canonical_kv_format",
     "effective_bits",
+    "geometry_from_config",
     "measure_decode_pressure",
+    "measure_layer_mix",
     "measure_step",
     "n_elem_per_token",
     "protocol_format_id",
@@ -98,10 +104,12 @@ class LayerGeometry:
             )
 
 
-# M4 paged_layout 合成几何（对拍 REPORT，不是 8B）
-M4_SYNTH = LayerGeometry(num_kv_heads=8, head_dim=64, num_layers=1)
+# 分页布局 paged_layout 合成几何（对拍 REPORT，不是 8B）
+PAGED_SYNTH_GEOMETRY = LayerGeometry(num_kv_heads=8, head_dim=64, num_layers=1)
 # 协议主 Pareto：Llama-3.1-8B-Instruct（GQA）
 LLAMA_31_8B = LayerGeometry(num_kv_heads=8, head_dim=128, num_layers=32)
+# 协议 Dev：Qwen2.5-0.5B-Instruct（GQA）
+QWEN25_05B = LayerGeometry(num_kv_heads=2, head_dim=64, num_layers=24)
 
 
 @dataclass(frozen=True)
@@ -167,6 +175,47 @@ class PressureTraffic:
         for key, value in self.last_step.as_dict().items():
             out[f"last_{key}"] = value
         return out
+
+
+@dataclass(frozen=True)
+class MixedLayerTraffic:
+    """各层可用不同格式；bytes 为单步全模合计。"""
+
+    n: int
+    layout: str
+    num_layers: int
+    layer_formats: tuple[str, ...]
+    payload: int
+    scale: int
+    zp: int
+    page: int
+    bytes_per_token: int
+    per_layer_bytes: tuple[int, ...]
+
+    def as_dict(self) -> dict[str, int | float | str | list[str] | list[int]]:
+        """便于实验脚本落 JSON。"""
+        return {
+            "n": self.n,
+            "layout": self.layout,
+            "num_layers": self.num_layers,
+            "layer_formats": list(self.layer_formats),
+            "payload": self.payload,
+            "scale": self.scale,
+            "zp": self.zp,
+            "page": self.page,
+            "bytes_per_token": self.bytes_per_token,
+            "per_layer_bytes": list(self.per_layer_bytes),
+        }
+
+
+def geometry_from_config(cfg: Any) -> LayerGeometry:
+    """从 HF ``config`` 读 KV 几何（GQA 用 ``num_key_value_heads``）。"""
+    n_kv = int(cfg.num_key_value_heads)
+    n_q = int(cfg.num_attention_heads)
+    hidden = int(cfg.hidden_size)
+    head_dim = int(getattr(cfg, "head_dim", None) or hidden // n_q)
+    n_layers = int(cfg.num_hidden_layers)
+    return LayerGeometry(num_kv_heads=n_kv, head_dim=head_dim, num_layers=n_layers)
 
 
 def canonical_kv_format(kv_format: str) -> str:
@@ -379,4 +428,65 @@ def measure_decode_pressure(
         total_kv_read=total,
         mean_bytes_per_token=total / l_out,
         last_step=last,
+    )
+
+
+def measure_layer_mix(
+    geometry: LayerGeometry,
+    layer_formats: Sequence[str],
+    *,
+    n: int,
+    layout: str = "contiguous",
+    page_size: int = DEFAULT_PAGE_SIZE,
+    pte_bytes: int = DEFAULT_PTE_BYTES,
+    device: torch.device | None = None,
+) -> MixedLayerTraffic:
+    """按层格式求和单步流量（敏感性 层消融的 x 轴）。
+
+    ``layer_formats`` 长度必须等于 ``geometry.num_layers``。
+    同一格式只测一次单层，再按层数相加。
+    """
+    if n <= 0:
+        raise ValueError(f"n 须为正，得到 {n}")
+    names = tuple(canonical_kv_format(fmt) for fmt in layer_formats)
+    if len(names) != geometry.num_layers:
+        raise ValueError(
+            f"layer_formats 长度 {len(names)} 与 num_layers={geometry.num_layers} 不一致"
+        )
+    one = LayerGeometry(
+        num_kv_heads=geometry.num_kv_heads,
+        head_dim=geometry.head_dim,
+        num_layers=1,
+    )
+    cache: dict[str, BytesBreakdown] = {}
+    per_layer_bytes: list[int] = []
+    payload = scale = zp = page = 0
+    for name in names:
+        if name not in cache:
+            cache[name] = measure_step(
+                one,
+                kv_format=name,
+                n=n,
+                layout=layout,
+                page_size=page_size,
+                pte_bytes=pte_bytes,
+                device=device,
+            ).per_layer
+        b = cache[name]
+        payload += b.payload
+        scale += b.scale
+        zp += b.zp
+        page += b.page
+        per_layer_bytes.append(breakdown_total(b))
+    return MixedLayerTraffic(
+        n=n,
+        layout=layout,
+        num_layers=geometry.num_layers,
+        layer_formats=names,
+        payload=payload,
+        scale=scale,
+        zp=zp,
+        page=page,
+        bytes_per_token=payload + scale + zp + page,
+        per_layer_bytes=tuple(per_layer_bytes),
     )

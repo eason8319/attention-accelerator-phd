@@ -4,7 +4,7 @@
 **状态**：本报告所列批次已完成；以保留的原始结果为依据。
 **证据来源**：results/summary.json。
 
-**阶段**：R1 / M5 WP2  
+**研究内容**：R1 / 双布局 KV 流量  
 **性质**：8B **几何**上的真实 cache-path 流量；未加载权重；无 PPL / 任务分  
 **协议**：[`protocols/metrics.md`](../../protocols/metrics.md) v1.1；模型阶梯 [`models_context.md`](../../protocols/models_context.md) v1.2  
 **记账**：[`bytes_accounting/traffic_model.py`](../../bytes_accounting/traffic_model.py)（C0 走 FP16 codec）  
@@ -22,7 +22,7 @@
 2. $D(16384,1024)$ 的全程 KV 读 / $L_{\mathrm{out}}$ 与末步 $N{=}17407$ 单步各是多少？  
 3. KIVI 残差窗如何把名义 2/4-bit 抬成有效比特？
 
-本实验 **不** 报精度，**不能**单独构成 Pareto。y 轴见独立的 WikiText 整模评测报告，不能由本流量实验推断。M3 Table 3 不能替代。
+本实验 **不** 报精度，**不能**单独构成 Pareto。y 轴见独立的 WikiText 整模评测报告，不能由本流量实验推断。KIVI 评估 Table 3 不能替代。
 
 ---
 
@@ -137,7 +137,7 @@ Paged 在本几何下相对 payload 可忽略（32K 上约 $0.024\%$），正式
 
 - 只记账，不跑 8B 前向；数字依赖几何与 codec，不依赖权重。  
 - 本实验自身不测 PPL / 任务分；组合 Pareto 需引用独立精度结果并核对模型与窗口。
-- INT4 / KIVI 载荷按名义比特，未 nibble-/bit-pack（与 M4 口径一致）。  
+- INT4 / KIVI 载荷按名义比特，未 nibble-/bit-pack（与分页布局口径一致）。  
 - 未扫 $P_{\mathrm{size}}$；未报 $B_{\mathrm{pad}}$；128K 未做。
 
 ---

@@ -1,14 +1,14 @@
-# 实验报告：M6 误差—流量敏感性
+# 实验报告：敏感性误差—流量敏感性
 
 **实验日期**：2026-09-08 至 2026-09-09；**整理日期**：2026-09-09（北京时间）。
 
 **状态**：本报告所列实验批次已完成，指标与计分记录已核验。
 
-**证据来源**：本目录 `results/metrics_f64_20260909/` 的原始 JSON、参数元数据及必要日志。
+**证据来源**：本目录 `results/metrics_f64/` 的原始 JSON、参数元数据及必要日志。
 
 ## 1. 实验目的
 
-将 M5 的整模精度—流量比较细分为层、KV head 和 token 位置，回答哪些位置对量化更敏感，以及增加保留精度是否值得额外的名义 KV 读流量。另观察短段 decode 中的误差变化，为 M7 的模型设计提供候选假设，不将短段结果当作完整长生成压力测试。
+将流量与精度的整模精度—流量比较细分为层、KV head 和 token 位置，回答哪些位置对量化更敏感，以及增加保留精度是否值得额外的名义 KV 读流量。另观察短段 decode 中的误差变化，为解码模拟器的模型设计提供候选假设，不将短段结果当作完整长生成压力测试。
 
 ## 2. 方法与设置
 
@@ -16,11 +16,11 @@
 
 | 批次 | 设置与完成范围 | 原始证据 |
 |---|---|---|
-| Dev 合成 | Qwen 0.5B 几何，2 个 KV head、head dim 64、24 层；N=512/1024/2048；种子 0/1/2 | [synth/summary.json](results/metrics_f64_20260909/synth/summary.json) |
-| 8B 合成 | Llama 8B 几何，8 个 KV head、head dim 128、32 层；N=17407/32768；仅种子 0 | [synth_b/summary.json](results/metrics_f64_20260909/synth_b/summary.json) |
-| Dev 层消融 | Qwen/Qwen2.5-0.5B-Instruct；24 层逐层、5 种压缩格式，加全层对照，共 126 行 | [layer/layer_summary.json](results/metrics_f64_20260909/layer/layer_summary.json) |
-| 8B 层抽样 | meta-llama/Llama-3.1-8B-Instruct；层 0/7/15/31，共 26 行 | [layer_8b/layer_summary.json](results/metrics_f64_20260909/layer_8b/layer_summary.json) |
-| 通路检查 | JackFram/llama-160m，66 行；仅作调试证据，不并入主结论 | [layer_160m/layer_summary.json](results/metrics_f64_20260909/layer_160m/layer_summary.json) |
+| Dev 合成 | Qwen 0.5B 几何，2 个 KV head、head dim 64、24 层；N=512/1024/2048；种子 0/1/2 | [synth/summary.json](results/metrics_f64/synth/summary.json) |
+| 8B 合成 | Llama 8B 几何，8 个 KV head、head dim 128、32 层；N=17407/32768；仅种子 0 | [synth_b/summary.json](results/metrics_f64/synth_b/summary.json) |
+| Dev 层消融 | Qwen/Qwen2.5-0.5B-Instruct；24 层逐层、5 种压缩格式，加全层对照，共 126 行 | [layer/layer_summary.json](results/metrics_f64/layer/layer_summary.json) |
+| 8B 层抽样 | meta-llama/Llama-3.1-8B-Instruct；层 0/7/15/31，共 26 行 | [layer_8b/layer_summary.json](results/metrics_f64/layer_8b/layer_summary.json) |
+| 通路检查 | JackFram/llama-160m，66 行；仅作调试证据，不并入主结论 | [layer_160m/layer_summary.json](results/metrics_f64/layer_160m/layer_summary.json) |
 
 合成 Q/K/V 为高斯张量，以未量化 float SDPA 为参考。头轴记录每个 KV head 的 last-query 误差；位置轴分别压缩全部、历史、最近 128 token。两种位置切分是诊断性方案，不能等同于 KIVI 自身的残差窗。主布局均为 contiguous。
 
@@ -30,7 +30,7 @@ Dev 合成含 prefill 256 + decode 128 步，在 1/16/64/128 步记录误差。8
 
 层消融以全层 C0 FP16 codec 为参考，分别量化全部层或只量化指定层。JSON 的 `leave_one` 表示“仅该层量化、其他层 C0”，不是“仅保留该层 FP16”。`logits_rel_l2` 对应 512-token 固定 prompt 的全部 logits；最后 token 误差另存于 `last_token_rel_l2`。
 
-短窗 PPL 来自 WikiText-2 test 前 4096 个 token，每次实际计分 4095 token，窗口 1024、stride 512。结果保存每次评测的 NLL、token 数及逐窗口明细，另记录完整参数、逐层格式、模型配置/dtype、数据集指纹、输入 token 哈希、软件版本及实际源码 SHA-256。M5 计分完整 test 的 288936 个 token，二者不能并列为同一 PPL 负载。
+短窗 PPL 来自 WikiText-2 test 前 4096 个 token，每次实际计分 4095 token，窗口 1024、stride 512。结果保存每次评测的 NLL、token 数及逐窗口明细，另记录完整参数、逐层格式、模型配置/dtype、数据集指纹、输入 token 哈希、软件版本及实际源码 SHA-256。流量与精度计分完整 test 的 288936 个 token，二者不能并列为同一 PPL 负载。
 
 流量按固定 prompt 的 N=512 几何计算，而非短窗 PPL 的 1024 窗口；`bytes_per_token` 为全层名义单步 KV 读取字节。它不包含实测吞吐、能量或额外算子耗时，不能称为“免费”精度。
 
@@ -87,7 +87,7 @@ Qwen 只量化第 0 层时，C3 的 PPL 增量为 108.259135，C2 为 6.505740�
 
 ## 4. 分析与讨论
 
-8B 短窗 PPL 中 C3 优于 C2，与 M5 已完成长窗口实验的方向一致；但高斯合成头轴中 C3 略差于 C2，说明合成张量只能回答给定分布下的局部问题。Qwen 的 C3 明显退化还可能涉及模型分布、实现路径与设定差异，尚不能只归因于层结构。
+8B 短窗 PPL 中 C3 优于 C2，与流量与精度已完成长窗口实验的方向一致；但高斯合成头轴中 C3 略差于 C2，说明合成张量只能回答给定分布下的局部问题。Qwen 的 C3 明显退化还可能涉及模型分布、实现路径与设定差异，尚不能只归因于层结构。
 
 C5 在本批次 8B 中以更高名义字节换取更低的 PPL 增量；C4 的 PPL 退化较大。没有预先定义可接受退化阈值，因此报告不将某格式直接判为“不可用”。C1 的极小负增量也不构成统计显著的精度提升。
 
@@ -96,11 +96,11 @@ C5 在本批次 8B 中以更高名义字节换取更低的 PPL 增量；C4 的 P
 - 218 次 PPL 均可由 NLL/token 记录独立重算；逐窗口计分覆盖位置 1–4095，无遗漏或重复。有限精度张量指标仍存在舍入误差。
 - 8B 合成只有一个种子，整模只抽样 4/32 层；没有 8B 长窗口逐层消融，也没有完整长 decode 实验。
 - 数据集使用离线缓存，并保存实际指纹；该指纹及模型配置标识不能替代公开发布全部权重/语料。
-- 实验源码与模型适配、层切换依赖保存在本地实验内的 runtime/，源码标识随结果保存；运行仍需安装依赖并取得相应权重。GitHub 发布范围不包含全部本地实验文件。
+- 实验入口保存在本地实验目录，模型适配、层切换和计量依赖由 r1_kv_baseline 主库提供；历史结果的源码标识保持原记录，对应源码归档见 experiment.json。运行仍需安装依赖并取得相应权重。GitHub 发布范围不包含全部本地实验文件。
 - 所有结果为当前实现、模型和语料范围内的观察；不报告未测硬件成本、统计显著性或普遍最优格式。
 
 ## 6. 结论与后续工作
 
 在已测 8B 短窗负载中，C5 以更高名义流量换取较低 PPL 退化，C4 进一步压缩流量但增加精度损失。Qwen 的层敏感性与 8B 抽样不同，合成张量规律不能直接外推到整模精度。
 
-下一步推进 M7，将上述精度—流量观察与模拟器代价对应，并补充真实负载下的层抽样及长 decode 验证。
+精度—流量观察与模拟器代价的联合讨论见 [R1 总验收报告](../../REPORT.md)。后续真实负载下的层抽样及长 decode 验证仍需独立证据。

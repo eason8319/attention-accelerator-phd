@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import torch
-
 from kv_cache import BytesBreakdown, ContiguousKVCache, KiviKVCache
 from kv_codecs import KiviFormat, KVCodec, get_codec
 from paged_cache import (
@@ -90,9 +89,7 @@ class AttentionWithCache:
                 codec, device=device, page_size=page_size, pte_bytes=pte_bytes
             )
         else:
-            raise TypeError(
-                f"codec 须为 KVCodec / KiviFormat / str，得到 {type(codec).__name__}"
-            )
+            raise TypeError(f"codec 须为 KVCodec / KiviFormat / str，得到 {type(codec).__name__}")
 
         self.device = self.cache.device
 
@@ -152,15 +149,11 @@ class AttentionWithCache:
         当前不做 causal mask（与 ``scaled_dot_product_attention`` 一致）。
         """
         if q.shape != k.shape or q.shape != v.shape:
-            raise ValueError(
-                f"q/k/v 形状须一致，得到 q={q.shape}, k={k.shape}, v={v.shape}"
-            )
+            raise ValueError(f"q/k/v 形状须一致，得到 q={q.shape}, k={k.shape}, v={v.shape}")
         if q.ndim != 4 or q.shape[0] != 1:
             raise ValueError(f"期望 (1, num_heads, seq, head_dim)，得到 {q.shape}")
         if q.shape[1] != self.num_heads or q.shape[3] != self.head_dim:
-            raise ValueError(
-                f"期望 (1, {self.num_heads}, seq, {self.head_dim})，得到 {q.shape}"
-            )
+            raise ValueError(f"期望 (1, {self.num_heads}, seq, {self.head_dim})，得到 {q.shape}")
         if q.shape[2] <= 0:
             raise ValueError("seq 须为正")
 
@@ -193,9 +186,7 @@ class AttentionWithCache:
         if q.ndim != 4 or q.shape[0] != 1 or q.shape[2] != 1:
             raise ValueError(f"期望 (1, num_heads, 1, head_dim)，得到 {q.shape}")
         if q.shape[1] != self.num_heads or q.shape[3] != self.head_dim:
-            raise ValueError(
-                f"期望 (1, {self.num_heads}, 1, {self.head_dim})，得到 {q.shape}"
-            )
+            raise ValueError(f"期望 (1, {self.num_heads}, 1, {self.head_dim})，得到 {q.shape}")
 
         q = q.to(device=self.device)
         # (1, H, 1, D) → cache 布局 (1, H, D)

@@ -292,78 +292,6 @@ def write_results(rows: list[dict[str, object]]) -> Path:
     return path
 
 
-def write_summary(rows: list[dict[str, object]]) -> Path:
-    path = OUTPUT_ROOT / "scalesim_summary.md"
-    lines = [
-        "# SCALE-Sim 32×32 Attention Sweep",
-        "",
-        "## Method",
-        "",
-        "- SCALE-Sim version: 3.0.0",
-        "- Array: 32×32; dataflows: WS and OS",
-        "- SRAM: 6 MiB IFMAP + 6 MiB filter + 4 MiB OFMAP",
-        "- Workloads: prefill/decode × 4K/32K/128K × four GEMMs",
-        (
-            "- Exact fixed tiles bounded by 256 per M/N/K dimension are "
-            "simulated once and multiplied by their repetition count."
-        ),
-        (
-            "- Aggregate cycles/traffic exclude inter-tile reuse and overlap; "
-            "use them for trend comparison, not absolute end-to-end latency."
-        ),
-        "",
-        "## Utilization",
-        "",
-        "| dataflow | seq | gemm | prefill util | decode util | ratio |",
-        "|---|---:|---|---:|---:|---:|",
-    ]
-    lookup = {
-        (
-            str(row["dataflow"]),
-            str(row["mode"]),
-            int(row["seq_len"]),
-            str(row["gemm"]),
-        ): row
-        for row in rows
-    }
-    for dataflow in DATAFLOWS:
-        for seq_len in SEQ_LENS:
-            for gemm in ("QK_T", "PV"):
-                prefill = lookup[(dataflow, "prefill", seq_len, gemm)]
-                decode = lookup[(dataflow, "decode", seq_len, gemm)]
-                p_util = float(prefill["overall_util_pct"])
-                d_util = float(decode["overall_util_pct"])
-                ratio = p_util / d_util if d_util else math.inf
-                lines.append(
-                    f"| {dataflow.upper()} | {seq_len} | {gemm} | "
-                    f"{p_util:.3f}% | {d_util:.3f}% | {ratio:.2f}× |"
-                )
-    lines.extend(
-        [
-            "",
-            "## Interpretation",
-            "",
-            (
-                "Decode preserves only one query row per head, so both "
-                "dataflows show severe PE under-utilization. WS and OS map "
-                "different GEMM dimensions spatially/temporally, which "
-                "explains their different absolute utilization."
-            ),
-            (
-                "Because all sequence lengths use the same fixed tile shape, "
-                "per-tile utilization is sequence-length independent; "
-                "sequence length changes tile count, aggregate cycles and "
-                "traffic."
-            ),
-            "",
-            "Raw reports are under `results/scalesim_raw/`; aggregated cycle, "
-            "utilization and SRAM/DRAM traffic are in `scalesim_results.csv`.",
-        ]
-    )
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    return path
-
-
 def validate(rows: list[dict[str, object]]) -> None:
     lookup = {
         (
@@ -399,9 +327,7 @@ def main() -> None:
 
     validate(all_rows)
     result_path = write_results(all_rows)
-    summary_path = write_summary(all_rows)
     print(f"Wrote {len(all_rows)} aggregated rows to {result_path}")
-    print(f"Wrote summary to {summary_path}")
     print("Validation passed: WS/OS decode QK_T/PV utilization < prefill.")
 
 

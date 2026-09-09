@@ -1,4 +1,4 @@
-"""KIVI / cache-path 整模复现：Llama / Mistral 接入与评测辅助。"""
+"""KIVI / cache-path 整模复现：Llama / Mistral / Qwen2 接入与评测辅助。"""
 
 from .hf_generate import (
     GenerateInfo,
@@ -13,14 +13,19 @@ from .llama_kivi_attn import (
     LlamaKiviAttention,
     MistralCachePathAttention,
     MistralKiviAttention,
+    Qwen2CachePathAttention,
+    Qwen2KiviAttention,
     bytes_stored_kivi,
     bytes_stored_llama_kivi,
+    cache_path_attns,
     canonical_cache_format,
     clear_kivi_caches,
     clear_llama_kivi_caches,
     is_cache_path_patched,
     is_kivi_format,
     is_kivi_patched,
+    layer_kv_formats,
+    set_layer_kv_formats,
 )
 from .lm_eval_tasks import (
     DEFAULT_TASKS,
@@ -52,20 +57,33 @@ from .patch_mistral import (
     patch_mistral_cache_path,
     patch_mistral_model,
 )
+from .patch_qwen import (
+    build_qwen_cache_path,
+    build_qwen_kivi,
+    is_qwen_cache_path_patched,
+    is_qwen_kivi_patched,
+    patch_qwen_cache_path,
+    patch_qwen_model,
+)
 
 __all__ = [
     "LlamaCachePathAttention",
     "LlamaKiviAttention",
     "MistralCachePathAttention",
     "MistralKiviAttention",
+    "Qwen2CachePathAttention",
+    "Qwen2KiviAttention",
     "bytes_stored_kivi",
     "bytes_stored_llama_kivi",
+    "cache_path_attns",
     "canonical_cache_format",
     "clear_kivi_caches",
     "clear_llama_kivi_caches",
     "is_cache_path_patched",
     "is_kivi_format",
     "is_kivi_patched",
+    "layer_kv_formats",
+    "set_layer_kv_formats",
     "build_llama_cache_path",
     "build_llama_kivi",
     "is_llama_cache_path_patched",
@@ -78,6 +96,12 @@ __all__ = [
     "is_mistral_kivi_patched",
     "patch_mistral_cache_path",
     "patch_mistral_model",
+    "build_qwen_cache_path",
+    "build_qwen_kivi",
+    "is_qwen_cache_path_patched",
+    "is_qwen_kivi_patched",
+    "patch_qwen_cache_path",
+    "patch_qwen_model",
     "GenerateInfo",
     "generate_ids",
     "generate_text",

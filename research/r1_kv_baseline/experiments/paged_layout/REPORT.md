@@ -4,7 +4,7 @@
 **状态**：本报告所列批次已完成；以保留的原始结果为依据。
 **证据来源**：results/raw_rows.json、results/summary.json。
 
-**阶段**：R1 / M4 阶段 A  
+**研究内容**：R1 / 分页布局（合成负载）  
 **性质**：合成张量、真实 cache-path；对照 **布局** 而非 codec 精度（精度谱系见 [`../codec_compare/REPORT.md`](../codec_compare/REPORT.md)）  
 **协议**：[`protocols/metrics.md`](../../protocols/metrics.md) §8（v1.1，$P_{\mathrm{size}}=16$，$B_{\mathrm{pte}}=8\,\mathrm{B}$）  
 **实验目录**：[`experiments/paged_layout/`](.)（本报告入库；`results/` 与 `run_*.py` 仅本地）
@@ -19,7 +19,7 @@
 2. $B_{\mathrm{payload}}$ / $B_{\mathrm{scale}}$ / $B_{\mathrm{zp}}$ 是否按占用 token 与 contiguous 一致？$B_{\mathrm{page}}$ 是否按 §8.5 计页表？  
 3. C4/C5 四池（量化历史 vs FP16 残差）页数是否与 §8.4 公式一致？尾页、跨页 decode、残差窗满 $R{=}128$ 是否可跑？
 
-本实验 **不** 报 PPL / 任务分，**不** 做 8B Pareto（M5）。主声称不得只引用 contiguous。
+本实验 **不** 报 PPL / 任务分，**不** 做 8B Pareto（流量与精度）。主声称不得只引用 contiguous。
 
 ---
 
@@ -158,17 +158,17 @@ $N{=}128$：Key 整窗量化 8 页，Value 仍 8 页 FP16 残差。$N{=}129$：K
 
 1. **正式流量表必须双列**；本实验 $B_{\mathrm{page}}$ 已按 §8.5 可复现。  
 2. 切页 **不改变** C0–C2 / C4–C5 的量化语义。  
-3. C3 **prefill** 与 contiguous 对齐到 $10^{-6}$。逐步 decode 的典型差仍是 $10^{-6}$；1/30 行可见 1 档 INT4（$V{=}1.81\times10^{-3}$），来自 encode 粒度×BDR，attention 仍为 $10^{-6}$。M5 主曲线不要把该差写成精度退化。  
+3. C3 **prefill** 与 contiguous 对齐到 $10^{-6}$。逐步 decode 的典型差仍是 $10^{-6}$；1/30 行可见 1 档 INT4（$V{=}1.81\times10^{-3}$），来自 encode 粒度×BDR，attention 仍为 $10^{-6}$。流量与精度主曲线不要把该差写成精度退化。  
 4. $B_{\mathrm{pad}}$（整页 DMA 空洞）按协议默认 **不** 并入主 `bytes/token`。
 
 ---
 
 ## 5. 局限与有效性
 
-- 合成张量、无因果 mask、非真实 LLM KV；0.5B 冒烟未跑（不阻塞 M4）。  
+- 合成张量、无因果 mask、非真实 LLM KV；0.5B 冒烟未跑（不阻塞分页布局）。  
 - 读侧仍全量 `load`，无 page-wise partial attention（§8 明确不要求）。  
 - INT4 / KIVI 载荷仍按协议名义比特记账，未 nibble-/bit-pack。  
-- 未扫 $P_{\mathrm{size}}$；未上 8B / 4K–32K Pareto（M5）。
+- 未扫 $P_{\mathrm{size}}$；未上 8B / 4K–32K Pareto（流量与精度）。
 
 ---
 
@@ -176,4 +176,4 @@ $N{=}128$：Key 整窗量化 8 页，Value 仍 8 页 FP16 残差。$N{=}129$：K
 
 - 两条后端的 paged 布局已在阶段 A 与 contiguous **双报**：页数、$B_{\mathrm{page}}$、占用 token 的 payload/scale/zp 均符合 metrics v1.1。  
 - C0–C2 / C4–C5 布局对齐到逐元素。C3 prefill 对齐到 float32 旋转容差；逐步 decode 允许 INT4 差 1 档（本实验 1/30 行），不否定切页规则。  
-- 后续 M5 的 [KV 流量](../kv_pareto/REPORT.md) 和 [WikiText 精度](../wikitext_ppl/REPORT.md) 已独立记录；本布局结果不替代整模精度或硬件性能测量。
+- 后续流量与精度的 [KV 流量](../kv_pareto/REPORT.md) 和 [WikiText 精度](../wikitext_ppl/REPORT.md) 已独立记录；本布局结果不替代整模精度或硬件性能测量。

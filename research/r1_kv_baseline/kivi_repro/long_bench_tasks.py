@@ -89,9 +89,7 @@ EXTENDED_DATASETS: tuple[str, ...] = (
 DEFAULT_MAX_LENGTH = 8192
 
 # few-shot / 代码类通常不套 chat template（沿用 LongBench 常见做法）
-_SKIP_CHAT_DATASETS = frozenset(
-    {"trec", "triviaqa", "samsum", "lsht", "lcc", "repobench-p"}
-)
+_SKIP_CHAT_DATASETS = frozenset({"trec", "triviaqa", "samsum", "lsht", "lcc", "repobench-p"})
 # 打分前取首行
 _FIRST_LINE_DATASETS = frozenset({"trec", "triviaqa", "samsum", "lsht"})
 
@@ -107,12 +105,12 @@ DATASET2PROMPT: dict[str, str] = {
     "qasper": (
         "You are given a scientific article and a question. Answer the question "
         "as concisely as you can, using a single phrase or sentence if possible. "
-        'If the question cannot be answered based on the information in the '
+        "If the question cannot be answered based on the information in the "
         'article, write "unanswerable". If the question is a yes/no question, '
         'answer "yes", "no", or "unanswerable". Do not provide any explanation.\n\n'
         "Article: {context}\n\n Answer the question based on the above article "
         "as concisely as you can, using a single phrase or sentence if possible. "
-        'If the question cannot be answered based on the information in the '
+        "If the question cannot be answered based on the information in the "
         'article, write "unanswerable". If the question is a yes/no question, '
         'answer "yes", "no", or "unanswerable". Do not provide any explanation.\n\n'
         "Question: {input}\n\nAnswer:"
@@ -162,9 +160,7 @@ DATASET2PROMPT: dict[str, str] = {
         "some examples.\n\n{context}\n\n{input}"
     ),
     "lcc": "Please complete the code given below. \n{context}Next line of code:\n",
-    "repobench-p": (
-        "Please complete the code given below. \n{context}{input}Next line of code:\n"
-    ),
+    "repobench-p": ("Please complete the code given below. \n{context}{input}Next line of code:\n"),
 }
 
 DATASET2MAXLEN: dict[str, int] = {
@@ -239,9 +235,7 @@ def rouge_score(prediction: str, ground_truth: str, **_kwargs: Any) -> float:
     try:
         from rouge import Rouge  # type: ignore[import-untyped]
     except ImportError as e:
-        raise ImportError(
-            "LongBench 摘要打分需要 rouge：pip install rouge"
-        ) from e
+        raise ImportError("LongBench 摘要打分需要 rouge：pip install rouge") from e
     try:
         scores = Rouge().get_scores([prediction], [ground_truth], avg=True)
     except Exception:  # noqa: BLE001 — 官方遇空串等返回 0
@@ -363,9 +357,7 @@ def load_longbench(dataset: str, *, longbench_e: bool = False):
     name = f"{dataset}_e" if longbench_e else dataset
 
     zip_path = Path(
-        hf_hub_download(
-            repo_id="THUDM/LongBench", repo_type="dataset", filename="data.zip"
-        )
+        hf_hub_download(repo_id="THUDM/LongBench", repo_type="dataset", filename="data.zip")
     )
     extract_dir = zip_path.parent / "longbench_data_extracted"
     jsonl_path = extract_dir / "data" / f"{name}.jsonl"
@@ -396,9 +388,8 @@ def truncate_middle(tokenizer: Any, prompt: str, max_length: int) -> str:
     if int(token_ids.shape[0]) <= max_length:
         return prompt
     half = max_length // 2
-    return (
-        tokenizer.decode(token_ids[:half], skip_special_tokens=True)
-        + tokenizer.decode(token_ids[-half:], skip_special_tokens=True)
+    return tokenizer.decode(token_ids[:half], skip_special_tokens=True) + tokenizer.decode(
+        token_ids[-half:], skip_special_tokens=True
     )
 
 
@@ -410,14 +401,10 @@ def build_chat_prompt(tokenizer: Any, prompt: str, model_name: str) -> str:
     name = model_name.lower()
     if "llama-3" in name and "instruct" in name:
         messages = [{"role": "user", "content": prompt}]
-        return tokenizer.apply_chat_template(
-            messages, tokenize=False, add_generation_prompt=True
-        )
+        return tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
     if "mistral" in name and "instruct" in name and "v0.2" in name:
         messages = [{"role": "user", "content": prompt}]
-        return tokenizer.apply_chat_template(
-            messages, tokenize=False, add_generation_prompt=True
-        )
+        return tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
     return prompt
 
 
@@ -644,10 +631,7 @@ def score_predictions(
                 buckets["4-8k"].append(s)
             else:
                 buckets["8k+"].append(s)
-        return {
-            k: round(100.0 * float(np.mean(v)), 2) if v else 0.0
-            for k, v in buckets.items()
-        }
+        return {k: round(100.0 * float(np.mean(v)), 2) if v else 0.0 for k, v in buckets.items()}
 
     total = 0.0
     for i, pred in enumerate(predictions):
@@ -735,9 +719,7 @@ def evaluate_tasks(
         if not note:
             note = "kivi" if is_llama_kivi_patched(model) else "fp16"
 
-    bundle = EvalBundle(
-        max_length=max_length, model_name=name, kv_note=note
-    )
+    bundle = EvalBundle(max_length=max_length, model_name=name, kv_note=note)
     out_path = Path(out_dir) if out_dir is not None else None
     if out_path is not None:
         out_path.mkdir(parents=True, exist_ok=True)
@@ -763,9 +745,7 @@ def evaluate_tasks(
         if isinstance(result.score, dict):
             # LongBench-E：记 0-4k/4-8k/8k+ 均值作子组概览
             vals = [float(v) for v in result.score.values()]
-            bundle.by_subgroup[sg][dataset] = (
-                round(float(np.mean(vals)), 2) if vals else 0.0
-            )
+            bundle.by_subgroup[sg][dataset] = round(float(np.mean(vals)), 2) if vals else 0.0
         else:
             bundle.by_subgroup[sg][dataset] = float(result.score)
 

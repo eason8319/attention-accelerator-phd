@@ -1,13 +1,13 @@
 # 研究里程碑
 
 对照现行 [`research_plan.md`](../research_plan.md) 的深度阶段 **R0–R5**（不按日历年）。  
-R1 实施细则：[`../../research/r1_kv_baseline/PLAN.md`](../../research/r1_kv_baseline/PLAN.md)。  
+R1 已完成，结果与适用范围见 [R1 总报告](../../research/r1_kv_baseline/REPORT.md)。
 旧「阶段 0–6 / 四主线」表已废止。
 
 | 深度 | 内容 | 产出 | 状态 |
 |------|------|------|------|
 | R0 | Survey + Learning 技能与证据基线 | `survey/`、`learning/`、本仓库计划与对比手册 | **已完成**（持续文献监视除外） |
-| R1 | 真实 KV cache-path、误差—流量模型、decode simulator 骨架 | 可复现测量 + 协议锁定 | **进行中**（M0–M6 约定范围完成；M7 尚未实现；M8 待验收） |
+| R1 | 真实 KV cache-path、误差—流量模型、decode simulator | 可复现测量 + 协议锁定 | **已完成**（[报告与适用边界](../../research/r1_kv_baseline/REPORT.md)） |
 | R2 | 静态 INT4（或 R1 选定主格式）流式通路；无完整 FP16 展开；关键 RTL | 架构主张 + 首版综合 | 未开始 |
 | R3 | 可规则化混合 / 结构感知比特分配 | 精度—硬件代价 Pareto | 未开始 |
 | R4 | 精度—布局—映射联合优化 | 映射方法与系统评估 | 未开始 |
@@ -24,28 +24,11 @@ R1 实施细则：[`../../research/r1_kv_baseline/PLAN.md`](../../research/r1_kv
 - [ ] 综述 PDF 本机编译与作者信息定稿（可选）
 - [ ] 选题报告 / 开题材料（按学校要求，内容以 research_plan 为准）
 
-## R1 入口门槛（摘自计划）
+## R1→R2 验收入口
 
-进入 R2 前须全部满足：
+完成依据与 R2 起步建议见 [R1 总报告](../../research/r1_kv_baseline/REPORT.md#6-结论与后续工作)，长期阶段目标见 [研究计划](../research_plan.md)。R2 尚未开始实施。
 
-1. 真实 token-wise KV quantize→store→load→dequant→attention 可复现；与投影假量化路径差异已文档化
-2. 至少一条长上下文 bytes/token–精度 Pareto（含 paged 列）
-3. 专用模拟器与独立工具在约定检查点趋势一致
-4. 默认模型列表与硬件包络假设已锁定
-
-工作目录：[`../../research/r1_kv_baseline/`](../../research/r1_kv_baseline/)。细则：[`PLAN.md`](../../research/r1_kv_baseline/PLAN.md)。
-
-### R1 细项
-
-- [x] **M0** 协议锁定：[`protocols/models_context.md`](../../research/r1_kv_baseline/protocols/models_context.md)、[`protocols/metrics.md`](../../research/r1_kv_baseline/protocols/metrics.md)
-- [x] **M1** contiguous cache-path（FP16/INT8/INT4）：[`cache_path/`](../../research/r1_kv_baseline/cache_path/)；谱系对照见 [`experiments/codec_compare/REPORT.md`](../../research/r1_kv_baseline/experiments/codec_compare/REPORT.md)
-- [x] **M2** INT4+BDR：[`cache_path/`](../../research/r1_kv_baseline/cache_path/)（`Int4BdrCodec`）；同上 [`codec_compare`](../../research/r1_kv_baseline/experiments/codec_compare/REPORT.md)
-- [x] **M3** KIVI 编解码 + 阶段 B 表格：[`experiments/kivi_eval/`](../../research/r1_kv_baseline/experiments/kivi_eval/)（Table 3 / LongBench：fp16 / kivi2 / kivi4 全集已跑通；kivi4 $\approx$ 本仓库 fp16）
-- [x] **M4** paged 双报告：[`cache_path/paged_cache.py`](../../research/r1_kv_baseline/cache_path/paged_cache.py) + [`experiments/paged_layout/REPORT.md`](../../research/r1_kv_baseline/experiments/paged_layout/REPORT.md)（阶段 A；C0–C5 双布局）
-- [x] **M5** bytes/token 与 decode 压力点、4K/8K/16K/32K PPL：四窗口六格式结果齐全，PPL 重算一致。
-- [x] **M6 实验与指标复核**：原网格及 float64 重测完成，余弦异常已定位并修复，相对 L2 已复核，PPL 溯源与重算通过；证据及适用范围见 [报告](../../research/r1_kv_baseline/experiments/kv_sensitivity/REPORT.md)。
-- [ ] **M7** decode simulator：输入完整性与 CPU 流量接口检查已通过，可开始实现；接入约束见 [实施计划](../../research/r1_kv_baseline/PLAN.md)。尚未实现，独立趋势验收待完成。
-- [ ] M8 REPORT 与 R1→R2 验收
+R1 的协议、编码对照、KIVI 任务评估、分页布局、长窗口精度与流量、敏感性及模拟器实验均已完成约定范围；实验入口统一见 [实验索引](../experiments.md)，不再保留临时阶段清单。
 
 ## 学习阶段（P1–P5）— 已归档
 

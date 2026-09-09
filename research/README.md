@@ -1,7 +1,7 @@
 # 正式研究目录（自 R1 起）
 
 > 长线计划：[`docs/research_plan.md`](../docs/research_plan.md)。  
-> R1 实施细则：[`r1_kv_baseline/PLAN.md`](r1_kv_baseline/PLAN.md)。  
+> R1 研究报告：[`r1_kv_baseline/REPORT.md`](r1_kv_baseline/REPORT.md)。
 > R0（`survey/` + `learning/`）已完成技能与文献地图；**本目录承接正式研究**。
 
 当前阶段与待办见 [研究里程碑](../docs/progress/milestones.md)，实验结果见 [实验索引](../docs/experiments.md)。本入口不重复维护进度。
@@ -12,7 +12,7 @@
 research/
   README.md                 # 本文件
   r1_kv_baseline/           # 真实 cache-path、评测协议、Pareto（见该目录 README）
-  r1_decode_sim/            # 专用 decode 模拟器骨架（M7）
+  r1_decode_sim/            # 专用 decode 模拟器
 ```
 
 环境与依赖：[`r1_kv_baseline/README.md`](r1_kv_baseline/README.md)。进度见 [`docs/progress/milestones.md`](../docs/progress/milestones.md)。

@@ -13,6 +13,14 @@
       {
         "path": "results/rtl/run_config.json",
         "sha256": "cd3576a21d09d8549fcf1d5d813995eef7dcedc9f28f5fb0d7dbd36599727955"
+      },
+      {
+        "path": "results/source_style_checks/run_config.json",
+        "sha256": "d525926f063196b4b3616f9baf7fc076c0bcb6c6841477a066b7d9c5a09d2736"
+      },
+      {
+        "path": "results/source_style_native/run_config.json",
+        "sha256": "f7dd7e8bda55826acee38c331cb116ac4bf4430416d0dabc12afee4fb9896588"
       }
     ],
     "note": "依赖声明用于环境准备；实际运行版本以结果元数据为准，历史缺失字段不补造。"
@@ -27,7 +35,7 @@
     "files": [
       {
         "path": "Makefile",
-        "sha256": "d11224d9b64c8552ebabd67bfa3f42a078e785fa4ce167938a7cbcdeb35646ba"
+        "sha256": "f66a7f5d738eeb21582db967e5537a9ed0f7ceba52b2d2b4f7715f5e7b45caff"
       },
       {
         "path": "environment.yml",
@@ -35,7 +43,7 @@
       },
       {
         "path": "exp_unit/exp_approx.sv",
-        "sha256": "56c0f925691ca1047273753f257b1108ea04d5efe19e37093e48b19279a5ec6c"
+        "sha256": "3dbc197ed5d6dab6c3d4b3c688c9d2ea9b0100609644bdd9e65c40d88136bbb4"
       },
       {
         "path": "scripts/compare_exp.py",
@@ -51,11 +59,11 @@
       },
       {
         "path": "scripts/exp_approx.py",
-        "sha256": "8d4f907fb04ad0541a84c21f96dd1b88649bd00932cad33f57ab74499d7feb7d"
+        "sha256": "a35faba41278ade2dc206cb6d521d40db019156ad295cba40f4e13050e59c57c"
       },
       {
         "path": "scripts/exp_rtl_model.py",
-        "sha256": "6a8c75ff0fd2e4127b1b079d6f534786c26cac5d3daa87431a8126e1169a7d20"
+        "sha256": "fcbbf87b707ce46d8434bad2902493b2d7ea3d18314308e89fb868ecdbc3932e"
       },
       {
         "path": "scripts/fixedpoint.py",
@@ -87,34 +95,80 @@
       },
       {
         "path": "softmax_unit/online_softmax.sv",
-        "sha256": "012069ea5c67b5d2063ea2b91511153f117d7f9a00af0f4e6f07de8fa837fe1e"
+        "sha256": "3bb314c8706b4469faaa9ec2e121dc28bec63f367ca7e054806e328d0aac1a84"
       },
       {
         "path": "systolic_array/pe.sv",
-        "sha256": "74e0bf2b70381c44860ac0af9dbe8e320dd9b93a1d1260659ef8376ecbc27b47"
+        "sha256": "1a9019288d08a3c962fab3185a03e5732a0128b0c78517a9f1725d2ae693da5c"
       },
       {
         "path": "systolic_array/systolic_array.sv",
-        "sha256": "29d8cad0ab878cdc989b814335345b2d76eff99a0769d48c158925378c28c613"
+        "sha256": "f68633779e819c32c40dc7ab347a4951660e99393a1435a5aba5f2d507e4f04d"
       },
       {
         "path": "tb/tb_exp.sv",
-        "sha256": "069fb7705d497460c55c8103f237613b4e06bf7ab26247d581148e40aed9e5e5"
+        "sha256": "d7195c02feba75360245d5c4daaff5044c3c9c848e0ab30fa21f2beb9d9f67f9"
       },
       {
         "path": "tb/tb_smoke.sv",
-        "sha256": "4a4c82984e187337560ffa703ebe9cf0fca1043bd1c8414d891ed0f868820c7e"
+        "sha256": "6713760fc1e305647777def8f0fac2222062f0f18917fb5acfc3582c84b88e45"
       },
       {
         "path": "tb/tb_softmax.sv",
-        "sha256": "d5e827c1e9bfd71331dd1439006995663eab7e39e45d6de255e2ae2751ca0139"
+        "sha256": "6f1d7da6bb442521150bed5a0314dea442624444c4207d5e2e478e9fe9526a33"
       },
       {
         "path": "tb/tb_systolic.sv",
-        "sha256": "c319ce5cfeaea23b5a9f913dcc228b31ec855cecfeaee0afb15c92af5885fbbb"
+        "sha256": "f6027d1aed1aced7b84ac4ab4d9d82e17709ce87a62e7a680539251d6f44a8a9"
       }
     ],
-    "dependencies": []
+    "dependencies": [],
+    "historical_archives": [
+      {
+        "path": "../../.server-sync/source-style/source_before.tar.gz",
+        "sha256": "6fd2de1404408bdba4e276ff2aa25ff73395374f657059907814f020028ed598",
+        "role": "注释与格式整理前的源码；保留历史结果的执行版本",
+        "members_sha256": {
+          "learning/p4_rtl/exp_unit/exp_approx.sv": "56c0f925691ca1047273753f257b1108ea04d5efe19e37093e48b19279a5ec6c",
+          "learning/p4_rtl/scripts/exp_approx.py": "8d4f907fb04ad0541a84c21f96dd1b88649bd00932cad33f57ab74499d7feb7d",
+          "learning/p4_rtl/scripts/exp_rtl_model.py": "6a8c75ff0fd2e4127b1b079d6f534786c26cac5d3daa87431a8126e1169a7d20",
+          "learning/p4_rtl/softmax_unit/online_softmax.sv": "012069ea5c67b5d2063ea2b91511153f117d7f9a00af0f4e6f07de8fa837fe1e",
+          "learning/p4_rtl/systolic_array/pe.sv": "74e0bf2b70381c44860ac0af9dbe8e320dd9b93a1d1260659ef8376ecbc27b47",
+          "learning/p4_rtl/systolic_array/systolic_array.sv": "29d8cad0ab878cdc989b814335345b2d76eff99a0769d48c158925378c28c613",
+          "learning/p4_rtl/tb/tb_exp.sv": "069fb7705d497460c55c8103f237613b4e06bf7ab26247d581148e40aed9e5e5",
+          "learning/p4_rtl/tb/tb_smoke.sv": "4a4c82984e187337560ffa703ebe9cf0fca1043bd1c8414d891ed0f868820c7e",
+          "learning/p4_rtl/tb/tb_softmax.sv": "d5e827c1e9bfd71331dd1439006995663eab7e39e45d6de255e2ae2751ca0139",
+          "learning/p4_rtl/tb/tb_systolic.sv": "c319ce5cfeaea23b5a9f913dcc228b31ec855cecfeaee0afb15c92af5885fbbb"
+        }
+      },
+      {
+        "path": "../../.server-sync/source-style/makefile_before.tar.gz",
+        "sha256": "21ca0f1e69465967ae635415b899aa16411ca95a8cd7b19b27e6a35cca6518a0",
+        "role": "注释与格式整理前的源码；保留历史结果的执行版本",
+        "members_sha256": {
+          "learning/p4_rtl/Makefile": "d11224d9b64c8552ebabd67bfa3f42a078e785fa4ce167938a7cbcdeb35646ba"
+        }
+      },
+      {
+        "path": "../../.server-sync/source-style/validation_source.tar.gz",
+        "sha256": "128ab72d5793f60e01c900fd6a59c34a60c6d18b973a56ed06c3f980a260f83a",
+        "role": "本次源码格式、注释及 CPU 验证脚本；归档成员路径相对于项目根目录",
+        "members_sha256": {
+          "tmp/source-style/check_identity.py": "3e2f64949e1a5c86cfb51433a6b8319d50ab78fe2b9e666424c3f1beb1231733",
+          "tmp/source-style/check_semantics.py": "1d081877accc6a7742d9228bfcf0e22e8c96f74132c29109f1550b9cb6431ed2",
+          "tmp/source-style/comment_units.json": "5b219349930672d0b4c56c78dfe6b2916ca3c45c75875562ddbdcffeecfd7620",
+          "tmp/source-style/final_check.py": "663f7b3009e78b633a01cec01600e2e77664cfd7b390f0f4e9a46c6871b8eb85",
+          "tmp/source-style/finalize_audit.py": "88c443e2764be4eaa6f6bcd47c1938916369bd5bf9856a1564806f0fbc0feb95",
+          "tmp/source-style/normalize_source.py": "63b26d36e501ba5d2a1d0234144889eea4a5d18d5bc3416ddaa5b08166bd312a",
+          "tmp/source-style/register_source.py": "63c70caea7878a04e5576faee08055763d66848fb8c4c57d7c8ee890076d4743",
+          "tmp/source-style/run_cpu_checks.py": "aa8a9050dc9ee32a8065bcadbf186007d3dba584e365c8b8e03282c226f9dce6",
+          "tmp/source-style/run_native_checks.py": "b7e809fe8dd59761f0c992a518b6cfde9a156a30b782e513b4249a8c32655eba",
+          "tmp/source-style/scan_source.py": "4647dcf79960b42e486f7927f3be01c9127e1090165a22dc3c5acb36c9555f6f",
+          "tmp/source-style/translate_comments.py": "ac113c6dcab89ee648da7d7c84ab880458ea380e9d9dd71963fd6d7d1a61d487",
+          "tmp/source-style/translations.json": "7a197edc9ed7c5ec33077088d98e38c0fba3656d4151ceb31f7ec5a17f2be505"
+        }
+      }
+    ]
   },
   "results": {
     "directory": "results",
@@ -190,6 +244,66 @@
       {
         "path": "results/rtl/vec_softmax/scores.txt",
         "sha256": "a5bd20453029f8b83e4442f42b440a0f0e1f8ea39d8611666b8b4a9f28f0670c"
+      },
+      {
+        "path": "results/source_style_checks/checks.json",
+        "sha256": "1e65275e1bc2bb698cfa0b7097616d837464ecad2ab8a1528af3bb538e1d9765",
+        "size_bytes": 4000
+      },
+      {
+        "path": "results/source_style_checks/exp_approx.log",
+        "sha256": "d9a92fde22a96fc032d4cee34c5e306eeeddd9fbda78dc0713f37f8092a5d8d6",
+        "size_bytes": 199
+      },
+      {
+        "path": "results/source_style_checks/exp_rtl_model.log",
+        "sha256": "cddb4c245927d584e152469140d29317ccb121bb9e63f2d662601d5d8b737ec7",
+        "size_bytes": 539
+      },
+      {
+        "path": "results/source_style_checks/run_config.json",
+        "sha256": "d525926f063196b4b3616f9baf7fc076c0bcb6c6841477a066b7d9c5a09d2736",
+        "size_bytes": 3529
+      },
+      {
+        "path": "results/source_style_checks/tb_exp.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "size_bytes": 0
+      },
+      {
+        "path": "results/source_style_checks/tb_smoke.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "size_bytes": 0
+      },
+      {
+        "path": "results/source_style_checks/tb_softmax.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "size_bytes": 0
+      },
+      {
+        "path": "results/source_style_checks/tb_systolic.log",
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "size_bytes": 0
+      },
+      {
+        "path": "results/source_style_native/checks.json",
+        "sha256": "8c7f1607ea1df1c86027ad089944afa0b1d1d2ded3d1cde6e2030f69ad22acda",
+        "size_bytes": 1081
+      },
+      {
+        "path": "results/source_style_native/exp_approx.log",
+        "sha256": "1e379d1f0b4637292638a49da541b6ec350d5deea928f17ead5ec583a40639cf",
+        "size_bytes": 28
+      },
+      {
+        "path": "results/source_style_native/exp_rtl_model.log",
+        "sha256": "2e7f875b01a11d9010448f957dde2acf7a107e1b025cfad6d57012ada4f1363c",
+        "size_bytes": 51
+      },
+      {
+        "path": "results/source_style_native/run_config.json",
+        "sha256": "f7dd7e8bda55826acee38c331cb116ac4bf4430416d0dabc12afee4fb9896588",
+        "size_bytes": 3641
       }
     ],
     "validation_status": "validated_existing_outputs",

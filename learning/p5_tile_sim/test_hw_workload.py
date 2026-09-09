@@ -52,7 +52,7 @@ def test_workload_prefill_decode_shapes() -> None:
 def test_mixed_precision_byte_hook() -> None:
     wl = llama7b_attention("prefill", 1024).with_bytes(q=0.5, k=0.5, v=1.0, o=2.0)
     assert wl.bytes == ElementBytes(q=0.5, k=0.5, v=1.0, o=2.0)
-    # br=64, bc=128, d=128
+    # 分块尺寸：br=64、bc=128，头维度 d=128
     # 64*128*0.5 + 128*128*(0.5+1) + 64*128*2
     expected = 64 * 128 * 0.5 + 128 * 128 * 1.5 + 64 * 128 * 2.0
     assert wl.tile_footprint_bytes(64, 128) == pytest.approx(expected)

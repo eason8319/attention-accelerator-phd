@@ -249,15 +249,23 @@ def write_results(
     if path.suffix.lower() != ".json":
         raise ValueError("结果导出必须使用 .json，禁止覆盖报告")
     path.parent.mkdir(parents=True, exist_ok=True)
-    rows = [{"mode": mode, "seq_len": seq,
-             "scalesim": asdict(scalesim[(mode, seq)]),
-             "p5": asdict(p5[(mode, seq)])}
-            for mode, seq in sorted(scalesim)]
-    data = {"source_csv": str(scalesim_csv), "hardware": asdict(hw),
-            "checks": [asdict(c) for c in checks], "rows": rows,
-            "all_checks_passed": bool(checks) and all(c.passed for c in checks)}
+    rows = [
+        {
+            "mode": mode,
+            "seq_len": seq,
+            "scalesim": asdict(scalesim[(mode, seq)]),
+            "p5": asdict(p5[(mode, seq)]),
+        }
+        for mode, seq in sorted(scalesim)
+    ]
+    data = {
+        "source_csv": str(scalesim_csv),
+        "hardware": asdict(hw),
+        "checks": [asdict(c) for c in checks],
+        "rows": rows,
+        "all_checks_passed": bool(checks) and all(c.passed for c in checks),
+    }
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-
 
 
 def main(argv: Sequence[str] | None = None) -> int:

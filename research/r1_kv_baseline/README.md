@@ -1,7 +1,7 @@
 # R1 — 真实 KV Cache-Path 基线
 
 正式研究入口（自 R1 起）。长线计划：[`docs/research_plan.md`](../../docs/research_plan.md)。  
-R1 实施细则：[`PLAN.md`](PLAN.md)。
+总验收与跨实验分析：[`REPORT.md`](REPORT.md)。
 
 ## 环境
 
@@ -31,10 +31,10 @@ hf auth whoami
 
 ```text
 r1_kv_baseline/
-├── PLAN.md                 # R1 实施细则（M0–M8）
+├── REPORT.md               # R1 总验收与跨实验分析
 ├── environment.yml
 ├── requirements.txt
-├── protocols/              # M0 已锁定：models_context.md / metrics.md
+├── protocols/              # 已锁定：models_context.md / metrics.md
 ├── cache_path/             # 真实 quantize→pack→store→load→dequant（含 rotation / codecs）
 ├── kivi_repro/             # KIVI 表格复现
 ├── bytes_accounting/       # bytes/token 与敏感性
@@ -45,4 +45,4 @@ r1_kv_baseline/
 
 ## 进度与结果入口
 
-当前进度统一见 [研究里程碑](../../docs/progress/milestones.md)，实施要求见 [PLAN.md](PLAN.md)，原始结果与报告见 [实验索引](../../docs/experiments.md)。运行环境与服务器代码不随结果回收覆盖本地。
+当前进度统一见 [研究里程碑](../../docs/progress/milestones.md)，已完成研究的分析与范围见 [总报告](REPORT.md)，原始结果与实验报告见 [实验索引](../../docs/experiments.md)。运行环境与服务器代码不随结果回收覆盖本地。

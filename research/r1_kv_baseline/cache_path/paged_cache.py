@@ -8,7 +8,6 @@ from __future__ import annotations
 import math
 
 import torch
-
 from kv_cache import BytesBreakdown, _validate_kv_append, scale_zp_nbytes
 from kv_codecs import EncodedKV, KiviKeyCodec, KiviValueCodec, KVCodec
 
@@ -169,7 +168,7 @@ def _check_page_invariants(
     group_size: int,
     residual_length: int,
 ) -> None:
-    """``P | g``、``P | R``、``g | R``（metrics.md §8.1）。"""
+    """检查整除约束 P | g、P | R、g | R，参见 metrics.md §8.1。"""
     if page_size <= 0:
         raise ValueError(f"page_size 须为正，得到 {page_size}")
     if group_size % page_size != 0:
@@ -177,9 +176,7 @@ def _check_page_invariants(
     if residual_length % page_size != 0:
         raise ValueError(f"page_size={page_size} 须整除 residual_length={residual_length}")
     if residual_length % group_size != 0:
-        raise ValueError(
-            f"residual_length={residual_length} 须能被 group_size={group_size} 整除"
-        )
+        raise ValueError(f"residual_length={residual_length} 须能被 group_size={group_size} 整除")
 
 
 class PagedUniformKVCache:
@@ -222,9 +219,7 @@ class PagedUniformKVCache:
 
     def append(self, k_t: torch.Tensor, v_t: torch.Tensor) -> None:
         """写入 float K/V；满页立即 encode，余数留在尾缓冲。"""
-        n_tokens = _validate_kv_append(
-            k_t, v_t, num_heads=self.num_heads, head_dim=self.head_dim
-        )
+        n_tokens = _validate_kv_append(k_t, v_t, num_heads=self.num_heads, head_dim=self.head_dim)
         k_t = k_t.to(device=self.device)
         v_t = v_t.to(device=self.device)
         self._k_tail = self._commit_full_pages(self._k_pages, self._k_tail, k_t)
@@ -298,9 +293,7 @@ class PagedUniformKVCache:
                 scale += s
                 zp += z
         n_pages = sum(self.page_counts().values())
-        return BytesBreakdown(
-            payload=payload, scale=scale, zp=zp, page=n_pages * self.pte_bytes
-        )
+        return BytesBreakdown(payload=payload, scale=scale, zp=zp, page=n_pages * self.pte_bytes)
 
     def bytes_stored(self) -> tuple[int, int]:
         """返回 ``(payload_bytes, metadata_bytes)``；metadata 含 page。"""
@@ -383,9 +376,7 @@ class PagedKiviKVCache:
 
     def append(self, k_t: torch.Tensor, v_t: torch.Tensor) -> None:
         """追加 K/V，按 KIVI 规则刷窗后写入对应页池。"""
-        n_tokens = _validate_kv_append(
-            k_t, v_t, num_heads=self.num_heads, head_dim=self.head_dim
-        )
+        n_tokens = _validate_kv_append(k_t, v_t, num_heads=self.num_heads, head_dim=self.head_dim)
         k_t = k_t.to(device=self.device, dtype=torch.float16)
         v_t = v_t.to(device=self.device, dtype=torch.float16)
         _append_fp16_pages(self._k_residual_pages, k_t, self.page_size)
@@ -403,9 +394,7 @@ class PagedKiviKVCache:
         residual = torch.cat(self._k_residual_pages, dim=0)
         encoded = self.k_codec.encode(residual[:n_flush].float())
         self._k_quant_pages.extend(
-            _split_kivi_key_pages(
-                encoded, page_size=self.page_size, group_size=self.group_size
-            )
+            _split_kivi_key_pages(encoded, page_size=self.page_size, group_size=self.group_size)
         )
         rest = residual[n_flush:]
         self._k_residual_pages = _repage_fp16(rest, self.page_size)
@@ -489,9 +478,7 @@ class PagedKiviKVCache:
         for page in (*self._k_residual_pages, *self._v_residual_pages):
             payload += _fp16_nbytes(page)
         n_pages = sum(self.page_counts().values())
-        return BytesBreakdown(
-            payload=payload, scale=scale, zp=zp, page=n_pages * self.pte_bytes
-        )
+        return BytesBreakdown(payload=payload, scale=scale, zp=zp, page=n_pages * self.pte_bytes)
 
     def bytes_stored(self) -> tuple[int, int]:
         """返回 ``(payload_bytes, metadata_bytes)``；metadata 含 page。"""

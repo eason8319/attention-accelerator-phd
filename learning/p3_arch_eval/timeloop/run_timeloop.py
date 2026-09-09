@@ -229,95 +229,15 @@ def parse_area() -> list[dict[str, object]]:
     return rows
 
 
-def write_summary(
-    energy_rows: list[dict[str, object]],
-    area_rows: list[dict[str, object]],
-) -> Path:
-    path = OUTPUTS / "timeloop_summary.md"
-    lines = [
-        "# Timeloop + Accelergy Summary",
-        "",
-        "## Method",
-        "",
-        "- Official image: `timeloopaccelergy/timeloop-accelergy-pytorch:latest-amd64`",
-        "- Architecture: 32×32 INT8 MACs, 16 MiB global SRAM, DRAM",
-        "- Mapper: energy then delay; fixed C×K spatial mapping",
-        "- Workloads use the same bounded tiles and repetition counts as SCALE-Sim",
-        "- Energy source: Timeloop PAT; area source: Accelergy/CACTI/Aladdin",
-        "",
-        "Official 2020 ISPASS tutorial exercise 00 passes in this image. "
-        "The repository's newer v0.4 `example_designs` do not parse unchanged "
-        "because their schema is newer than the bundled front-end; this "
-        "project therefore uses the compatible legacy schema.",
-        "",
-        "## Per-layer energy breakdown",
-        "",
-        "| mode | seq | MAC | registers | SRAM | DRAM | total (mJ) |",
-        "|---|---:|---:|---:|---:|---:|---:|",
-    ]
-    grouped: dict[tuple[str, int], list[dict[str, object]]] = {}
-    for row in energy_rows:
-        grouped.setdefault((str(row["mode"]), int(row["seq_len"])), []).append(row)
-    for (mode, seq_len), rows in sorted(grouped.items()):
-        component_keys = (
-            "mac_energy_pj",
-            "register_energy_pj",
-            "sram_energy_pj",
-            "dram_energy_pj",
-        )
-        values = {key: sum(float(row[key]) for row in rows) for key in component_keys}
-        total = sum(values.values())
-        lines.append(
-            f"| {mode} | {seq_len} | "
-            f"{100 * values['mac_energy_pj'] / total:.3f}% | "
-            f"{100 * values['register_energy_pj'] / total:.3f}% | "
-            f"{100 * values['sram_energy_pj'] / total:.3f}% | "
-            f"{100 * values['dram_energy_pj'] / total:.3f}% | "
-            f"{total / 1e9:.6g} |"
-        )
-    total_area = sum(float(row["total_area_mm2"]) for row in area_rows)
-    lines.extend(
-        [
-            "",
-            "## Area estimate",
-            "",
-            "| component | instances | total area (mm²) |",
-            "|---|---:|---:|",
-        ]
-    )
-    for row in area_rows:
-        lines.append(
-            f"| {row['component']} | {row['instances']} | {float(row['total_area_mm2']):.6g} |"
-        )
-    lines.extend(
-        [
-            f"| **Total** | — | **{total_area:.6g}** |",
-            "",
-            "## Interpretation",
-            "",
-            "Under the bundled 45 nm PAT model, the 16 MiB global SRAM—not "
-            "DRAM—dominates dynamic energy. This does not support a literal "
-            '"DRAM energy dominates" claim; the robust conclusion from '
-            "Roofline/SCALE-Sim is bandwidth pressure and low decode PE "
-            "utilization. Absolute energy shares require technology and "
-            "memory-model calibration before publication.",
-        ]
-    )
-    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    return path
-
-
 def main() -> None:
     workloads = load_workloads()
     tile_results = run_tiles(workloads)
     energy_rows = build_energy_rows(workloads, tile_results)
     energy_path = write_energy_csv(energy_rows)
     run_accelergy()
-    area_rows = parse_area()
-    summary_path = write_summary(energy_rows, area_rows)
+    parse_area()
     print(f"Wrote {len(energy_rows)} energy rows to {energy_path}")
     print(f"Wrote area estimates to {OUTPUTS / 'timeloop_area.csv'}")
-    print(f"Wrote summary to {summary_path}")
 
 
 if __name__ == "__main__":

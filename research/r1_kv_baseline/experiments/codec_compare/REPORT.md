@@ -4,7 +4,7 @@
 **状态**：本报告所列批次已完成；以保留的原始结果为依据。
 **证据来源**：results/raw_metrics.csv、summary_mean_std.csv、run_config.json。
 
-**阶段**：R1 / M3 骨架（合并原 M1+M2，并纳入 KIVI 风格 C4/C5）  
+**研究内容**：R1 / C0–C5 编码对照  
 **性质**：合成张量、真实 cache-path（非投影 fake-quant；非 PPL）  
 **统计**：$n{=}20$ 配对种子；原始汇总保存 mean 与样本标准差；下方主表为 mean。
 **实验目录**：[`experiments/codec_compare/`](.)（本报告入库；`results/` 仅本地）  
@@ -134,7 +134,7 @@ KIVI 尚未刷窗时，K/V 全在 FP16 残差中：C4/C5 的 prefill rel-$\ell_2
 ## 5. 局限与有效性
 
 - 合成张量，非真实 LLM KV / 非 LM-Eval；KIVI 在真实模型上的优势可能被低估或高估。  
-- 无 causal mask；无 paged 布局（M4）。  
+- 无 causal mask；无 paged 布局（分页布局）。  
 - INT4 网格未 nibble-pack；KIVI 载荷未 bit-pack——bytes 为协议记账口径。  
 - 残差窗超参固定为协议默认；未扫 `residual_length`。
 
@@ -142,7 +142,7 @@ KIVI 尚未刷窗时，K/V 全在 FP16 残差中：C4/C5 的 prefill rel-$\ell_2
 
 ## 6. 结论与后续工作
 
-- 已在同一真实 cache-path 上跑通 **C0–C5** 配对对照，并合并原 M1/M2 口径。  
-- **BDR**：outlier 下相对 INT4 稳定增益，流量不变（复现 M2 结论）。  
+- 已在同一真实 cache-path 上跑通 **C0–C5** 配对对照。  
+- **BDR**：outlier 下相对 INT4 稳定增益，流量不变。  
 - **KIVI-4**：刷窗后精度 Pareto 上优于均匀 INT4，代价是更高 bytes 与窗语义；**KIVI-2** 在本合成设定误差过大。  
 - 后续整模阶段 B 已有独立 [KIVI 任务报告](../kivi_eval/REPORT.md)；本合成实验不代替真实模型评估，也不支持 SOTA 声称。

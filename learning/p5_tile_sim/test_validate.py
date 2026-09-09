@@ -67,8 +67,14 @@ def test_export_cannot_overwrite_formal_report(tmp_path: Path) -> None:
     report = tmp_path / "REPORT.md"
     report.write_text("已撰写的实验分析", encoding="utf-8")
     with pytest.raises(ValueError, match="禁止覆盖报告"):
-        write_results(report, scalesim={}, p5={}, checks=[],
-                      scalesim_csv=tmp_path / "unused.csv", hw=default_hw_config())
+        write_results(
+            report,
+            scalesim={},
+            p5={},
+            checks=[],
+            scalesim_csv=tmp_path / "unused.csv",
+            hw=default_hw_config(),
+        )
     assert report.read_text(encoding="utf-8") == "已撰写的实验分析"
 
 

@@ -2,7 +2,7 @@
 
 **实验日期**：2026-07-15；**整理日期**：2026-09-08。
 **状态**：历史实验完成；本次未重跑仿真。
-**证据来源**：results/ 下的 roofline_table.csv、scalesim_results.csv、timeloop_energy.csv、timeloop_area.csv、cross_joined.csv；历史摘录 cross_validation_data.md。
+**证据来源**：results/ 下的 roofline_table.csv、scalesim_results.csv、timeloop_energy.csv、timeloop_area.csv、cross_joined.csv；历史摘录归档于 results/archive/，成员与哈希见 experiment.json。
 
 ## 1. 实验目的
 

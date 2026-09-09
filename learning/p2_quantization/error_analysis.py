@@ -110,7 +110,7 @@ def analyze_activations(
     head_dim = q.shape[-1]
 
     # 逐通道最大绝对值（outlier 检测）
-    k_flat = k[0, 0].float()  # (seq, head_dim)
+    k_flat = k[0, 0].float()  # 张量形状：(seq, head_dim)
     channel_max = k_flat.abs().max(dim=0).values.numpy()
 
     # 旋转矩阵
@@ -226,8 +226,9 @@ def write_results(results: dict, path: Path) -> None:
     """只保存测量数据，正式分析在实验完成后独立撰写。"""
     if path.suffix.lower() != ".json":
         raise ValueError("结果导出必须使用 .json，禁止覆盖报告")
-    path.write_text(json.dumps(results, ensure_ascii=False, indent=2, default=float) + "\n", encoding="utf-8")
-
+    path.write_text(
+        json.dumps(results, ensure_ascii=False, indent=2, default=float) + "\n", encoding="utf-8"
+    )
 
 
 def main() -> None:

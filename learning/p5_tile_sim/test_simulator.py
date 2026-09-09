@@ -28,7 +28,7 @@ def test_infeasible_when_tile_exceeds_sram() -> None:
 
 def test_double_buffer_requires_2x_footprint() -> None:
     wl = llama7b_attention("prefill", 32_768)
-    hw = HwConfig()  # 16 MiB
+    hw = HwConfig()  # SRAM 容量：16 MiB
     # INT8 等宽时 footprint = 2*d*(br+bc) ≈ 256*(br+bc)。
     # 选约 9 MiB 单缓冲，使 2× 超过 16 MiB。
     br, bc = 2048, 32_768

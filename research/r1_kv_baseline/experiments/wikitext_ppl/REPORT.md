@@ -3,7 +3,7 @@
 **实验日期**：2026-09-07 至 2026-09-09（北京时间）；**整理日期**：2026-09-09。
 **状态**：4K、8K、16K、32K 六种格式均完成；四个窗口共 24 个成功结果。
 **证据来源**：`results/ppl/L4096/`、`L8192/`、`L16384/`、`L32768/` 中的 `ppl_summary.json`；本次快照为 2026-09-09 05:24 UTC。本次核对原始数值后撰写，未重跑实验。
-**阶段**：R1 / M5 精度点（阶段 B）  
+**研究内容**：R1 / 长窗口 PPL（阶段 B）  
 **性质**：真实权重、整模 cache-path；短序列冒烟 + WikiText-2 test 滑动窗口 PPL  
 **对照**：相对本仓库 **C0 FP16 codec**（`c0`），不是原生 HF `fp16`  
 **实验目录**：[`experiments/wikitext_ppl/`](.)；源码入口为 `run_wikitext_ppl.py`、`run_smoke.py`，结果位于 `results/`。
@@ -19,7 +19,7 @@
 1. C0–C5 在 Llama-3.1-8B 上能否加载、短序列前向与贪心生成？  
 2. WikiText-2 test、窗口 4K/8K/16K/32K 上，各格式相对同窗口 C0 codec 的 PPL 差多少？格式排序是否随窗口改变？
 
-M3 Table 3 / LongBench **不能**替代：模型不同，且 M3 的 C0 是原生 HF。
+KIVI 评估 Table 3 / LongBench **不能**替代：模型不同，且KIVI 评估的 C0 是原生 HF。
 
 ---
 
@@ -36,7 +36,7 @@ M3 Table 3 / LongBench **不能**替代：模型不同，且 M3 的 C0 是原生
 | C4 | `kivi2` | KIVI 2-bit |
 | C5 | `kivi4` | KIVI 4-bit |
 
-布局 contiguous（paged 数值 M4 已对齐，主 Pareto 精度不双跑）。KIVI：`group_size=32`，`residual_length=128`。禁止投影 fake-quant。C0 禁止原生 HF `fp16`。
+布局 contiguous（paged 数值分页布局已对齐，主 Pareto 精度不双跑）。KIVI：`group_size=32`，`residual_length=128`。禁止投影 fake-quant。C0 禁止原生 HF `fp16`。
 
 ### 2.2 指标与负载
 
@@ -48,7 +48,7 @@ M3 Table 3 / LongBench **不能**替代：模型不同，且 M3 的 C0 是原生
 
 墙钟平台：`node7`，NVIDIA GeForce RTX 4090（24 GB），`torch=2.5.1+cu121`。作业 19227（冒烟）→ 19228（PPL，`afterok`）。计算节点 `HF_HUB_OFFLINE=1`。
 
-本地保存实验源码、`results/smoke/smoke.json` 和各窗口原始 JSON。`results/ppl/ppl_summary.json` 与 `L4096/ppl_summary.json` 为相同的历史 4K 汇总，统计时只计一次。入口使用本地 M6 实验内共享的固定依赖版本，具体路径与源码哈希见 `experiment.json`；运行还需要依赖环境和模型权重。
+本地保存实验源码、`results/smoke/smoke.json` 和四个窗口各自的 `ppl_summary.json`，后者包含全部 24 条计分记录。入口使用 r1_kv_baseline 主库，当前依赖和历史源码归档见 `experiment.json`；运行还需要依赖环境和模型权重。
 
 ---
 
@@ -136,14 +136,14 @@ x 轴取 [`kv_pareto`](../kv_pareto/REPORT.md) 全模单步 bytes/token、$N{=}4
 3. **极限压流量并接受 PPL 上升**：C4。  
 4. **未量化对照**：C0；INT8 与 C0 的数值差很小。
 
-与 M3 任务分方向一致：KIVI-4 ≈ C0，KIVI-2 可见掉点、未崩。与 `codec_compare` 合成 C4 误差过大不可互换。
+与KIVI 评估任务分方向一致：KIVI-4 ≈ C0，KIVI-2 可见掉点、未崩。与 `codec_compare` 合成 C4 误差过大不可互换。
 
 ---
 
 ## 5. 局限与有效性
 
 - 四个窗口均已完成；结果为单次评测，不提供置信区间。完整测试集 PPL 不等同于真实长对话生成质量。
-- 未跑 paged 精度（M4 已对齐数值，主表不双跑）。  
+- 未跑 paged 精度（分页布局已对齐数值，主表不双跑）。  
 - 未与论文公开 WikiText PPL 并表。  
 - Instruct 模型在 WikiText 上不是语言建模最优设定；只作本仓库相对 $\Delta$。  
 - `attn_implementation=eager`；墙钟不是吞吐上限。  
@@ -157,4 +157,4 @@ x 轴取 [`kv_pareto`](../kv_pareto/REPORT.md) 全模单步 bytes/token、$N{=}4
 - 8B 上 C0–C5 cache-path 冒烟 6/6；WikiText-2 test 4K/8K/16K/32K 的六种格式均完成。
 - **C5 ≈ C0**（$+0.026$）；**C4 $+1.30$**；C3 优于均匀 INT4。  
 - 与 `kv_pareto` $N{=}4\mathrm{K}$ 流量可画第一条 bytes/token–PPL 曲线。  
-- M5 的 4K–32K 完整对照已形成；后续敏感性见 [M6 报告](../kv_sensitivity/REPORT.md)，M7 仍需独立模拟器核验。
+- 流量与精度的 4K–32K 完整对照已形成；敏感性见 [敏感性报告](../kv_sensitivity/REPORT.md)，双布局关联图及与模拟器的联合讨论见 [R1 总验收报告](../../REPORT.md)。

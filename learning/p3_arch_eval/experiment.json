@@ -22,7 +22,7 @@
     "files": [
       {
         "path": "collect_results.py",
-        "sha256": "6cdef4dc77cd9551e1e6105ddf1f4cb2c8a93ac573f4f9f3fdf9bfdbc0d97fe3"
+        "sha256": "9cfb17e67ff607040d1902d2a04e1d993b0ea2f1002b70e6601404c330af0811"
       },
       {
         "path": "environment.yml",
@@ -30,7 +30,7 @@
       },
       {
         "path": "roofline.py",
-        "sha256": "ed1887084944c78ab591162abfa613d7d2c8e66ad5cabf6c54e211fc9e4a0e29"
+        "sha256": "22a39729897ed1ed90817c263f46de4de29c3d909feb828b0a03239fe29aba8c"
       },
       {
         "path": "scale-sim/arch_32x32_os.cfg",
@@ -42,7 +42,7 @@
       },
       {
         "path": "scale-sim/run_scalesim.py",
-        "sha256": "0edb9d47077d405698ed3d4234e4b769b0e1b73f01c486002a3648e6883f6b00"
+        "sha256": "a618d2d8a41b8ab816c809f407bea428ca8114ed3e1324cdc4c31412fb6bfa6f"
       },
       {
         "path": "timeloop/arch.yaml",
@@ -66,21 +66,100 @@
       },
       {
         "path": "timeloop/run_timeloop.py",
-        "sha256": "9687fc42be41609e96bea472d6777c36d85d7cc421e79a20a58e99518b4d44ec"
+        "sha256": "feb13389e4636dbc693f627bf81708f31dfa095625bfc6effce9e0f06913c9c5"
       }
     ],
-    "dependencies": []
+    "dependencies": [],
+    "historical_archives": [
+      {
+        "path": "../../.server-sync/results-dedup-20260909/before-edits.tar.gz",
+        "sha256": "0eb1b768135218422a2c87806bac02add49c1355b0a189dafe0df499a0ce99e1",
+        "role": "Source files before result-storage cleanup; archive member paths relative to project root"
+      },
+      {
+        "path": "../../.server-sync/source-style/source_before.tar.gz",
+        "sha256": "6fd2de1404408bdba4e276ff2aa25ff73395374f657059907814f020028ed598",
+        "role": "注释与格式整理前的源码；保留历史结果的执行版本",
+        "members_sha256": {
+          "learning/p3_arch_eval/collect_results.py": "6cdef4dc77cd9551e1e6105ddf1f4cb2c8a93ac573f4f9f3fdf9bfdbc0d97fe3"
+        }
+      }
+    ]
   },
   "results": {
     "directory": "results",
+    "validation_status": "historical_evidence",
+    "scope": "参见 REPORT.md；文件齐全与哈希通过不等于全部实验指标通过。",
+    "historical_archives": [
+      {
+        "path": "results/archive/history.tar.gz",
+        "sha256": "c5dc42b4f6095bf7e2470a063be137a98f8a3b9747ec0566ff80db0677df7fce",
+        "role": "Retained validation evidence or history not yet covered by a reproducible replacement",
+        "member_paths_relative_to": "experiment directory",
+        "members_sha256": {
+          "results/cross_validation_data.md": "9eb8ea7c79f7e0f58d56e165baf352c2944393854f7da697d1782ed7be451931",
+          "results/scalesim_summary.md": "020c6297a998c152775e1e9193029c4a34fa0944f127d4997c1eeced44a81f45",
+          "results/timeloop_summary.md": "b0ca177ae651ced388fa43981ce36c1067de1a6c5ba0bc11724077b735c5be7c"
+        }
+      }
+    ],
+    "retired_files": [
+      {
+        "original_path": "results/cross_validation_data.md",
+        "original_sha256": "9eb8ea7c79f7e0f58d56e165baf352c2944393854f7da697d1782ed7be451931",
+        "reason": "archived_history",
+        "preserved_in": {
+          "path": "results/archive/history.tar.gz",
+          "sha256": "c5dc42b4f6095bf7e2470a063be137a98f8a3b9747ec0566ff80db0677df7fce",
+          "member_path": "results/cross_validation_data.md",
+          "member_sha256": "9eb8ea7c79f7e0f58d56e165baf352c2944393854f7da697d1782ed7be451931"
+        }
+      },
+      {
+        "original_path": "results/roofline_table.md",
+        "original_sha256": "62c77bed16bf106537404d334148c9ff717309b8ddc9ba477b5f6a54dd10df88",
+        "reason": "roofline_reproduced_24_rows_and_existing_configuration",
+        "replacement": {
+          "path": "results/roofline_table.csv",
+          "sha256": "8c598a4ca081f867e103905f7eda81a9d89c858e1f7035ecdd17abbf6aa8e46d"
+        },
+        "validation": {
+          "path": "../../.server-sync/result-policy/plan.json",
+          "sha256": "c1350ebb667930d85068abaaba2b073dc213747e8c262804a86aa6e08d2fefdf",
+          "section": "checks"
+        }
+      },
+      {
+        "original_path": "results/scalesim_summary.md",
+        "original_sha256": "020c6297a998c152775e1e9193029c4a34fa0944f127d4997c1eeced44a81f45",
+        "reason": "archived_history",
+        "preserved_in": {
+          "path": "results/archive/history.tar.gz",
+          "sha256": "c5dc42b4f6095bf7e2470a063be137a98f8a3b9747ec0566ff80db0677df7fce",
+          "member_path": "results/scalesim_summary.md",
+          "member_sha256": "020c6297a998c152775e1e9193029c4a34fa0944f127d4997c1eeced44a81f45"
+        }
+      },
+      {
+        "original_path": "results/timeloop_summary.md",
+        "original_sha256": "b0ca177ae651ced388fa43981ce36c1067de1a6c5ba0bc11724077b735c5be7c",
+        "reason": "archived_history",
+        "preserved_in": {
+          "path": "results/archive/history.tar.gz",
+          "sha256": "c5dc42b4f6095bf7e2470a063be137a98f8a3b9747ec0566ff80db0677df7fce",
+          "member_path": "results/timeloop_summary.md",
+          "member_sha256": "b0ca177ae651ced388fa43981ce36c1067de1a6c5ba0bc11724077b735c5be7c"
+        }
+      }
+    ],
     "files": [
+      {
+        "path": "results/archive/history.tar.gz",
+        "sha256": "c5dc42b4f6095bf7e2470a063be137a98f8a3b9747ec0566ff80db0677df7fce"
+      },
       {
         "path": "results/cross_joined.csv",
         "sha256": "2390397cfcb7db96c146dc9f353f627fc1747c42685b41bb6ab831a6e05d5a5d"
-      },
-      {
-        "path": "results/cross_validation_data.md",
-        "sha256": "9eb8ea7c79f7e0f58d56e165baf352c2944393854f7da697d1782ed7be451931"
       },
       {
         "path": "results/roofline_points.png",
@@ -89,10 +168,6 @@
       {
         "path": "results/roofline_table.csv",
         "sha256": "8c598a4ca081f867e103905f7eda81a9d89c858e1f7035ecdd17abbf6aa8e46d"
-      },
-      {
-        "path": "results/roofline_table.md",
-        "sha256": "62c77bed16bf106537404d334148c9ff717309b8ddc9ba477b5f6a54dd10df88"
       },
       {
         "path": "results/scalesim_raw/os/attention_32x32_os/BANDWIDTH_REPORT.csv",
@@ -123,20 +198,12 @@
         "sha256": "1b9431e1c55ade4012307bc30bb721ead99697737c35ea0a2e2a6f57f822fac6"
       },
       {
-        "path": "results/scalesim_summary.md",
-        "sha256": "020c6297a998c152775e1e9193029c4a34fa0944f127d4997c1eeced44a81f45"
-      },
-      {
         "path": "results/timeloop_area.csv",
         "sha256": "4250efdc0f5e1078c507031ad5288bfca77315809355b1b196e24599278c4820"
       },
       {
         "path": "results/timeloop_energy.csv",
         "sha256": "aa93e86b39b49ff5ca90ed2fc23b1e830c5b3a39e6dc2f185e70d70a8e4c20b8"
-      },
-      {
-        "path": "results/timeloop_summary.md",
-        "sha256": "b0ca177ae651ced388fa43981ce36c1067de1a6c5ba0bc11724077b735c5be7c"
       },
       {
         "path": "results/traffic_energy_stack.png",
@@ -146,13 +213,11 @@
         "path": "results/util_prefill_vs_decode.png",
         "sha256": "e53103b86dd461f18816166880da009e00d2e40e3d4036e7eed2c5c039ac80e8"
       }
-    ],
-    "validation_status": "historical_evidence",
-    "scope": "参见 REPORT.md；文件齐全与哈希通过不等于全部实验指标通过。"
+    ]
   },
   "report": {
     "path": "REPORT.md",
-    "sha256": "698af49c5d9d734fc7356eded6b54551af7b000f012d82695c6ba0a031cf5690",
+    "sha256": "5c40c8feebaa12e1d29fc76f9180b2398612f78ffa9ebea282e1d90681cabf1b",
     "sections": 6
   }
 }

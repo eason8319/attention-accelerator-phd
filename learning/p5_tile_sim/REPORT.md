@@ -2,7 +2,7 @@
 
 **实验日期**：2026-07-22；**整理日期**：2026-09-08。
 **状态**：历史实验完成；本次未重跑全部搜索。
-**证据来源**：results/search_results.csv、分负载搜索 CSV、results/cross_check_vs_scalesim_data.md；测试状态来自原验收记录。
+**证据来源**：results/search_results.csv（包含全部负载搜索点）、results/cross_check_vs_scalesim_data.md；测试状态来自原验收记录。
 
 ## 1. 实验目的
 

@@ -21,7 +21,7 @@ DEFAULT_SEQ_LENS = (4_096, 32_768, 131_072)
 
 @dataclass(frozen=True)
 class ElementBytes:
-    """Bytes per element for Q / K / V / O (mixed-precision hook)."""
+    """Q / K / V / O 的每元素字节数，作为混合精度配置接口。"""
 
     q: float = 1.0
     k: float = 1.0
@@ -41,7 +41,7 @@ class ElementBytes:
 
 @dataclass(frozen=True)
 class Workload:
-    """One attention layer invocation (single batch, all heads)."""
+    """一次 attention 层调用的负载，覆盖单批次的所有头。"""
 
     mode: Mode
     seq_len: int
@@ -66,12 +66,12 @@ class Workload:
 
     @property
     def n_q(self) -> int:
-        """Query sequence length (1 for decode-step)."""
+        """查询序列长度；单步 decode 时为 1。"""
         return 1 if self.mode == "decode" else self.seq_len
 
     @property
     def n_kv(self) -> int:
-        """KV cache / key-value sequence length."""
+        """KV 缓存中的键值序列长度。"""
         return self.seq_len
 
     def with_bytes(
@@ -82,7 +82,7 @@ class Workload:
         v: float | None = None,
         o: float | None = None,
     ) -> Workload:
-        """Return a copy with selected per-tensor byte widths updated."""
+        """返回副本，并更新指定张量的每元素字节数。"""
         b = self.bytes
         return replace(
             self,
@@ -95,11 +95,9 @@ class Workload:
         )
 
     def tile_footprint_bytes(self, br: int, bc: int) -> float:
-        """Single-buffer SRAM footprint for one head's FA tile (reading notes §1.2).
+        """单头 FA 分块的单缓冲 SRAM 占用，参见阅读笔记 §1.2。
 
-        $$
-        B_r d b_Q + B_c d (b_K+b_V) + B_r d b_O
-        $$
+        字节数为 Br×d×bQ + Bc×d×(bK+bV) + Br×d×bO。
         """
         if br <= 0 or bc <= 0:
             raise ValueError("br and bc must be positive")
@@ -124,7 +122,7 @@ def llama7b_attention(
     *,
     bytes: ElementBytes | None = None,
 ) -> Workload:
-    """Factory matching P3 LLaMA-7B-scale single-layer attention."""
+    """构造与 P3 LLaMA-7B 规模一致的单层 attention 负载。"""
     return Workload(
         mode=mode,
         seq_len=seq_len,

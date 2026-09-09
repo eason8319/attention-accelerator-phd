@@ -5,10 +5,10 @@ from __future__ import annotations
 import hashlib
 import importlib.metadata
 import os
-from pathlib import Path
 import platform
 import subprocess
 import sys
+from pathlib import Path
 from typing import Any
 
 import torch
@@ -26,12 +26,19 @@ def tensor_sha256(tensor: torch.Tensor) -> str:
 
 def evaluation_provenance(root: Path, args: Any) -> dict[str, Any]:
     """记录实际执行源码哈希；Git HEAD 不能替代含未提交改动的源码标识。"""
-    sources = {p.relative_to(root).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
-               for p in sorted(root.rglob("*.py")) if "results" not in p.parts}
+    sources = {
+        p.relative_to(root).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
+        for p in sorted(root.rglob("*.py"))
+        if "results" not in p.parts
+    }
     try:
-        head = subprocess.check_output(
-            ["git", "-C", str(root), "rev-parse", "HEAD"], stderr=subprocess.DEVNULL
-        ).decode().strip()
+        head = (
+            subprocess.check_output(
+                ["git", "-C", str(root), "rev-parse", "HEAD"], stderr=subprocess.DEVNULL
+            )
+            .decode()
+            .strip()
+        )
     except subprocess.CalledProcessError:
         head = None
     packages = {}
@@ -40,10 +47,18 @@ def evaluation_provenance(root: Path, args: Any) -> dict[str, Any]:
             packages[name] = importlib.metadata.version(name)
         except importlib.metadata.PackageNotFoundError:
             packages[name] = None
-    return {"metric_version": METRIC_VERSION, "metric_dtype": "float64",
-            "arguments": vars(args), "argv": sys.argv, "git_head_context": head,
-            "source_sha256": sources, "python": platform.python_version(),
-            "packages": packages, "torch_threads": torch.get_num_threads(),
-            "cuda_version": torch.version.cuda, "job_id": os.getenv("SLURM_JOB_ID"),
-            "node": platform.node(),
-            "gpu": torch.cuda.get_device_name() if torch.cuda.is_available() else None}
+    return {
+        "metric_version": METRIC_VERSION,
+        "metric_dtype": "float64",
+        "arguments": vars(args),
+        "argv": sys.argv,
+        "git_head_context": head,
+        "source_sha256": sources,
+        "python": platform.python_version(),
+        "packages": packages,
+        "torch_threads": torch.get_num_threads(),
+        "cuda_version": torch.version.cuda,
+        "job_id": os.getenv("SLURM_JOB_ID"),
+        "node": platform.node(),
+        "gpu": torch.cuda.get_device_name() if torch.cuda.is_available() else None,
+    }

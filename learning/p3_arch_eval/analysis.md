@@ -4,7 +4,7 @@
 对象：LLaMA-7B 规模单层 attention（`hidden=4096`，`heads=32`，`head_dim=128`）  
 硬件假设：128 TOPS INT8、1 TB/s HBM、16 MiB 片上 SRAM；微架构对照为 32×32 systolic array（WS / OS）
 
-本文汇总 Roofline、SCALE-Sim v3 与 Timeloop/Accelergy 的交叉结果，回答三个阶段 1 相关问题：长上下文下片外访存占比、decode 利用率跌幅，以及 16 MiB SRAM 能容纳多长的 KV tile。图与表来自 `results/`；正式实验分析见 `REPORT.md`；历史交叉数据见 `results/cross_validation_data.md`。
+本文汇总 Roofline、SCALE-Sim v3 与 Timeloop/Accelergy 的交叉结果，回答三个阶段 1 相关问题：长上下文下片外访存占比、decode 利用率跌幅，以及 16 MiB SRAM 能容纳多长的 KV tile。图与表来自 `results/`；正式实验分析见 `REPORT.md`；历史交叉摘录归档于 `results/archive/`，成员与哈希见 `experiment.json`。
 
 ## 1. 方法与假设
 
@@ -127,7 +127,7 @@ $$
 | SCALE-Sim tile 重复 | 无跨 tile 复用 → traffic/cycle 偏保守（偏大） |
 | Timeloop PAT | 大 SRAM 能量占比高 → 勿直接当「DRAM 能耗结论」 |
 
-历史数据见 `results/cross_validation_data.md`，正式结论见 `REPORT.md`。
+历史摘录见 `results/archive/`，原始数据入口见 `experiment.json`，正式结论见 `REPORT.md`。
 
 ## 7. 对阶段 1 / 后续工作的含义
 

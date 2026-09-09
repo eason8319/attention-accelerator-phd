@@ -4,10 +4,8 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Optional
 
 import torch
-
 from rotation import BlockDiagonalRotation
 
 
@@ -16,8 +14,8 @@ class EncodedKV:
     """encode 产出：载荷与可选 scale / zero-point。"""
 
     payload: torch.Tensor
-    scale: Optional[torch.Tensor] = None
-    zero_point: Optional[torch.Tensor] = None
+    scale: torch.Tensor | None = None
+    zero_point: torch.Tensor | None = None
 
 
 class KVCodec(ABC):
@@ -186,9 +184,7 @@ def encode_kivi_key(
         raise ValueError(f"KIVI Key 期望 (T, H, D)，得到 {tuple(x.shape)}")
     t, h, d = x.shape
     if t <= 0 or t % group_size != 0:
-        raise ValueError(
-            f"KIVI Key 要求 T>0 且能被 group_size={group_size} 整除，得到 T={t}"
-        )
+        raise ValueError(f"KIVI Key 要求 T>0 且能被 group_size={group_size} 整除，得到 T={t}")
     qmax = _kivi_qmax(bits)
     n_groups = t // group_size
     work = x.float().reshape(n_groups, group_size, h, d)
@@ -197,7 +193,7 @@ def encode_kivi_key(
     scale = ((mx - mn) / qmax).clamp(min=1e-8)
     q = ((work - mn) / scale).clamp(0, qmax).round()
     payload = q.reshape(t, h, d).to(torch.uint8)
-    # scale/mn: (n_groups, 1, H, D) → (n_groups, H, D)
+    # 调整 scale/mn 的形状：(n_groups, 1, H, D) → (n_groups, H, D)
     scale_out = scale.squeeze(1).to(torch.float16)
     mn_out = mn.squeeze(1).to(torch.float16)
     return EncodedKV(payload=payload, scale=scale_out, zero_point=mn_out)
@@ -248,9 +244,7 @@ def encode_kivi_value(
         raise ValueError(f"KIVI Value 期望 (T, H, D)，得到 {tuple(x.shape)}")
     t, h, d = x.shape
     if d <= 0 or d % group_size != 0:
-        raise ValueError(
-            f"KIVI Value 要求 D>0 且能被 group_size={group_size} 整除，得到 D={d}"
-        )
+        raise ValueError(f"KIVI Value 要求 D>0 且能被 group_size={group_size} 整除，得到 D={d}")
     qmax = _kivi_qmax(bits)
     n_groups = d // group_size
     work = x.float().reshape(t, h, n_groups, group_size)
@@ -259,7 +253,7 @@ def encode_kivi_value(
     scale = ((mx - mn) / qmax).clamp(min=1e-8)
     q = ((work - mn) / scale).clamp(0, qmax).round()
     payload = q.reshape(t, h, d).to(torch.uint8)
-    # scale/mn: (T, H, n_groups, 1) → (T, H, n_groups)
+    # 调整 scale/mn 的形状：(T, H, n_groups, 1) → (T, H, n_groups)
     scale_out = scale.squeeze(-1).to(torch.float16)
     mn_out = mn.squeeze(-1).to(torch.float16)
     return EncodedKV(payload=payload, scale=scale_out, zero_point=mn_out)
@@ -388,9 +382,7 @@ class Int4Codec(KVCodec):
         return "int4"
 
     def encode(self, x: torch.Tensor) -> EncodedKV:
-        return _encode_uniform_int(
-            x, bits=4, symmetric=self.symmetric, group_size=self.group_size
-        )
+        return _encode_uniform_int(x, bits=4, symmetric=self.symmetric, group_size=self.group_size)
 
     def decode(self, encoded: EncodedKV) -> torch.Tensor:
         return _decode_uniform_int(encoded, group_size=self.group_size)
@@ -431,13 +423,9 @@ class Int4BdrCodec(KVCodec):
 
     def _ensure_rotation(self, dim: int) -> BlockDiagonalRotation:
         if self._rot is None:
-            self._rot = BlockDiagonalRotation(
-                dim, block_size=self.block_size, seed=self.seed
-            )
+            self._rot = BlockDiagonalRotation(dim, block_size=self.block_size, seed=self.seed)
         elif self._rot.dim != dim:
-            raise ValueError(
-                f"INT4+BDR 末维须与构造时一致：期望 {self._rot.dim}，得到 {dim}"
-            )
+            raise ValueError(f"INT4+BDR 末维须与构造时一致：期望 {self._rot.dim}，得到 {dim}")
         return self._rot
 
     def encode(self, x: torch.Tensor) -> EncodedKV:
@@ -489,8 +477,7 @@ class KiviFormat:
             raise ValueError(f"residual_length 须为正，得到 {self.residual_length}")
         if self.residual_length % self.group_size != 0:
             raise ValueError(
-                f"residual_length={self.residual_length} 须能被 "
-                f"group_size={self.group_size} 整除"
+                f"residual_length={self.residual_length} 须能被 group_size={self.group_size} 整除"
             )
 
     @property
@@ -574,8 +561,7 @@ def get_codec(format_id: str, **kwargs) -> KVCodec | KiviFormat:
     }
     if key not in aliases:
         raise ValueError(
-            f"未知 format_id={format_id!r}；支持 fp16/int8/int4/int4_bdr/kivi2/kivi4 "
-            f"或 C0–C5"
+            f"未知 format_id={format_id!r}；支持 fp16/int8/int4/int4_bdr/kivi2/kivi4 或 C0–C5"
         )
     name = aliases[key]
     if name == "fp16":
@@ -583,18 +569,14 @@ def get_codec(format_id: str, **kwargs) -> KVCodec | KiviFormat:
     if name == "int8":
         return Int8Codec(**{k: v for k, v in kwargs.items() if k in {"symmetric"}})
     if name == "int4":
-        return Int4Codec(
-            **{k: v for k, v in kwargs.items() if k in {"symmetric", "group_size"}}
-        )
+        return Int4Codec(**{k: v for k, v in kwargs.items() if k in {"symmetric", "group_size"}})
     if name in {"kivi2", "kivi4"}:
         bits = 2 if name == "kivi2" else 4
         kivi_keys = {"group_size", "residual_length", "k_bits", "v_bits", "bits"}
         params = {k: v for k, v in kwargs.items() if k in kivi_keys}
         # 别名已锁定默认 bits；仅当显式传入且冲突时拒绝
         if "bits" in params and params["bits"] != bits:
-            raise ValueError(
-                f"{format_id!r} 对应 bits={bits}，与传入 bits={params['bits']} 冲突"
-            )
+            raise ValueError(f"{format_id!r} 对应 bits={bits}，与传入 bits={params['bits']} 冲突")
         params["bits"] = bits
         return KiviFormat(**params)
     bdr_keys = {"symmetric", "group_size", "block_size", "seed", "dim"}

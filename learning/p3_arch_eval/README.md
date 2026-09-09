@@ -27,7 +27,7 @@ arch_eval/
 ├── timeloop/           # Timeloop arch/workload/mapping YAML
 ├── roofline.py         # roofline 解析模型
 ├── collect_results.py  # 三方结果汇总出图
-├── results/            # 自动生成的 CSV / Markdown / 图表
+├── results/            # CSV / JSON / 图表，archive/ 保存历史摘录
 └── analysis.md         # 瓶颈分析短文（最终产出）
 ```
 
@@ -39,8 +39,7 @@ conda run -n p3-arch-eval python learning/p3_arch_eval/roofline.py
 
 默认参数为 128 TOPS INT8、1 TB/s HBM、16 MiB SRAM，以及
 LLaMA-7B 规模单层 attention。脚本评估 prefill/decode ×
-4K/32K/128K，输出 `results/roofline_table.csv` 和
-`results/roofline_table.md`。
+4K/32K/128K，输出 `results/roofline_table.csv`。
 
 ## SCALE-Sim
 
@@ -53,7 +52,6 @@ prefill/decode × 4K/32K/128K × QKV 投影、`QK^T`、`PV`、输出投影，
 输出：
 
 - `results/scalesim_results.csv`：48 条汇总 cycle/utilization/traffic
-- `results/scalesim_summary.md`：prefill/decode 利用率对照
 - `results/scalesim_raw/`：SCALE-Sim 原始三类报告
 
 由于 SCALE-Sim 会显式构造 demand matrix，超长上下文采用每维最大
@@ -72,7 +70,6 @@ conda run -n p3-arch-eval python learning/p3_arch_eval/timeloop/run_timeloop.py
 
 - `results/timeloop_energy.csv`：逐 GEMM 的 MAC/register/SRAM/DRAM energy
 - `results/timeloop_area.csv`：32×32 MAC、register、16 MiB SRAM 的 area
-- `results/timeloop_summary.md`：逐层 energy 占比和模型适用范围
 - `timeloop/generated/`：每种 tile 的 mapping 和原始 stats
 
 官方 2020 ISPASS tutorial exercise 00 已在该镜像中跑通。仓库较新的
@@ -91,7 +88,7 @@ conda run -n p3-arch-eval python learning/p3_arch_eval/collect_results.py
 - `results/util_prefill_vs_decode.png`：WS/OS 利用率对照
 - `results/traffic_energy_stack.png`：traffic 与 energy 堆叠
 - `results/roofline_points.png`：AI vs attained TOPS
-- `results/cross_validation_results.json`：后续运行的交叉数据；历史摘录为 `cross_validation_data.md`，正式分析见 `REPORT.md` 与 `analysis.md`
+- `results/cross_validation_results.json`：后续运行的交叉数据；历史摘录归档于 `results/archive/`，成员及哈希见 `experiment.json`，正式分析见 `REPORT.md` 与 `analysis.md`
 
 验收以相对趋势为准（decode ≪ prefill、memory-bound），不要求三方绝对值一致。
 

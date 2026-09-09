@@ -27,7 +27,7 @@ from fixedpoint import Q6_10, UQ0_24, fixed_to_float, float_to_fixed  # noqa: E4
 
 # 与 exp_approx.sv 中的 SV 参数一致
 N_SEG = 16
-LOG2E_Q214 = 23637  # round(log2(e) * 2^14)
+LOG2E_Q214 = 23637  # 将 log2(e) * 2^14 四舍五入为定点常量
 
 # PWL：截距 UQ2.22，斜率 UQ2.14 — 在 2^f 端点处精确
 _INTERCEPT_Q222 = np.array(
@@ -94,7 +94,7 @@ def _exp_one(x_raw: int) -> int:
     intercept = int(_INTERCEPT_Q222[seg])
     slope = int(_SLOPE_Q214[seg])
     # slope*local / 2^16 将 UQ2.14 * UQ0.20 对齐为 UQ2.22 加项
-    pwl = intercept + ((slope * local) >> 16)  # UQ2.22
+    pwl = intercept + ((slope * local) >> 16)  # 定点格式：UQ2.22
 
     # 2^yi * pwl -> UQ0.24：wide = pwl << 2（UQ2.24），再 >> (-yi)
     wide = np.int64(pwl) << 2

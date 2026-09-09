@@ -5,7 +5,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 import torch
-
 from kv_codecs import EncodedKV, KiviKeyCodec, KiviValueCodec, KVCodec
 
 
@@ -84,9 +83,7 @@ class ContiguousKVCache:
         约定 ``k_t``/``v_t`` 形状为 ``(n_tokens, num_heads, head_dim)``，
         ``n_tokens`` 通常为 1（decode）也可 >1（prefill 批量写入）。
         """
-        n_tokens = _validate_kv_append(
-            k_t, v_t, num_heads=self.num_heads, head_dim=self.head_dim
-        )
+        n_tokens = _validate_kv_append(k_t, v_t, num_heads=self.num_heads, head_dim=self.head_dim)
         k_t = k_t.to(device=self.device)
         v_t = v_t.to(device=self.device)
         self._k_chunks.append(self.codec.encode(k_t))
@@ -182,7 +179,7 @@ class KiviKVCache:
 
         self._k_quant: list[EncodedKV] = []
         self._v_quant: list[EncodedKV] = []
-        self._k_residual: torch.Tensor | None = None  # FP16 (T_r, H, D)
+        self._k_residual: torch.Tensor | None = None  # FP16 残差张量形状：(T_r, H, D)
         self._v_residual: torch.Tensor | None = None
         self._seq_len: int = 0
 
@@ -201,9 +198,7 @@ class KiviKVCache:
 
     def append(self, k_t: torch.Tensor, v_t: torch.Tensor) -> None:
         """追加 K/V，并按 KIVI 规则刷残差窗（支持 n=1 decode 与 n>1 prefill）。"""
-        n_tokens = _validate_kv_append(
-            k_t, v_t, num_heads=self.num_heads, head_dim=self.head_dim
-        )
+        n_tokens = _validate_kv_append(k_t, v_t, num_heads=self.num_heads, head_dim=self.head_dim)
         k_t = k_t.to(device=self.device, dtype=torch.float16)
         v_t = v_t.to(device=self.device, dtype=torch.float16)
 

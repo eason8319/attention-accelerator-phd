@@ -27,7 +27,7 @@
 - Attention 输出相对 FP16 golden：cosine similarity、相对 $\ell_2$
 - Cache round-trip：quantize→pack→store→load→dequant 后与直通 FP16 的误差上界（实现时在测试中钉数值阈值）
 
-误差归约使用 [`tensor_metrics.py`](../bytes_accounting/tensor_metrics.py) 的 `tensor-error-f64-v1`：仅在计算指标时将预测、参考转为 float64，再计算差值、点积和范数。模型、Q/K/V、量化与反量化、attention 和 logits 的生成精度保持实验原设置；合成 M6 的参考是未量化 float SDPA，整模 M6 的参考是 C0 codec，必须分别注明。
+误差归约使用 [`tensor_metrics.py`](../bytes_accounting/tensor_metrics.py) 的 `tensor-error-f64-v1`：仅在计算指标时将预测、参考转为 float64，再计算差值、点积和范数。模型、Q/K/V、量化与反量化、attention 和 logits 的生成精度保持实验原设置；合成敏感性的参考是未量化 float SDPA，整模敏感性的参考是 C0 codec，必须分别注明。
 
 相对 L2 为 `norm(pred64-gold64)/norm(gold64)`；余弦为 `dot(pred64,gold64)/(norm(pred64)*norm(gold64))`，两者共用同一参考范数。不得添加 epsilon 改写非零小范数。参考范数为零时相对 L2 未定义，任一范数为零时余弦未定义，JSON 写 `null`，不能写 0、1 或 NaN；空张量按零范数处理。非有限输入、归约溢出或余弦绝对值大于 `1+1e-12` 必须报错；不裁剪余弦。聚合时明确未定义值数目，不能把它们当作零参与均值。
 
@@ -116,7 +116,15 @@ $$
 
 ---
 
-## 5. 与模拟器交叉核对（M7 预留）
+## 5. 模拟器输入与交叉核对
+
+权威流量输入为 `experiments/kv_pareto/results/summary.json`：以 `(n, protocol_id, layout)` 唯一定位 48 个单步点，以 `(l_in, l_out, protocol_id, layout)` 定位 12 个压力点。模型、KV heads、head dimension、层数、page size 和 PTE bytes 必须与模型协议匹配。
+
+输入表的 `bytes_per_token` 是全模型 32 层的单步 KV 读流量；`b_eff` 是单层有效比特，`n_elem=2*n_kv*head_dim=2048`。接入单层时用 `bytes_per_token / num_layers`，接入元素时用 `b_eff / 8`；不得重复乘层数或用名义 2/4-bit 代替有效比特。`payload + scale + zp + page` 已含在总量中，分页元数据不得再次追加。压力的 `total_kv_read / l_out` 与 `last_bytes_per_token` 分别表示全程均值与末步，不能互换。
+
+精度输入为 WikiText 四窗口的 `ppl_summary.json`，共 24 个结果，按模型、窗口、格式关联。精度仅在 contiguous 评测，不能写成独立测过 paged PPL。合成误差和抽样层消融按各自范围解释，不替代完整 8B decode 精度。名义字节不代表实测 HBM 时间；解码、旋转和未打包载荷的实现代价须明确建模或列为局限。
+
+模拟器代码在 `research/r1_decode_sim/` 自包含，运行时不导入 `learning/`。正式独立参照使用相同负载与硬件参数重新建立，历史学习实验仅作设计参考。入口、保留测试和结果放在模拟器的实验目录内，保存参数、输入与源码标识后，依据已核验结果撰写唯一正式报告。
 
 检查点（趋势一致即可，不要求绝对值相等）：
 
@@ -128,7 +136,7 @@ $$
 
 ---
 
-## 6. 误差—流量敏感性（M6 口径）
+## 6. 误差—流量敏感性
 
 至少报告：
 
@@ -149,7 +157,7 @@ $$
 
 ## 8. Paged 布局切分规则
 
-本节约束 **存储布局与流量记账**，不改变 C0–C5 的量化语义。M4 不要求 page-wise partial attention：读侧仍可 `load` 全量再做 SDPA。两条 cache 后端都要能切页；只给均匀 codec 包一层 page **不算**完成 M4。
+本节约束 **存储布局与流量记账**，不改变 C0–C5 的量化语义。分页布局不要求 page-wise partial attention：读侧仍可 `load` 全量再做 SDPA。两条 cache 后端都要能切页；只给均匀 codec 包一层 page **不算**完成分页布局。
 
 ### 8.1 默认参数与不变量
 
@@ -232,9 +240,9 @@ $$
 
 C0–C3 对 K、V 两池求和；C4/C5 对上表四池求和。$B_{\mathrm{payload}}$ / $B_{\mathrm{scale}}$ / $B_{\mathrm{zp}}$ 按**已占用 token** 计，尾页空洞不计入载荷。
 
-**可选附录列** $B_{\mathrm{pad}}$：若实现按整页 DMA 读取，尾页未占用槽位的载荷字节。默认 **不** 并入主 `bytes/token`，以免 M5 主曲线在实现 DMA 策略前被碎片放大。需要并入时须先改本协议版本。
+**可选附录列** $B_{\mathrm{pad}}$：若实现按整页 DMA 读取，尾页未占用槽位的载荷字节。默认 **不** 并入主 `bytes/token`，以免流量与精度主曲线在实现 DMA 策略前被碎片放大。需要并入时须先改本协议版本。
 
-`bytes_stored` 须能拆出 payload / scale / zp / page 四项；contiguous 的 page 恒为 0。M4 报告给出分解即可，完整 Pareto 仍属 M5。
+`bytes_stored` 须能拆出 payload / scale / zp / page 四项；contiguous 的 page 恒为 0。分页布局报告给出分解即可，完整 Pareto 由 KV 流量与 WikiText 精度实验联合给出。
 
 ### 8.6 与 contiguous 的关系
 
@@ -243,7 +251,7 @@ C0–C3 对 K、V 两池求和；C4/C5 对上表四池求和。$B_{\mathrm{paylo
 | C0–C3 精度 | paged 与 contiguous 应对齐到实现容差 |
 | C4/C5 精度 | 刷窗不变则应对齐到实现容差 |
 | 流量 | paged 的 $B_{\mathrm{page}}>0$；占用 token 的 payload/scale/zp 与 contiguous 同量级 |
-| 主声称 | 自 M4 起正式流量表默认双列；禁止只报连续地址上界 |
+| 主声称 | 正式流量表默认双列；禁止只报连续地址上界 |
 
 ### 8.7 实现回写
 

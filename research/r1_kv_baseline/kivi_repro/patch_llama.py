@@ -1,7 +1,7 @@
 """将 HuggingFace Llama 的 attention 替换为本仓库 cache-path。
 
 提供：
-  - ``patch_llama_model`` / ``build_llama_kivi``：C4/C5 KIVI（M3 API）
+  - ``patch_llama_model`` / ``build_llama_kivi``：C4/C5 KIVI（KIVI evaluation API）
   - ``patch_llama_cache_path`` / ``build_llama_cache_path``：C0–C5
 
 超参默认对齐协议：``group_size=32``，``residual_length=128``。

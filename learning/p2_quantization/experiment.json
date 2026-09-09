@@ -9,7 +9,9 @@
         "sha256": "4e05a5f837ae814e189ec1ae8ea6be977720b0c9bc8ee3476a9f0c44e9042f06"
       }
     ],
-    "actual_run_metadata": [],
+    "actual_run_metadata": [
+      "results/source_style_native/run_config.json"
+    ],
     "note": "依赖声明用于环境准备；实际运行版本以结果元数据为准，历史缺失字段不补造。"
   },
   "source": {
@@ -21,7 +23,7 @@
     "files": [
       {
         "path": "error_analysis.py",
-        "sha256": "e1c83de83e5ba235765b40637fda8bad464d62d8d08f758130259c03e9a6ac4e"
+        "sha256": "292ded43350a42374e626f9e55f996f90fee70eb5a0259240e54e2beb5f7092d"
       },
       {
         "path": "fakequant.py",
@@ -44,7 +46,36 @@
         "sha256": "41efc47186096b70b81be5815379d1061691e70682e95af11b8abbde626e3d37"
       }
     ],
-    "dependencies": []
+    "dependencies": [],
+    "historical_archives": [
+      {
+        "path": "../../.server-sync/source-style/source_before.tar.gz",
+        "sha256": "6fd2de1404408bdba4e276ff2aa25ff73395374f657059907814f020028ed598",
+        "role": "注释与格式整理前的源码；保留历史结果的执行版本",
+        "members_sha256": {
+          "learning/p2_quantization/error_analysis.py": "e1c83de83e5ba235765b40637fda8bad464d62d8d08f758130259c03e9a6ac4e"
+        }
+      },
+      {
+        "path": "../../.server-sync/source-style/validation_source.tar.gz",
+        "sha256": "128ab72d5793f60e01c900fd6a59c34a60c6d18b973a56ed06c3f980a260f83a",
+        "role": "本次源码格式、注释及 CPU 验证脚本；归档成员路径相对于项目根目录",
+        "members_sha256": {
+          "tmp/source-style/check_identity.py": "3e2f64949e1a5c86cfb51433a6b8319d50ab78fe2b9e666424c3f1beb1231733",
+          "tmp/source-style/check_semantics.py": "1d081877accc6a7742d9228bfcf0e22e8c96f74132c29109f1550b9cb6431ed2",
+          "tmp/source-style/comment_units.json": "5b219349930672d0b4c56c78dfe6b2916ca3c45c75875562ddbdcffeecfd7620",
+          "tmp/source-style/final_check.py": "663f7b3009e78b633a01cec01600e2e77664cfd7b390f0f4e9a46c6871b8eb85",
+          "tmp/source-style/finalize_audit.py": "88c443e2764be4eaa6f6bcd47c1938916369bd5bf9856a1564806f0fbc0feb95",
+          "tmp/source-style/normalize_source.py": "63b26d36e501ba5d2a1d0234144889eea4a5d18d5bc3416ddaa5b08166bd312a",
+          "tmp/source-style/register_source.py": "63c70caea7878a04e5576faee08055763d66848fb8c4c57d7c8ee890076d4743",
+          "tmp/source-style/run_cpu_checks.py": "aa8a9050dc9ee32a8065bcadbf186007d3dba584e365c8b8e03282c226f9dce6",
+          "tmp/source-style/run_native_checks.py": "b7e809fe8dd59761f0c992a518b6cfde9a156a30b782e513b4249a8c32655eba",
+          "tmp/source-style/scan_source.py": "4647dcf79960b42e486f7927f3be01c9127e1090165a22dc3c5acb36c9555f6f",
+          "tmp/source-style/translate_comments.py": "ac113c6dcab89ee648da7d7c84ab880458ea380e9d9dd71963fd6d7d1a61d487",
+          "tmp/source-style/translations.json": "7a197edc9ed7c5ec33077088d98e38c0fba3656d4151ceb31f7ec5a17f2be505"
+        }
+      }
+    ]
   },
   "results": {
     "directory": "results",
@@ -60,6 +91,21 @@
       {
         "path": "results/kv_cache_ppl.txt",
         "sha256": "634a868ac313bbb27f990cec72a43ec3f786b7d2c21243e7b89f1a7c86b1b65b"
+      },
+      {
+        "path": "results/source_style_native/checks.json",
+        "sha256": "eee9a35803bc28d5041daa94ae9f85db702cee2b33ecf33648fd1876fbef867b",
+        "size_bytes": 862
+      },
+      {
+        "path": "results/source_style_native/pytest.log",
+        "sha256": "b83710606e1150f99780769301f643e5658a65bf4e23ce89c3b609d4b54d4755",
+        "size_bytes": 99
+      },
+      {
+        "path": "results/source_style_native/run_config.json",
+        "sha256": "89f821299aeecce286442910ce6abfd518d3cb97779c5eaa77214bc003534324",
+        "size_bytes": 1513
       }
     ],
     "validation_status": "historical_evidence",
