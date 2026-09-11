@@ -33,11 +33,11 @@
 @misc{dao2023flashdecoding,
   title        = {Flash-Decoding for Long-Context Inference},
   author       = {Dao, Tri and Haziza, Daniel and Massa, Francisco and Sizov, Grigory},
-  howpublished = {Stanford {CRFM} Blog},
+  howpublished = {Princeton NLP Group technical blog},
   year         = {2023},
   month        = oct,
-  url          = {https://crfm.stanford.edu/2023/10/12/flashdecoding.html},
-  note         = {Also see FlashDecoding++ (arXiv:2311.01282)}
+  url          = {https://princeton-nlp.github.io/flash-decoding/},
+  note         = {Published 2023-10-12; author technical post, not a proceedings paper; verified 2026-09-11}
 }
 
 @article{su2024roformer,
@@ -144,10 +144,14 @@
 % ===== 主线2：混合精度 attention datapath 与 KV cache 量化 =====
 
 @article{sawint42026,
-  title   = {{SAW-INT4}: System-AWare 4-Bit {KV}-Cache Quantization for Real-World {LLM} Serving},
-  author  = {Jia, Jinda and Li, Jisen and Zhou, Zhongzhu and others},
-  journal = {arXiv preprint arXiv:2604.19157},
-  year    = {2026}
+  title         = {{SAW-INT4}: System-Aware 4-Bit {KV}-Cache Quantization for Real-World {LLM} Serving},
+  author        = {Jia, Jinda and Li, Jisen and Zhou, Zhongzhu and Heo, Jung Hwan and Wang, Jue and Dao, Tri and Song, Shuaiwen Leon and Athiwaratkun, Ben and Xu, Chenfeng and Zhang, Tianyi and Wu, Xiaoxia},
+  journal       = {arXiv preprint arXiv:2604.19157},
+  year          = {2026},
+  eprint        = {2604.19157},
+  archivePrefix = {arXiv},
+  url           = {https://arxiv.org/abs/2604.19157},
+  note          = {Preprint v1; author implementation: https://github.com/togethercomputer/saw-int4; verified 2026-09-11}
 }
 
 @inproceedings{bitdecoding2026,
@@ -157,7 +161,7 @@
   year      = {2026},
   pages     = {1--13},
   doi       = {10.1109/HPCA68181.2026.11408481},
-  note      = {arXiv:2503.18773; verified 2026-07-23}
+  note      = {arXiv:2503.18773v3; HPCA proceedings and author implementation verified 2026-09-11}
 }
 
 @article{batquant2026,
@@ -376,4 +380,40 @@
   booktitle = {International Conference on Architectural Support for Programming Languages and Operating Systems ({ASPLOS})},
   year      = {2024},
   doi       = {10.1145/3620666.3651380}
+}
+
+% ===== R2 related-work additions; verified 2026-09-11 =====
+
+@inproceedings{qserve2025,
+  title         = {{QServe}: {W4A8KV4} Quantization and System Co-design for Efficient {LLM} Serving},
+  author        = {Lin, Yujun and Tang, Haotian and Yang, Shang and Zhang, Zhekai and Xiao, Guangxuan and Gan, Chuang and Han, Song},
+  booktitle     = {Proceedings of Machine Learning and Systems},
+  volume        = {7},
+  year          = {2025},
+  eprint        = {2405.04532},
+  archivePrefix = {arXiv},
+  url           = {https://proceedings.mlsys.org/paper_files/paper/2025/hash/fbe2b2f74a2ece8070d8fb073717bda6-Abstract-Conference.html},
+  note          = {MLSys 2025; arXiv v3; author implementation: https://github.com/mit-han-lab/omniserve}
+}
+
+@article{innerq2026,
+  title         = {{InnerQ}: Hardware-Aware Tuning-Free Quantization of {KV} Cache for Large Language Models},
+  author        = {Tayaranian Hosseini, Sayed Mohammadreza and Ardakani, Amir and Gross, Warren J.},
+  journal       = {arXiv preprint arXiv:2602.23200},
+  year          = {2026},
+  eprint        = {2602.23200},
+  archivePrefix = {arXiv},
+  url           = {https://arxiv.org/abs/2602.23200v2},
+  note          = {Preprint v2, revised 2026-05-20; verified 2026-09-11}
+}
+
+@article{msdequant2026,
+  title         = {Multi-Scale Dequant: Eliminating Dequantization Bottleneck via Activation Decomposition for Efficient {LLM} Inference},
+  author        = {Zheng, Lingchao and Fan, Yuwei and Li, Jun and Hu, Chengqiu and Liao, Qichen and Fan, Junyi and Shi, Rui and Miao, Fangzheng},
+  journal       = {arXiv preprint arXiv:2605.13915},
+  year          = {2026},
+  eprint        = {2605.13915},
+  archivePrefix = {arXiv},
+  url           = {https://arxiv.org/abs/2605.13915v1},
+  note          = {Preprint v1; analytical models and numerical simulation; verified 2026-09-11}
 }

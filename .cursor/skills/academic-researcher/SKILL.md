@@ -14,6 +14,8 @@ description: >-
 
 先读 [`docs/lit_watch/README.md`](../../../docs/lit_watch/README.md)。定量声明随后用 **academic-citation-guard**；综述结构用 **literature-review-writer**。
 
+全项目引用前登记要求以 [AGENTS.md](../../../AGENTS.md#literature-registration)为准；本技能执行该规则，不仅在用户明确要求更新手册时才触发。
+
 ## Hard rules
 
 1. **禁止编造**：未定位并核实题名、作者、venue、年份、DOI/URL 的论文，不得写入 `ledger.yaml`、对比表或 `.bib`。
@@ -38,12 +40,12 @@ queries.md → inbox.md → 打开原文/会刊页核实 → ledger.yaml
   → 手册顶部修订记录；必要时改 cutoff
 ```
 
-1. 用 [`docs/lit_watch/queries.md`](../../../docs/lit_watch/queries.md) 检索 arXiv / ACL Anthology / IEEE Xplore / OpenReview / PMLR。
+1. 先按题名、DOI/arXiv ID/规范 URL 核对手册、ledger 和所属 .bib；已给出来源则定向核验，广泛检索使用 [`queries.md`](../../../docs/lit_watch/queries.md)，并说明本次范围。
 2. 候选只进 `inbox.md`：链接 + 一句话理由，**不写未核实数字**。
 3. 打开原文或正式会刊页，按 [`docs/lit_watch/CARD_TEMPLATE.md`](../../../docs/lit_watch/CARD_TEMPLATE.md) 填卡片。
 4. 与 `ledger.yaml` 的 `id` / `arxiv_id` / `doi` 去重；已有条目则更新字段，不另造 id。
 5. 核实后追加或修改 `ledger.yaml`（`status: verified`，`verified_on`，`verify_sources`）。
-6. 同步对比手册总览表与分篇卡片；Cutoff 不早于本次成功检索日。
+6. 同步手册总览/卡片与所用 .bib，复用既有引用键；交付前检查本次引用覆盖。Cutoff 不早于本次核验日，并标明定向增量或广泛检索，不能冒充全表复核。
 7. `docs/lit_watch/CHANGELOG.md` 与手册「修订记录」各记一行。
 
 未完成核实的条目留在 inbox，**不要**写入总览表主行。
@@ -63,8 +65,8 @@ queries.md → inbox.md → 打开原文/会刊页核实 → ledger.yaml
 
 - `id`：短横线小写 slug（如 `minima_kv`）
 - `bucket`：`algo_gpu` / `hw_asic_fpga` / `survey` / `adjacent`
-- `venue_type`：`proceedings` | `journal` | `findings` | `preprint` | `workshop`
-- `arxiv_id` 或 `doi` 至少其一；`canonical_url` 指向最权威页
+- `venue_type`：`proceedings` | `journal` | `findings` | `preprint` | `workshop` | `technical_post`；`source_type` 区分论文与作者技术说明
+- 论文记录 DOI/arXiv ID 或正式会刊页；作者技术说明可无 DOI/arXiv，以明确类型及原始 `canonical_url` 登记；作者代码附于相应工作
 - 定量细节放现有台账的 `notes` 并指向 table/section；正式分析更新现有对比手册。遵守根 AGENTS.md，不另建 `AUDIT_*.md`、核验报告或任务小结。
 
 ## Comparison handbook

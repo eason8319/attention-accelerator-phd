@@ -1,17 +1,20 @@
 # Literature ledger — verified metadata; quantitative audit is tracked separately
 # status: verified | provisional
-# venue_type: proceedings | journal | findings | preprint | workshop
+# venue_type: proceedings | journal | findings | preprint | workshop | technical_post
+# source_type: paper (default) | technical_post; author code is attached to its source record
 # bucket: algo_gpu | hw_asic_fpga | survey | adjacent
 #
-# Verification pass: 2026-09-03 (arXiv abs + PMLR/ACL/IEEE where available)
+# Latest incremental verification: 2026-09-11 (seven R2 sources; not a full-ledger re-audit)
 
 quantitative_audit:
   date: "2026-09-03"
   report: "docs/lit_watch/AUDIT_2026-09-03.md"
+  evidence_status: "historical_missing_attachment; revisit primary sources before using quantitative claims"
   scope: "all 21 ledger entries; latest public full text or official proceedings"
 
 cutoff:
-  date: "2026-09-03"
+  date: "2026-09-11"
+  scope: "R2 seven-source incremental check; previous full search 2026-09-03; not an exhaustive search through this date"
   latest_seen:
     arxiv_id: "2608.23843"
     title: "PuzzleKV: Page-Wise Low-Rank Decomposition for KV Cache Compression"
@@ -71,11 +74,17 @@ papers:
     code: "https://github.com/OpenBitSys/BitDecoding"
     bucket: algo_gpu
     status: verified
-    verified_on: "2026-07-23"
+    verified_on: "2026-09-11"
     verify_sources:
       - "IEEE DOI / GitHub CITATION"
       - "arXiv API 2503.18773"
-    notes: "Treat as peer-reviewed HPCA'26; arXiv is preprint mirror."
+    notes: "R2 source review: arXiv v3 Sec. V-A/V-B covers GQA query reshaping, residual append, online quantization/packing and both scaling directions. Do not claim earlier GPU work omits write-side handling. Metadata verified against IEEE record; this update does not re-audit all performance points."
+    bibtex_key: "bitdecoding2026"
+    reviewed_version: "HPCA 2026 metadata; arXiv v3 mechanism"
+    r2_verify_sources:
+      - "https://ieeexplore.ieee.org/document/11408481/"
+      - "https://arxiv.org/html/2503.18773v3"
+      - "https://github.com/OpenBitSys/BitDecoding"
 
   - id: saw_int4
     short_name: SAW-INT4
@@ -101,13 +110,18 @@ papers:
     arxiv_last_updated: "2026-04-21"
     doi: null
     canonical_url: "https://arxiv.org/abs/2604.19157"
-    code: null
+    code: "https://github.com/togethercomputer/saw-int4"
     bucket: algo_gpu
     status: verified
-    verified_on: "2026-07-23"
+    verified_on: "2026-09-11"
     verify_sources:
       - "arXiv API 2604.19157"
-    notes: "No journal_ref/DOI as of cutoff; keep as preprint."
+    notes: "Preprint v1. Author BDR environment reference: HADAMARD rotates K with Q correction; ROTATE_V also rotates V and inversely transforms output. main is mutable; pin a commit when running. R1 C3 is not automatically the official configuration."
+    bibtex_key: "sawint42026"
+    reviewed_version: "arXiv v1; author main documentation"
+    r2_verify_sources:
+      - "https://arxiv.org/abs/2604.19157"
+      - "https://github.com/togethercomputer/saw-int4/blob/main/docs/bdr_env_vars.md"
 
   - id: minikv
     short_name: MiniKV
@@ -184,10 +198,15 @@ papers:
     canonical_url: "https://arxiv.org/abs/2602.23200"
     bucket: algo_gpu
     status: verified
-    verified_on: "2026-07-23"
+    verified_on: "2026-09-11"
     verify_sources:
       - "arXiv API 2602.23200"
-    notes: "No venue yet at cutoff. Abstract speedup numbers vary across versions; cite table when using."
+    notes: "R2 uses v2 (2026-05-20), not only v1. Tables 3/4: effective 3.0-3.5 bits; Xavier NX batch-one fused dequant-GEMV, not complete-model latency. Hybrid latency assumes 99% sparsity of quantization-mode mask M (not sparsity of numeric zero-points); Table 6 ablates this. Table 4 says Llama 3.1-8B but Sec. 5.3 prose says 3.2-8B; retain this source inconsistency. Normalization is computed at prefill and folded into model parameters; do not equate it with R2 runtime scale folding."
+    bibtex_key: "innerq2026"
+    reviewed_version: "arXiv v2"
+    r2_verify_sources:
+      - "https://arxiv.org/abs/2602.23200v2"
+      - "https://arxiv.org/html/2602.23200v2"
 
   - id: block_gtq
     short_name: Block-GTQ
@@ -445,12 +464,18 @@ papers:
     code: "https://github.com/AICrossSim/PLENA_Simulator"
     bucket: hw_asic_fpga
     status: verified
-    verified_on: "2026-09-03"
+    verified_on: "2026-09-11"
     verify_sources:
       - "https://www.iscaconf.org/isca2026/program/"
       - "University of Cambridge accepted-version repository"
       - "DOI 10.1109/ISCA66397.2026.00023"
-    notes: "System name PLENA; upgraded from preprint to peer-reviewed ISCA 2026. Use the final-version 2.23x/4.70x/4.04x results, not stale arXiv-abstract values."
+    notes: "ISCA 2026 confirmed by official program; system name PLENA. R2 compares asymmetric arithmetic, flattened-array mapping and native FlashAttention with matched resources; simulation/RTL evidence is not measured silicon. Existing citation key plena2025 is retained for compatibility although publication year is 2026. This update reviews metadata and mechanism, not every historical numeric claim."
+    bibtex_key: "plena2025"
+    reviewed_version: "ISCA 2026 metadata; arXiv v3 mechanism"
+    r2_verify_sources:
+      - "https://www.iscaconf.org/isca2026/program/"
+      - "https://arxiv.org/abs/2509.09505"
+      - "https://arxiv.org/html/2509.09505v3"
 
   - id: flatattention
     short_name: FlatAttention
@@ -588,3 +613,96 @@ papers:
       - "ACM DOI 10.1145/3716368.3735145"
       - "arXiv 2505.17787 full text"
     notes: "Chiplet/CIM adjacent; formal ACM proceedings DOI and pages verified."
+
+  - id: flash_decoding
+    short_name: Flash-Decoding
+    source_type: technical_post
+    title_official: "Flash-Decoding for Long-Context Inference"
+    authors:
+      - Tri Dao
+      - Daniel Haziza
+      - Francisco Massa
+      - Grigory Sizov
+    venue: "Princeton NLP Group author technical blog"
+    venue_type: technical_post
+    year: 2023
+    first_posted: "2023-10-12"
+    arxiv_id: null
+    doi: null
+    canonical_url: "https://princeton-nlp.github.io/flash-decoding/"
+    code: "https://github.com/Dao-AILab/flash-attention"
+    bibtex_key: dao2023flashdecoding
+    bucket: algo_gpu
+    status: verified
+    verified_on: "2026-09-11"
+    verify_sources:
+      - "https://princeton-nlp.github.io/flash-decoding/"
+    result_source: "author technical post; benchmark sections, not a paper abstract"
+    notes: "KV sequence splits with log-sum-exp output reduction. CodeLlama-34B generation section claims up to 8x; attention microbenchmark section claims up to 50x vs FlashAttention. A100 FP16, 16 Q heads/2 KV heads, d=128: B=1, N=65536 gives 64.4 us vs FA2 v2.0.9 2300.6 us. Intro says batch one but benchmark table varies B; preserve row-specific shape. Not FlashDecoding++ and not a peer-reviewed proceedings paper."
+
+  - id: qserve
+    short_name: QServe
+    source_type: paper
+    title_official: "QServe: W4A8KV4 Quantization and System Co-design for Efficient LLM Serving"
+    authors:
+      - Yujun Lin
+      - Haotian Tang
+      - Shang Yang
+      - Zhekai Zhang
+      - Guangxuan Xiao
+      - Chuang Gan
+      - Song Han
+    venue: "MLSys 2025"
+    venue_detail: "Proceedings of Machine Learning and Systems, volume 7"
+    venue_type: proceedings
+    year: 2025
+    arxiv_id: "2405.04532"
+    arxiv_first_posted: "2024-05-07"
+    arxiv_last_updated: "2025-05-01"
+    doi: null
+    canonical_url: "https://proceedings.mlsys.org/paper_files/paper/2025/hash/fbe2b2f74a2ece8070d8fb073717bda6-Abstract-Conference.html"
+    code: "https://github.com/mit-han-lab/omniserve"
+    bibtex_key: qserve2025
+    bucket: algo_gpu
+    status: verified
+    verified_on: "2026-09-11"
+    reviewed_version: "MLSys 2025 proceedings; arXiv v3 metadata"
+    verify_sources:
+      - "https://proceedings.mlsys.org/paper_files/paper/2025/hash/fbe2b2f74a2ece8070d8fb073717bda6-Abstract-Conference.html"
+      - "https://proceedings.mlsys.org/paper_files/paper/2025/file/fbe2b2f74a2ece8070d8fb073717bda6-Paper-Conference.pdf"
+      - "https://arxiv.org/abs/2405.04532"
+    result_source: "abstract; Sec. 4.3, Sec. 5.3-5.4, Table 1, Fig. 11"
+    notes: "Abstract: INT4 dequant overhead 20-90%; maximum serving-throughput gains vs TensorRT-LLM are Llama-3-8B 1.2x/1.4x and Qwen1.5-72B 2.4x/3.5x on A100/L40S. Sec. 5.3 uses input/output 1024/512, same device memory budgets, maximum feasible batches; not fixed-batch KV-only benefit. Sec. 4.3/Table 1 and Sec. 5.4: A100 B=64,N=1024 naive KV4 0.48 ms, optimized 0.28 ms, KV8 0.42 ms. Scale/zero prefetch and simpler addressing are supported; do not infer a specific page-metadata colocation layout."
+
+  - id: multi_scale_dequant
+    short_name: Multi-Scale Dequant
+    source_type: paper
+    title_official: "Multi-Scale Dequant: Eliminating Dequantization Bottleneck via Activation Decomposition for Efficient LLM Inference"
+    authors:
+      - Lingchao Zheng
+      - Yuwei Fan
+      - Jun Li
+      - Chengqiu Hu
+      - Qichen Liao
+      - Junyi Fan
+      - Rui Shi
+      - Fangzheng Miao
+    venue: "preprint (arXiv)"
+    venue_type: preprint
+    year: 2026
+    arxiv_id: "2605.13915"
+    arxiv_first_posted: "2026-05-13"
+    arxiv_last_updated: "2026-05-13"
+    doi: null
+    canonical_url: "https://arxiv.org/abs/2605.13915v1"
+    code: null
+    bibtex_key: msdequant2026
+    bucket: algo_gpu
+    status: verified
+    verified_on: "2026-09-11"
+    reviewed_version: "arXiv v1; page/header date discrepancy retained"
+    verify_sources:
+      - "https://arxiv.org/abs/2605.13915v1"
+      - "https://arxiv.org/html/2605.13915v1"
+    result_source: "abstract; Sec. 4.2-4.4, Sec. 5.1, Sec. 6 numerical simulation"
+    notes: "BF16 activation decomposition into multiple low-precision passes; K scales absorbed into Q. Abstract claims about 16 effective bits for two INT8 passes, about 6.6 for MXFP4 vs 5.24 for MXFP8, error bound alpha/64, and up to 2.5x KV HBM reduction. Sec. 4.4.4 derives 5Md/2Md under a Vector-HBM-Cube round trip; not measured traffic on this ASIC or a fused baseline. Sec. 6 uses NumPy/PyTorch with FP32 golden; no full-model quality or end-to-end speed validation. abs calls INT8 weights W4A16, while HTML says W8A16; HTML title date is August 24 although arXiv history is May 13. Use arXiv version history for publication metadata, retain discrepancies."

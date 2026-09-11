@@ -1,6 +1,6 @@
 # 固定检索词（Literature Watch）
 
-> 更新对比手册前，至少跑一遍下列查询。记录日期写入 `inbox.md`。
+> 广泛查新时使用下列查询；已有明确引用的补录可定向核验，不要求扩展为全领域检索。核验日期和范围写入 `inbox.md`，引用登记规则见 [AGENTS.md](../../AGENTS.md#literature-registration)。
 
 ## 数据源
 

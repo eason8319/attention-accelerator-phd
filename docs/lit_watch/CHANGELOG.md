@@ -4,6 +4,18 @@
 
 ---
 
+## 2026-09-11（对照表排序与来源标签）
+
+- 手册 §2.1 和 §2.2 按台账首次公开日期升序排列，同日保持原顺序；保留正式 Venue 与原有结果。
+- Flash-Decoding、QServe、Multi-Scale Dequant 的来源使用 Author Blog、MLSys、arXiv 标识及 Paper/HTML 英文链接文字，QServe 补上已有卡片中的 arXiv 入口。
+
+## 2026-09-11（R2 引用补录与全项目登记规则）
+
+- 定向核对 R2 七项来源，补入 Flash-Decoding（作者技术说明）、QServe（MLSys 2025）、Multi-Scale Dequant（预印本）；更新 BitDecoding、SAW-INT4、InnerQ、PLENA 的版本、实现或证据边界。台账现有 23 篇论文与 1 项作者技术说明；未将本次增量核验记为全表重审。
+- 同步既有 BibTeX：新增 QServe、InnerQ、Multi-Scale Dequant，补全 Flash-Decoding 与 SAW-INT4 来源，保留既有引用键。InnerQ 使用 v2；模式掩码稀疏率与数值 zero-point 分开；MSD 分析/数值仿真不称为硬件实测。
+- R2 的 QServe 对照改为原文可支持的参数预取与地址计算；手册旧 C0–C5 建议表改指向 R1 协议。新增来源记录题名、作者、状态、版本、来源位置、基线与限制。
+- 全项目引用登记要求写入 [AGENTS.md](../../AGENTS.md#literature-registration)，既有 skill、Cursor 规则、流程和卡片模板链接该规范；交付前检查引用覆盖、去重与链接，不新增独立核验报告。
+
 ## 2026-09-03（全文定量与发表状态复核）
 
 - 对 `ledger.yaml` 全部 21 篇记录完成全文级定量复核；每个结果补齐模型/负载、平台、基线、正文表图位置与适用边界，详见 `AUDIT_2026-09-03.md`。

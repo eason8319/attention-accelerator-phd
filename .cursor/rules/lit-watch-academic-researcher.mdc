@@ -1,6 +1,6 @@
 ---
 description: 更新文献、lit_watch、对比手册或 related work 时，必须先加载并遵循 academic-researcher skill
-globs: docs/lit_watch/**/*,docs/recent_works_comparison.md,survey/manuscript/**/*,**/references.bib,**/cite_log.md
+globs: docs/lit_watch/**/*,docs/recent_works_comparison.md,docs/research_plan.md,research/**/*.md,survey/manuscript/**/*,**/references.bib,**/cite_log.md
 alwaysApply: false
 ---
 
@@ -16,8 +16,10 @@ alwaysApply: false
 
 - 更新 `docs/lit_watch/`（检索、inbox、ledger、卡片）
 - 更新 `docs/recent_works_comparison.md`
-- 为 survey / learning 增补参考文献或 related work
+- 为研究计划、实验设计/报告、survey / learning 或项目讨论引用相关文献、作者技术说明与实现
 - 用户说「更新文献」「查新论文」「核实 venue/DOI」「文献监视」等
+
+全项目查重和缺项补录要求见 [AGENTS.md](../../AGENTS.md#literature-registration)，不能仅把新引用留在对话或单份计划中。
 
 ## 必须遵守（与 skill 一致）
 

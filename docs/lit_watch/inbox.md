@@ -16,9 +16,32 @@
 
 ## 待审列表
 
-（当前为空。下次检索从这里追加。）
+（当前为空。）
 
 ## 最近一次检索记录
+
+本次 2026-09-11 定向核对 R2 的七项来源；补录以下三项，并更新已有 BitDecoding、SAW-INT4、InnerQ 和 PLENA 的引用信息。不是全领域重新检索。
+
+### 2026-09-11 | Flash-Decoding
+
+- link: https://princeton-nlp.github.io/flash-decoding/
+- why: R2 的 KV-split 与 log-sum-exp 归并基线；按作者技术说明核验。
+- suggested_bucket: algo_gpu
+- status: verified → ledger；已补手册与引用键，证据范围见卡片
+
+### 2026-09-11 | QServe
+
+- link: https://proceedings.mlsys.org/paper_files/paper/2025/hash/fbe2b2f74a2ece8070d8fb073717bda6-Abstract-Conference.html
+- why: R2 的 KV4 计算瓶颈、量化参数预取和公平 GPU 对照。
+- suggested_bucket: algo_gpu
+- status: verified → ledger；已补手册与引用键，证据范围见卡片
+
+### 2026-09-11 | Multi-Scale Dequant
+
+- link: https://arxiv.org/abs/2605.13915
+- why: R2 的尺度折叠、激活分解和压缩收益边界近邻方法。
+- suggested_bucket: algo_gpu
+- status: verified → ledger；已补手册与引用键，证据范围见卡片
 
 ### 2026-09-03 | SPECTRA
 - link: https://arxiv.org/abs/2608.07915

@@ -27,14 +27,18 @@ queries.md 检索 → inbox.md 候选 → 人工核实 → ledger.yaml 入库
 
 ## 更新步骤（每次）
 
-1. 用 `queries.md` 在 arXiv / ACL Anthology / IEEE Xplore / OpenReview 检索。
+全项目引用前的查重、核验和缺项补录要求见 [AGENTS.md](../../AGENTS.md#literature-registration)；本节只说明执行方法。已提供明确来源时可定向核验，广泛查新时再使用完整检索词；记录两者的范围。
+
+1. 先查手册、ledger 及所属参考文献库，按题名、DOI/arXiv ID/规范 URL 匹配已有记录；缺项用 `queries.md` 或提供的原始来源核验。
 2. 新文写入 `inbox.md`（只填链接与一句话理由；摘要中的数字可暂存为 `unverified_abstract_claim`，不得直接写成已核实结论）。
 3. 打开原文或正式会刊页，按 `CARD_TEMPLATE.md` 填写；**Venue 以会刊/DOI 为准，不以二手摘要为准**。摘要定量数字必须保留，并追到正文表/图；追不到时明确标 `result_source: abstract`。
-4. 将核实后的条目追加到 `ledger.yaml`（`status: verified`）。
-5. 同步改 `recent_works_comparison.md` 总览表与分篇卡片。
-6. 在 `CHANGELOG.md` 与对比手册顶部「修订记录」各记一行。
+4. 核实后更新已有条目或补入 `ledger.yaml`（`status: verified`），记录版本、核验日期、来源位置及来源类型；verified 表示所列范围已核验，不等于已在本项目复现。
+5. 同步手册总览与卡片；正式 BibTeX 引用补齐所属既有文献库并复用引用键，在 ledger 登记 bibtex_key。将 inbox 候选标为已入库，检查使用它的计划/报告链接。
+6. 检查本次引用的手册/台账/引用键覆盖、重复 ID 与链接；在 `CHANGELOG.md` 和手册修订记录登记范围，区分定向补录与全量检索。
 
 ## 核实规则
+
+- **非论文来源**：作者技术说明使用 `source_type: technical_post`、`venue_type: technical_post` 和原始 URL；DOI/arXiv 可为空。作者代码附在对应条目，不能凭仓库说明升级论文发表状态。台账 `papers` 是历史集合名，可容纳明确标注类型的技术来源。
 
 - **正式录用/出版**：必须有 venue +（尽量）DOI 或 anthology/PMLR 链接。
 - **预印本**：`venue: preprint`，写清 `arxiv_id` 与 `first_posted` / `last_updated`。
