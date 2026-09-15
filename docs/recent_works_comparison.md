@@ -8,6 +8,7 @@
 
 | 日期 | 变更 |
 |------|------|
+| 2026-09-15 | 定向补录研究计划中尚未入账的 OScaR、PM-KVQ、KVmix、MixKVQ，以及易混的同类工作 OSCAR（与 OScaR 不是同一篇）；不重建总览表，不宣称全领域穷尽。 |
 | 2026-09-11 | §2.1/§2.2 按首次公开时间升序排列；三个新增条目的来源标签统一为英文，并保留全部条目和结果口径。 |
 | 2026-09-11 | 补录 Flash-Decoding、QServe、Multi-Scale Dequant，补全 R2 七项来源的元数据、实现入口与证据边界；建立全项目引用前核对和缺项补录规则，纠正旧建议编号与 R1 协议的冲突。 |
 | 2026-09-03 | 将 academic-researcher 迁入仓库 `.cursor/skills/`，去掉云端 `/root/...` 绝对路径。 |
@@ -21,7 +22,7 @@
 
 ## 检索截止
 
-- **Cutoff 日期**：2026-09-11（本次为 R2 七项来源定向增量核验；上一轮广泛检索为 2026-09-03，不表示截至本日的文献已穷尽）
+- **Cutoff 日期**：2026-09-15（本次为计划专名与同类 2-bit 旋转的定向增量；上一轮为 2026-09-11 的 R2 七项来源核验与 2026-09-03 广泛检索，不表示截至本日的文献已穷尽）
 - **窗口内最新收录**：Wang et al., *PuzzleKV: Page-Wise Low-Rank Decomposition for KV Cache Compression*，[arXiv:2608.23843](https://arxiv.org/abs/2608.23843)（预印本；首发 2026-08-24）
 - **使用约定**：摘要中的数字全部记录，并由正文表/图补齐口径；**不可跨平台直接比绝对倍数**。`状态` 列：`会议/期刊/Workshop` = 已核实正式 venue；`预印本` = 仅 arXiv（或仅有 submitted 声明）；`作者技术说明` = 原始博客/技术说明，不视为同行评审论文。作者代码作为对应条目的实现证据单列。
 
@@ -43,8 +44,8 @@
 
 ### 1.2 默认对照锚点
 
-1. **算法精度**：KIVI、SAW-INT4（+BDR）、KVTuner / Block-GTQ；新近理论参照 AATC / SPECTRA
-2. **GPU 系统**：BitDecoding、QServe；KV-split 基线 Flash-Decoding；混合格式对照 Minima-KV；（可选）UltraQuant
+1. **算法精度**：KIVI、SAW-INT4（+BDR）、KVTuner / PM-KVQ / KVmix / MixKVQ / Block-GTQ；新近理论参照 AATC / SPECTRA
+2. **GPU 系统**：BitDecoding、QServe；KV-split 基线 Flash-Decoding；2-bit 旋转对照 OScaR / OSCAR（二者不是同一篇）；混合格式对照 Minima-KV；（可选）UltraQuant
 3. **硬件**：SystolicAttention、PLENA、AccLLM；稀疏上界 Salca（非主路径）
 4. **尺度处理**：InnerQ、Multi-Scale Dequant；区分微基准与分析/数值仿真。具体实验角色见 [R2 计划](../research/r2_streaming_attention/PLAN.md#r2-related-work)。
 
@@ -72,10 +73,15 @@ queries → inbox → 核实 venue/DOI → ledger.yaml → 改本手册表/卡�
 | MiniKV | ACL 2025 Findings；pp. 18506–18523 | 会议（Findings） | DOI [10.18653/v1/2025.findings-acl.952](https://doi.org/10.18653/v1/2025.findings-acl.952)；[Anthology](https://aclanthology.org/2025.findings-acl.952/)；[arXiv:2411.18077](https://arxiv.org/abs/2411.18077) | GPU + Triton | 2-bit + 自适应保留；与 FlashAttention 兼容内核 | Table 1/3–4：摘要称 $>80\%$ KV 压缩；Llama2-7B-chat 平均 34.65 vs FP16 35.19；选择性 kernel 工作区 0.25 vs 1.25GB，但 prefill kernel 0.622 vs 0.118ms | 区分完整 cache 压缩与 kernel 工作区 |
 | KVTuner | ICML 2025；PMLR 267:36451–36485 | 会议 | [PMLR](https://proceedings.mlr.press/v267/li25dd.html)；[arXiv:2502.04420](https://arxiv.org/abs/2502.04420) | GPU | 层间离线混合精度搜索 | Table 8：Llama-3.1-8B 3.25-bit 对 KIVI-KV8 提升 $16.79\%$–$21.25\%$；最大值对应 BS=64、input=128（4652 vs 3836 token/s） | 最大值不是全上下文统一收益 |
 | BitDecoding | HPCA 2026 | 会议 | DOI [10.1109/HPCA68181.2026.11408481](https://doi.org/10.1109/HPCA68181.2026.11408481)；[arXiv:2503.18773](https://arxiv.org/abs/2503.18773) | Ampere–Blackwell GPU | TC 友好布局 + warp dequant + CUDA/TC 流水；MXFP4 | §VI：相对 FP16 FlashDecoding-v2，Blackwell/Hopper/Ada 最高 $8.6/8.0/7.5\times$；相对 QServe 最高 $4.3\times$；A100、Llama-3.1-8B@128K 单请求端到端约 $3\times$ | “最高/平均”须绑定 GPU 与 shape |
+| KVmix | AAAI 2026；40(37):31563–31572 | 会议 | DOI [10.1609/aaai.v40i37.40422](https://doi.org/10.1609/aaai.v40i37.40422)；[OJS](https://ojs.aaai.org/index.php/AAAI/article/view/40422)；[arXiv:2506.08018](https://arxiv.org/abs/2506.08018) | RTX 4090 | 层间梯度重要性混合比特；近期 RPC 保持全精度 | Table 1 Llama-2-7B LongBench 均分 33.714 vs FP16 33.839；Fig. 8 最大 BS=30、1032 tok/s（图注 $5.32\times$，摘要 $5.3\times$）；Fig. 7 内存约 $4.9\times$ | LongBench 最长 4096；RPC 是显式高精度窗 |
+| PM-KVQ | ICLR 2026 Poster | 会议 | [OpenReview](https://openreview.net/forum?id=Vem6FQvRvq)；[ICLR 日程](https://iclr.cc/virtual/2026/poster/10009118)；[arXiv:2505.18610](https://arxiv.org/abs/2505.18610) | 精度：假量化 8×A100；吞吐：A100-80G | 16→8→4→2 渐进降比特 + 块级整数规划 | Table 2 Qwen-7B AIME-2024 pass@1：16-bit 41.04、KIVI 32.08、PM-KVQ BS=40 为 40.00；Table 3 相对 16-bit 为 $2.73\times$（32B@16K）–$5.18\times$（7B@32K） | 摘要「最高 8%」是百分点；先占 16-bit 再收缩 |
+| MixKVQ | ACL 2026；pp. 7189–7204 | 会议 | DOI [10.18653/v1/2026.acl-long.326](https://doi.org/10.18653/v1/2026.acl-long.326)；[Anthology](https://aclanthology.org/2026.acl-long.326/)；[arXiv:2512.19206](https://arxiv.org/abs/2512.19206) | A800 80GB | 查询感知 Key 通道混合比特；V 均匀 2-bit；残差窗 $R$ | Table 3 Distill-Qwen-32B 均分 MixKVQ-C2.3 66.04 vs BF16 67.84、KIVI-KV2 58.89；Fig. 5 Llama2-13B 吞吐 $2.63\times$–$2.81\times$ | 非连续混合精度块可能增加 decode 延迟 |
 | InnerQ | arXiv（首发 2026-02-26） | 预印本 | [arXiv:2602.23200](https://arxiv.org/abs/2602.23200) | Jetson Xavier NX 微基准 | 内维分组；recent+sink 高精度 | Table 3–4：有效位宽 3.0–3.5 bit/number；单层 fused dequant-GEMV 平均约 $2.7\times$ vs FP16，32K Hybrid 为 3180µs vs FP16 9516µs、KIVI 4331µs | 非端到端 token latency；Hybrid 假定量化模式掩码 M 为 99% 稀疏 |
 | Don’t Waste Bits! | **CVPR 2026 Workshops（LoViF）**；pp. 4957–4966 | Workshop | [CVF Open Access](https://openaccess.thecvf.com/content/CVPR2026W/LoViF/html/Boroujeni_Dont_Waste_Bits_Adaptive_KV-Cache_Quantization_for_Lightweight_On-Device_LLMs_CVPRW_2026_paper.html)；[arXiv:2604.04722](https://arxiv.org/abs/2604.04722) | 端侧小模型 | 动态 $\{2,4,8,\mathrm{FP16}\}$ | SmolLM-360M/HellaSwag：相对静态 KV 量化，ms/token $-17.75\%$、准确率 $+7.60$ points，距 FP16 0.30 points | 已正式发表，但不是 CVPR main；动态控制开销需计入 |
 | SAW-INT4 | arXiv 2026-04-21 | 预印本 | [arXiv:2604.19157](https://arxiv.org/abs/2604.19157) | H100；paged | token-wise INT4 + BDR；融合 rotate–quant | Table 3–4/Appendix D：Qwen3-8B BDR-128 均分 69.97 vs BF16 70.84；融合旋转 kernel 与 plain INT4 相差约 $0.6\%$；长上下文 system TPS 对 BF16 为 $+8.4\%$–$41.4\%$ | “近零开销”仅指融合实现与给定服务设置 |
 | Multi-Scale Dequant | arXiv v1，2026-05-13 | 预印本 | [arXiv:2605.13915](https://arxiv.org/abs/2605.13915v1)；[HTML](https://arxiv.org/html/2605.13915v1) | 数值仿真；Ascend 向分析模型 | 激活多分量分解、K 尺度折入 Q、多次低精度 GEMM | §4.4.4 的 2.5× HBM 比值来自 5Md/2Md 模型；§6 检查数值误差 | 不是整模质量、实测加速或 ASIC PPA；亦是收益边界模型的近邻 |
+| OSCAR | arXiv 2026-05-18 | 预印本 | [arXiv:2605.17757](https://arxiv.org/abs/2605.17757)；[HTML](https://arxiv.org/html/2605.17757) | H100；paged SGLang | 离线谱协方差旋转；INT2 历史 + BF16 sink/recent | Table 2 相对 BF16 均分差距：Qwen3-4B $-3.78$、Qwen3-8B $-1.42$；Fig. 4 GLM-4.7 BS=32 为 $7.83\times$（摘要写最高 $7\times$） | **不是 OScaR**；残差窗是显式 BF16 |
+| OScaR | arXiv 2026-05-19 | 预印本 | [arXiv:2605.19660](https://arxiv.org/abs/2605.19660)；[HTML](https://arxiv.org/html/2605.19660v1) | H20 141GB | Canalized 旋转 + Omni-Token Scaling；INT2 | Table 1 LongBench-E Llama-3.1-8B 均分 41.75 vs 16-bit 41.70；§5.3 / Fig. 6：128K decode $3.0\times$，BS=48 内存 $5.3\times$、吞吐 $4.1\times$ vs FD-v2 | **不是 OSCAR**；效率数字绑定 Qwen3-8B / H20 |
 | UltraQuant | arXiv 2026-06-18 | 预印本 | [arXiv:2606.20474](https://arxiv.org/abs/2606.20474) | AMD MI355X；TP=2 | FP4 KV + FP8 Q | Table 1：相对 FP8 KV，晚期轮次 P50 TTFT $3.47\times$、全轮次 $2.3\times$、output throughput $1.63\times$；warm rounds 仅 $0.86\times$（FP8 更快） | 收益主要来自 cache residency |
 | Block-GTQ | arXiv 2026-06-23（题名 *RoPE-Aware Bit Allocation…*） | 预印本 | [arXiv:2606.24033](https://arxiv.org/abs/2606.24033) | H800；packed | RoPE 块感知 K 比特；不物化完整 FP16 KV | Table 12：Qwen2.5-3B、128K 时 K3V3 为 $3.24\times$ KV 压缩、70.96→52.95ms（$1.34\times$）、峰值 56.31→19.85GB；≤64K 反而慢于 FP16 FA2 | 结构感知 + packed 路径；速度有 crossover |
 | KV 服务综述 | **ACL 2026 Findings**；pp. 38450–38476 | 会议（Findings） | DOI [10.18653/v1/2026.findings-acl.1916](https://doi.org/10.18653/v1/2026.findings-acl.1916)；[arXiv:2607.08057](https://arxiv.org/abs/2607.08057) | 文献综合 | 系统感知 KV 优化分类 | 统一粒度/平均比特等比较轴 | Related work 元框架 |
@@ -244,6 +250,106 @@ queries → inbox → 核实 venue/DOI → ledger.yaml → 改本手册表/卡�
 - **原文差异**：abs 将 INT8 权重括注为 W4A16，HTML 写 W8A16；HTML 标题日期为 2026-08-24，arXiv 版本记录为 2026-05-13。元数据按版本记录，不擅自改首发/更新日期。
 - **核实 / 引用键**：2026-09-11；arXiv 元数据、v1 正文；`msdequant2026`。
 
+<a id="kvmix"></a>
+
+### 3.16 KVmix
+
+- **来源类型**：论文
+- **题名（正式）**：*KVmix: Gradient-Based Layer Importance-Aware Mixed-Precision Quantization for KV Cache*
+- **作者**：Fei Li, Song Liu, Weiguo Wu, Shiqiang Nie, Jinyu Wang
+- **Venue / 状态**：AAAI 2026；*Proceedings of the AAAI Conference on Artificial Intelligence* 40(37):31563–31572
+- **标识**：DOI [10.1609/aaai.v40i37.40422](https://doi.org/10.1609/aaai.v40i37.40422)；[OJS](https://ojs.aaai.org/index.php/AAAI/article/view/40422)；[arXiv:2506.08018](https://arxiv.org/abs/2506.08018)（v1 2025-05-18，v3 2026-02-02）
+- **代码**：[LfLab-AI/KVmix](https://github.com/LfLab-AI/KVmix)
+- **引用键 / 版本**：`kvmix2026`；会刊 PDF
+- **平台**：RTX 4090 24GB（效率）；LongBench 因显存将最大长度设为 4096
+- **方法要点**：按 K/V 投影对损失的 $L2$ 梯度范数做层间混合比特；近期 pivotal tokens（RPC）保持全精度。
+- **摘要定量主张**：k2.19v2.38 近无损；内存约 $4.9\times$、吞吐最高 $5.3\times$。
+- **正文复核结果**：Table 1 Llama-2-7B LongBench 均分 FP16 33.839 vs k2.19v2.38 33.714；Table 3 GSM8K 13.25 vs 13.52、Wikitext-2 ppl 同为 8.71；Fig. 8 输入 688 / 生成 1024，FP16 在 BS=4 OOM，KVmix 最大 BS=30、1032 tok/s（图注 $5.32\times$）。
+- **口径边界**：GPU kernel / 端侧显存饱和吞吐，不是 ASIC；RPC 为显式高精度窗。
+- **冲突或缺口**：摘要 $5.3\times$ 与图注 $5.32\times$ 为同一实验的四舍五入。
+- **对本课题**：R3 层间表 + 时间窗的已核实代表；不可比点是未给出无完整 FP16 展开的流式 ASIC 通路。
+- **核实**：2026-09-15；AAAI OJS / DOI / 会刊 PDF / arXiv 元数据
+
+<a id="pm-kvq"></a>
+
+### 3.17 PM-KVQ
+
+- **来源类型**：论文
+- **题名（正式）**：*PM-KVQ: Progressive Mixed-precision KV Cache Quantization for Long-CoT LLMs*
+- **作者**：Tengxuan Liu, Shiyao Li, Jiayi Yang, Tianchen Zhao, Feng Zhou, Xiaohui Song, Guohao Dai, Shengen Yan, Huazhong Yang, Yu Wang
+- **Venue / 状态**：ICLR 2026 Poster；[OpenReview](https://openreview.net/forum?id=Vem6FQvRvq)、[ICLR 虚拟海报页](https://iclr.cc/virtual/2026/poster/10009118)；本次未找到 Crossref DOI
+- **标识**：[arXiv:2505.18610](https://arxiv.org/abs/2505.18610)（v1 2025-05-24，v2 2026-07-11）
+- **代码**：[thu-nics/PM-KVQ](https://github.com/thu-nics/PM-KVQ)
+- **引用键 / 版本**：`pmkvq2026`；OpenReview PDF + arXiv v2 元数据
+- **平台**：精度实验为 8×A100-80G **假量化**；吞吐为 A100-80G 上 KIVI 官方引擎 + 作者 shrinking kernel
+- **方法要点**：内存占满后 16→8→4→2 右移收缩；块级整数规划分配更高比特；校准用短序列 + RoPE 位置插值。
+- **摘要定量主张**：同内存预算下相对 SOTA 最高约 8%；相对 16-bit 吞吐 $2.73$–$5.18\times$。
+- **正文复核结果**：Table 2 Distill-Qwen-7B（1×4090-24G）AIME-2024 pass@1：16-bit 41.04、KIVI 2-2 为 32.08、PM-KVQ BS=40 为 40.00（约 +7.92 百分点，即摘要「8%」口径）；Table 3 Qwen-7B 原 BS=18 vs 量化 BS=110，32K 为 52.06 vs 269.51 tok/s；Qwen-32B 原 BS=1 vs 量化 BS=4，16K 为 12.34 vs 33.74 tok/s。
+- **口径边界**：精度不是 fused decode 实测；吞吐含更大 batch；推理路径先以 16-bit 占用再收缩。
+- **冲突或缺口**：无 DOI；「8%」不是相对百分比。
+- **对本课题**：R3/R5 长 CoT 混合精度与误差累积设定；与「默认不物化完整 FP16 KV」原则相反方向，只能作算法对照。
+- **核实**：2026-09-15；ICLR 海报页、OpenReview PDF、arXiv 版本史
+
+<a id="mixkvq"></a>
+
+### 3.18 MixKVQ
+
+- **来源类型**：论文
+- **题名（正式）**：*MixKVQ: Query-Aware Mixed-Precision KV Cache Quantization for Long-Context Reasoning*
+- **作者**：Tao Zhang, Ziqian Zeng, Hao Peng, Huiping Zhuang, Cen Chen
+- **Venue / 状态**：ACL 2026 Long Papers，pp. 7189–7204
+- **标识**：DOI [10.18653/v1/2026.acl-long.326](https://doi.org/10.18653/v1/2026.acl-long.326)；[Anthology](https://aclanthology.org/2026.acl-long.326/)；[arXiv:2512.19206](https://arxiv.org/abs/2512.19206)（v1 2025-12-22）
+- **代码**：会刊页未给出仓库
+- **引用键 / 版本**：`mixkvq2026`；Anthology PDF
+- **平台**：单卡 A800 80GB；效率为 Llama2-13B-chat、ShareGPT、仿 vLLM 显存饱和
+- **方法要点**：Key 通道 salience $A_d=I_d\cdot S_d$，分 BF16 / UINT4 / UINT2；Value 均匀 2-bit per-token；长度 $R$ 的全精度缓冲后再成组量化。
+- **摘要定量主张**：复杂推理上接近全精度、显著低于现有低比特方法（摘要未给单一倍数）。
+- **正文复核结果**：Table 3 Distill-Qwen-32B 均分 MixKVQ-C2.3 66.04 vs BF16 67.84、KIVI-KV2 58.89；Table 4 Llama-3.1-8B-Instruct LongBench 均分 C2.7 为 53.71 vs BF16 54.00；Fig. 5 吞吐 $2.63\times$–$2.81\times$、batch 最高约 $2.25\times$。
+- **口径边界**：主表 $G=32$、$R=128$；作者承认混合精度非连续块可能增加 decode 延迟，且尚未接入 vLLM。
+- **冲突或缺口**：无
+- **对本课题**：R3 query / 通道混合比特的已核实代表；残差窗仍是高精度缓冲。
+- **核实**：2026-09-15；ACL Anthology / DOI / 正式 bib
+
+<a id="oscar-spectral"></a>
+
+### 3.19 OSCAR（谱协方差旋转；不是 OScaR）
+
+- **来源类型**：论文（预印本）
+- **题名（正式）**：*OSCAR: Offline Spectral Covariance-Aware Rotation for 2-bit KV Cache Quantization*
+- **作者**：Zhongzhu Zhou, Donglin Zhuang, Jisen Li, Ziyan Chen, Shuaiwen Leon Song, Ben Athiwaratkun, Xiaoxia Wu
+- **Venue / 状态**：preprint (arXiv)；本次未核实到会刊页
+- **标识**：[arXiv:2605.17757](https://arxiv.org/abs/2605.17757)（v1 2026-05-18）
+- **代码**：[FutureMLS-Lab/OSCAR](https://github.com/FutureMLS-Lab/OSCAR)；项目页 [oscar-quantize.github.io](https://oscar-quantize.github.io/)
+- **引用键 / 版本**：`zhou2026oscar`；arXiv v1 HTML
+- **平台**：H100；Qwen3-32B / GLM-4.7 用张量并行；SGLang paged
+- **方法要点**：离线估计 attention-aware 协方差并固定旋转与裁剪；在线 INT2 历史 + BF16 sink=64 / recent=256。
+- **摘要定量主张**：KV 内存约 $8\times$；大 batch 吞吐最高约 $7\times$；BS=1 decode 最高约 $3\times$；Qwen3-4B/8B 相对 BF16 差距 3.78 / 1.42 分。
+- **正文复核结果**：Table 2 与摘要的 3.78 / 1.42 分一致；Fig. 4 Qwen3-4B BS=1 在 100k 为 $3.08\times$；GLM-4.7-FP8 在 100k、BS=32 为 $7.83\times$。
+- **口径边界**：BPE 含 scale/zero 与 BF16 保护窗；LCB 受 32K 生成截断。
+- **冲突或缺口**：摘要吞吐「最高 $7\times$」低于正文 Fig. 4 的 $7.83\times$，引用用图而不是摘要上限。
+- **对本课题**：2-bit + 时间窗 + paged 服务内核，接近 R2 布局问题；仍是 GPU serving，不是 ASIC 映射。
+- **核实**：2026-09-15；arXiv abs + HTML
+
+<a id="oscar-occam"></a>
+
+### 3.20 OScaR（Occam 旋转缩放；不是 OSCAR）
+
+- **来源类型**：论文（预印本）
+- **题名（正式）**：*OScaR: The Occam's Razor for Extreme KV Cache Quantization in LLMs and Beyond*
+- **作者**：Zunhai Su, Rui Yang, Chao Zhang, Yaxiu Liu, Yifan Zhang, Wei Wu, Jing Xiong, Dayou Du, Xialie Zhuang, Yulei Qian, Yuchen Xie, Yik-Chung Wu, Hongxia Yang, Ngai Wong
+- **Venue / 状态**：preprint (arXiv)；本次未核实到会刊页
+- **标识**：[arXiv:2605.19660](https://arxiv.org/abs/2605.19660)（v1 2026-05-19）
+- **代码**：[ZunhaiSu/OScaR-KV-Quant](https://github.com/ZunhaiSu/OScaR-KV-Quant)
+- **引用键 / 版本**：`su2026oscar`；arXiv v1 HTML
+- **平台**：单卡 H20 141GB；内核基于 BitDecoding / HadaCore
+- **方法要点**：针对 Token Norm Imbalance：Canalized Rotation（Hadamard）后接 Omni-Token Scaling；训练免费 INT2。
+- **摘要定量主张**：相对 BF16 FlashDecoding-v2，decode 最高 $3.0\times$、内存 $5.3\times$、吞吐 $4.1\times$。
+- **正文复核结果**：Table 1 LongBench-E Llama-3.1-8B 均分 41.75 vs 16-bit 41.70，Qwen3-8B 48.74 vs 49.56；§5.3 / Fig. 6 将上述三个效率数字绑定为 Qwen3-8B、128K 延迟与 BS=48 内存/吞吐。
+- **口径边界**：效率是单模型单 GPU 微基准/服务形状，不是跨平台 ASIC。
+- **冲突或缺口**：无（效率三数摘要与 §5.3 一致）
+- **对本课题**：计划「极限 2-bit + 旋转」专名的已核实条目；与 OSCAR 题名相近必须分列。
+- **核实**：2026-09-15；arXiv abs + HTML v1
+
 ---
 
 ## 4. 跨工作对比维度
@@ -265,7 +371,8 @@ queries → inbox → 核实 venue/DOI → ledger.yaml → 改本手册表/卡�
 
 | 对照角色 | 相关来源 | 使用边界 |
 |---|---|---|
-| 公开 GPU 系统与内核 | BitDecoding、SAW-INT4、QServe、Flash-Decoding | 固定版本、模型、几何和指标；区分 KV-only 与全模型量化 |
+| 公开 GPU 系统与内核 | BitDecoding、SAW-INT4、QServe、Flash-Decoding、OSCAR | 固定版本、模型、几何和指标；区分 KV-only 与全模型量化；OSCAR 不是 OScaR |
+| 混合 / 结构感知比特（算法） | KVTuner、PM-KVQ、KVmix、MixKVQ、Block-GTQ、OScaR | 精度或服务数字不直接填入本项目结果；注意残差窗、假量化与渐进 16-bit 收缩 |
 | 尺度处理与复用 | InnerQ、Multi-Scale Dequant | 区分微基准、数值仿真、分析模型与本项目实测 |
 | 专用架构 | PLENA | 核对资源、数值格式和模拟/RTL 层级 |
 | 项目功能与性能基线 | 同 codec 高精度参考、先展开再计算、优化 FP16、共享流式解码 | 具体对照、消融与否定条件在 R2 计划维护 |

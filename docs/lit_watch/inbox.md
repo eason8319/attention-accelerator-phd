@@ -16,11 +16,46 @@
 
 ## 待审列表
 
-（当前为空。）
+（当前无未核实候选。2026-09-15 定向检索的计划专名均已入库，见下方检索记录。）
 
 ## 最近一次检索记录
 
-本次 2026-09-11 定向核对 R2 的七项来源；补录以下三项，并更新已有 BitDecoding、SAW-INT4、InnerQ 和 PLENA 的引用信息。不是全领域重新检索。
+本次 2026-09-15 按冻结范围做定向补录（decode × 混合/低比特 KV，单芯片推理对照），不是全领域重新检索。查询了研究计划中尚未入账的 OScaR、PM-KVQ、KVmix、MixKVQ，以及题名相近的 OSCAR。
+
+### 2026-09-15 | KVmix
+
+- link: https://ojs.aaai.org/index.php/AAAI/article/view/40422
+- why: 计划中的层间混合精度 + 时间维高精度窗代表。
+- suggested_bucket: algo_gpu
+- status: verified → ledger；DOI 10.1609/aaai.v40i37.40422；bibtex_key `kvmix2026`
+
+### 2026-09-15 | PM-KVQ
+
+- link: https://openreview.net/forum?id=Vem6FQvRvq
+- why: 计划中的渐进/块级混合精度与长 CoT 误差累积设定。
+- suggested_bucket: algo_gpu
+- status: verified → ledger；ICLR 2026 Poster，无 Crossref DOI；bibtex_key `pmkvq2026`
+
+### 2026-09-15 | MixKVQ
+
+- link: https://aclanthology.org/2026.acl-long.326/
+- why: 计划中的 query 感知通道混合比特代表。
+- suggested_bucket: algo_gpu
+- status: verified → ledger；DOI 10.18653/v1/2026.acl-long.326；bibtex_key `mixkvq2026`
+
+### 2026-09-15 | OSCAR（谱协方差；不是 OScaR）
+
+- link: https://arxiv.org/abs/2605.17757
+- why: 与计划 2-bit + 残差窗同类，且为 paged SGLang INT2 内核；必须与 OScaR 分列。
+- suggested_bucket: algo_gpu
+- status: verified → ledger；预印本；bibtex_key `zhou2026oscar`
+
+### 2026-09-15 | OScaR（Occam；不是 OSCAR）
+
+- link: https://arxiv.org/abs/2605.19660
+- why: 计划点名的极限 2-bit + 旋转方法族。
+- suggested_bucket: algo_gpu
+- status: verified → ledger；预印本；bibtex_key `su2026oscar`
 
 ### 2026-09-11 | Flash-Decoding
 

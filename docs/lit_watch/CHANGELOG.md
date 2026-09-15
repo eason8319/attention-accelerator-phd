@@ -4,6 +4,12 @@
 
 ---
 
+## 2026-09-15（计划专名定向补录）
+
+- 按冻结范围定向核验研究计划中尚未入账的 OScaR、PM-KVQ、KVmix、MixKVQ，并补入题名相近、必须分列的 OSCAR（arXiv:2605.17757）。不是全领域检索，也不把 Cutoff 写成穷尽声称。
+- Venue：KVmix → AAAI 2026（DOI 10.1609/aaai.v40i37.40422）；PM-KVQ → ICLR 2026 Poster（OpenReview `Vem6FQvRvq`，无 Crossref DOI）；MixKVQ → ACL 2026（DOI 10.18653/v1/2026.acl-long.326）；OScaR 与 OSCAR 保持预印本。
+- 手册在既有总览表按首次公开日期插入五行并新增卡片；BibTeX 键为 `kvmix2026`、`pmkvq2026`、`mixkvq2026`、`zhou2026oscar`、`su2026oscar`。未改综述 `.tex` 正文，未写入 R1 实验数字。
+
 ## 2026-09-11（对照表排序与来源标签）
 
 - 手册 §2.1 和 §2.2 按台账首次公开日期升序排列，同日保持原顺序；保留正式 Venue 与原有结果。

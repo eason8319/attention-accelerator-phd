@@ -4,7 +4,7 @@
 # source_type: paper (default) | technical_post; author code is attached to its source record
 # bucket: algo_gpu | hw_asic_fpga | survey | adjacent
 #
-# Latest incremental verification: 2026-09-11 (seven R2 sources; not a full-ledger re-audit)
+# Latest incremental verification: 2026-09-15（计划专名与同类 2-bit 旋转；非全表重审）
 
 quantitative_audit:
   date: "2026-09-03"
@@ -13,12 +13,12 @@ quantitative_audit:
   scope: "all 21 ledger entries; latest public full text or official proceedings"
 
 cutoff:
-  date: "2026-09-11"
-  scope: "R2 seven-source incremental check; previous full search 2026-09-03; not an exhaustive search through this date"
+  date: "2026-09-15"
+  scope: "directed increment: plan-named mixed/low-bit KV papers (OScaR, PM-KVQ, KVmix, MixKVQ) plus similar OSCAR INT2 rotation; previous R2 seven-source check 2026-09-11 and full search 2026-09-03; not an exhaustive search through this date"
   latest_seen:
     arxiv_id: "2608.23843"
     title: "PuzzleKV: Page-Wise Low-Rank Decomposition for KV Cache Compression"
-    note: "preprint; arXiv first posted 2026-08-24"
+    note: "preprint; arXiv first posted 2026-08-24; 2026-09-15 increment did not replace this as the newest recorded item"
 
 papers:
   - id: kivi
@@ -706,3 +706,179 @@ papers:
       - "https://arxiv.org/html/2605.13915v1"
     result_source: "abstract; Sec. 4.2-4.4, Sec. 5.1, Sec. 6 numerical simulation"
     notes: "BF16 activation decomposition into multiple low-precision passes; K scales absorbed into Q. Abstract claims about 16 effective bits for two INT8 passes, about 6.6 for MXFP4 vs 5.24 for MXFP8, error bound alpha/64, and up to 2.5x KV HBM reduction. Sec. 4.4.4 derives 5Md/2Md under a Vector-HBM-Cube round trip; not measured traffic on this ASIC or a fused baseline. Sec. 6 uses NumPy/PyTorch with FP32 golden; no full-model quality or end-to-end speed validation. abs calls INT8 weights W4A16, while HTML says W8A16; HTML title date is August 24 although arXiv history is May 13. Use arXiv version history for publication metadata, retain discrepancies."
+
+  # 2026-09-15 定向补录：研究计划中尚未入账的混合/低比特 KV 专名，以及易混的 OSCAR（与 OScaR 不是同一篇）
+  - id: kvmix
+    short_name: KVmix
+    source_type: paper
+    title_official: "KVmix: Gradient-Based Layer Importance-Aware Mixed-Precision Quantization for KV Cache"
+    title_arxiv: "KVmix: Gradient-Based Layer Importance-Aware Mixed-Precision Quantization for KV Cache"
+    authors:
+      - Fei Li
+      - Song Liu
+      - Weiguo Wu
+      - Shiqiang Nie
+      - Jinyu Wang
+    venue: "AAAI 2026"
+    venue_detail: "Proceedings of the AAAI Conference on Artificial Intelligence, 40(37):31563-31572"
+    venue_type: proceedings
+    year: 2026
+    arxiv_id: "2506.08018"
+    arxiv_first_posted: "2025-05-18"
+    arxiv_last_updated: "2026-02-02"
+    doi: "10.1609/aaai.v40i37.40422"
+    canonical_url: "https://ojs.aaai.org/index.php/AAAI/article/view/40422"
+    code: "https://github.com/LfLab-AI/KVmix"
+    bucket: algo_gpu
+    status: verified
+    verified_on: "2026-09-15"
+    reviewed_version: "AAAI 2026 proceedings PDF; arXiv v3 metadata"
+    verify_sources:
+      - "https://ojs.aaai.org/index.php/AAAI/article/view/40422"
+      - "https://doi.org/10.1609/aaai.v40i37.40422"
+      - "https://arxiv.org/abs/2506.08018"
+    bibtex_key: "kvmix2026"
+    result_source: "abstract; Table 1-3; Fig. 7-8; Experimental Setup"
+    notes: "Layer-wise mixed bits from L2 gradient norms of K/V projections; recent pivotal tokens kept full precision (RPC). Experimental Setup: RTX 4090 24GB for efficiency; LongBench max length 4096 due to GPU memory. Table 1 Llama-2-7B LongBench avg FP16 33.839 vs k2.19v2.38 33.714. Table 3 GSM8K 13.25 vs FP16 13.52; Wikitext-2 ppl 8.71 vs 8.71. Fig. 8: Llama-2-7B-hf, input 688 / gen 1024, FP16 OOM at BS=4, KVmix max BS=30 at 1032 tok/s (figure 5.32x; abstract 5.3x). Fig. 7 memory about 4.9x vs FP16 at BS=4. Not a fused no-FP16-expand ASIC path; RPC is an explicit high-precision window."
+
+  - id: pm_kvq
+    short_name: PM-KVQ
+    source_type: paper
+    title_official: "PM-KVQ: Progressive Mixed-precision KV Cache Quantization for Long-CoT LLMs"
+    authors:
+      - Tengxuan Liu
+      - Shiyao Li
+      - Jiayi Yang
+      - Tianchen Zhao
+      - Feng Zhou
+      - Xiaohui Song
+      - Guohao Dai
+      - Shengen Yan
+      - Huazhong Yang
+      - Yu Wang
+    venue: "ICLR 2026"
+    venue_detail: "ICLR 2026 Poster; OpenReview forum id Vem6FQvRvq"
+    venue_type: proceedings
+    year: 2026
+    arxiv_id: "2505.18610"
+    arxiv_first_posted: "2025-05-24"
+    arxiv_last_updated: "2026-07-11"
+    doi: null
+    canonical_url: "https://openreview.net/forum?id=Vem6FQvRvq"
+    code: "https://github.com/thu-nics/PM-KVQ"
+    bucket: algo_gpu
+    status: verified
+    verified_on: "2026-09-15"
+    reviewed_version: "ICLR 2026 OpenReview PDF; arXiv v2 metadata"
+    verify_sources:
+      - "https://openreview.net/forum?id=Vem6FQvRvq"
+      - "https://openreview.net/pdf?id=Vem6FQvRvq"
+      - "https://iclr.cc/virtual/2026/poster/10009118"
+      - "https://arxiv.org/abs/2505.18610"
+    bibtex_key: "pmkvq2026"
+    result_source: "abstract; Table 2-3; Sec. 4.1-4.3"
+    notes: "Progressive 16->8->4->2 shrinking plus block-wise integer-program bit tables; RoPE positional interpolation in calibration. Quality in Sec. 4.1 is fake quantization on 8x A100-80G; do not treat as fused decode quality. Table 2 DeepSeek-R1-Distill-Qwen-7B on 1x 4090-24G, AIME-2024 pass@1: 16-bit 41.04, KIVI 2-2 32.08, PM-KVQ BS=40 2-2 40.00 (about +7.92 points vs KIVI; abstract 'up to 8%' is this point gap, not a relative percent). Table 3 A100-80G tokens/s, official KIVI engine: Qwen-7B orig BS=18 vs quantized BS=110, 32K 52.06 vs PM-KVQ 269.51; Qwen-32B orig BS=1 vs quantized BS=4, 16K 12.34 vs 33.74. Body 2.73-5.18x vs 16-bit matches those two endpoints. Starts from 16-bit occupancy then shrinks; not 'never materialize FP16 KV'."
+
+  - id: mixkvq
+    short_name: MixKVQ
+    source_type: paper
+    title_official: "MixKVQ: Query-Aware Mixed-Precision KV Cache Quantization for Long-Context Reasoning"
+    authors:
+      - Tao Zhang
+      - Ziqian Zeng
+      - Hao Peng
+      - Huiping Zhuang
+      - Cen Chen
+    venue: "ACL 2026"
+    venue_detail: "Proceedings of the 64th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers), pages 7189-7204, San Diego"
+    venue_type: proceedings
+    year: 2026
+    arxiv_id: "2512.19206"
+    arxiv_first_posted: "2025-12-22"
+    arxiv_last_updated: "2025-12-22"
+    doi: "10.18653/v1/2026.acl-long.326"
+    canonical_url: "https://aclanthology.org/2026.acl-long.326/"
+    code: null
+    bucket: algo_gpu
+    status: verified
+    verified_on: "2026-09-15"
+    reviewed_version: "ACL 2026 Anthology PDF; arXiv v1 metadata"
+    verify_sources:
+      - "https://aclanthology.org/2026.acl-long.326/"
+      - "https://doi.org/10.18653/v1/2026.acl-long.326"
+      - "https://aclanthology.org/2026.acl-long.326.bib"
+      - "https://arxiv.org/abs/2512.19206"
+    bibtex_key: "mixkvq2026"
+    result_source: "abstract; Table 3-4; Sec. 5.1-5.4"
+    notes: "Query-aware key-channel salience A_d=I_d*S_d; K mixed BF16/UINT4/UINT2 per channel, V uniform 2-bit per token; recent buffer of length R then group quantize (G=32, R=128 in main tables). Single A800 80GB. Table 3 DeepSeek-R1-Distill-Qwen-32B avg: BF16 67.84, MixKVQ-C2.3 66.04, KIVI KV2 58.89, RotateKV KV4 64.51. Table 4 Llama-3.1-8B-Instruct LongBench avg MixKVQ C2.7 53.71 vs BF16 54.00. Fig. 5 Llama2-13B-chat ShareGPT, vLLM-style memory saturation: up to 2.25x batch and 2.63-2.81x throughput vs FP16. Limitations: non-contiguous mixed-precision blocks may add decode latency; no vLLM integration in this paper. Residual window is explicit high precision, not a claim of zero FP16 KV."
+
+  - id: oscar_spectral
+    short_name: OSCAR
+    source_type: paper
+    title_official: "OSCAR: Offline Spectral Covariance-Aware Rotation for 2-bit KV Cache Quantization"
+    authors:
+      - Zhongzhu Zhou
+      - Donglin Zhuang
+      - Jisen Li
+      - Ziyan Chen
+      - Shuaiwen Leon Song
+      - Ben Athiwaratkun
+      - Xiaoxia Wu
+    venue: "preprint (arXiv)"
+    venue_type: preprint
+    year: 2026
+    arxiv_id: "2605.17757"
+    arxiv_first_posted: "2026-05-18"
+    arxiv_last_updated: "2026-05-18"
+    doi: null
+    canonical_url: "https://arxiv.org/abs/2605.17757"
+    code: "https://github.com/FutureMLS-Lab/OSCAR"
+    bucket: algo_gpu
+    status: verified
+    verified_on: "2026-09-15"
+    reviewed_version: "arXiv v1 HTML"
+    verify_sources:
+      - "https://arxiv.org/abs/2605.17757"
+      - "https://arxiv.org/html/2605.17757"
+    bibtex_key: "zhou2026oscar"
+    result_source: "abstract; Table 1-2; Fig. 4; Sec. 5.1-5.2"
+    notes: "Distinct from OScaR (su2026oscar / 2605.19660). Offline attention-aware covariance rotations, INT2 history plus BF16 sink=64 and recent=256, paged SGLang kernels. Table 2 mean-gap to BF16 at 2.28 BPE: Qwen3-4B-Thinking-2507 -3.78, Qwen3-8B -1.42, Qwen3-32B -0.02, GLM-4.7-FP8 +0.27. Table 1 AIME25 32K: Qwen3-8B OSCAR 66.67 vs BF16 66.00 (BPE 2.38 in that table). Fig. 4 Qwen3-4B BS=1 prefix-hit decode vs BF16: 1.98x/2.52x/3.08x at 30k/60k/100k; GLM-4.7-FP8 2.83x at BS=1 and 7.83x at BS=32 (100k). Abstract says about 8x KV memory, up to 7x throughput, up to 3x BS=1 decode; body 7.83x exceeds the abstract '7x' cap, cite Fig. 4 not the abstract cap. H100; Qwen3-32B/GLM use TP."
+
+  - id: oscar_occam
+    short_name: OScaR
+    source_type: paper
+    title_official: "OScaR: The Occam's Razor for Extreme KV Cache Quantization in LLMs and Beyond"
+    authors:
+      - Zunhai Su
+      - Rui Yang
+      - Chao Zhang
+      - Yaxiu Liu
+      - Yifan Zhang
+      - Wei Wu
+      - Jing Xiong
+      - Dayou Du
+      - Xialie Zhuang
+      - Yulei Qian
+      - Yuchen Xie
+      - Yik-Chung Wu
+      - Hongxia Yang
+      - Ngai Wong
+    venue: "preprint (arXiv)"
+    venue_type: preprint
+    year: 2026
+    arxiv_id: "2605.19660"
+    arxiv_first_posted: "2026-05-19"
+    arxiv_last_updated: "2026-05-19"
+    doi: null
+    canonical_url: "https://arxiv.org/abs/2605.19660"
+    code: "https://github.com/ZunhaiSu/OScaR-KV-Quant"
+    bucket: algo_gpu
+    status: verified
+    verified_on: "2026-09-15"
+    reviewed_version: "arXiv v1 HTML"
+    verify_sources:
+      - "https://arxiv.org/abs/2605.19660"
+      - "https://arxiv.org/html/2605.19660v1"
+    bibtex_key: "su2026oscar"
+    result_source: "abstract; Table 1; Sec. 5.3 / Fig. 6"
+    notes: "Distinct from OSCAR (zhou2026oscar / 2605.17757). Canalized Hadamard rotation plus Omni-Token Scaling against Token Norm Imbalance; training-free INT2; CUDA on BitDecoding/HadaCore. Table 1 LongBench-E INT2 g=32: Llama-3.1-8B avg OScaR 41.75 vs 16-bit 41.70; Qwen3-8B 48.74 vs 49.56. Sec. 5.3 single H20 141GB, Qwen3-8B vs BF16 FlashDecoding-v2: 128K decode up to 3.0x; BS=48 memory 5.3x and throughput 4.1x. These three efficiency numbers match the abstract when bound to that GPU/model/shape. Does not by itself prove a mixed-format paged path without FP16 expansion."
