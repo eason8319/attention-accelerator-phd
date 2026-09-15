@@ -4,7 +4,7 @@
 # source_type: paper (default) | technical_post; author code is attached to its source record
 # bucket: algo_gpu | hw_asic_fpga | survey | adjacent
 #
-# Latest incremental verification: 2026-09-11 (seven R2 sources; not a full-ledger re-audit)
+# Latest incremental verification: 2026-09-15（第二轮定向：混合精度 paged 内核与 FA-native / 阵列实时 KV 硬件对照；非全表重审）
 
 quantitative_audit:
   date: "2026-09-03"
@@ -13,12 +13,12 @@ quantitative_audit:
   scope: "all 21 ledger entries; latest public full text or official proceedings"
 
 cutoff:
-  date: "2026-09-11"
-  scope: "R2 seven-source incremental check; previous full search 2026-09-03; not an exhaustive search through this date"
+  date: "2026-09-15"
+  scope: "second directed increment on 2026-09-15: remaining in-scope gaps vs frozen decode x mixed/low-bit KV (Kitty paged mixed-precision; plan-named FA-native StreamAttention/COSA+/DESA; M-ANT systolic real-time KV). Not a full-field sweep. Previous same-day plan-name increment, streaming-path seven-source check 2026-09-11, and full search 2026-09-03 remain."
   latest_seen:
     arxiv_id: "2608.23843"
     title: "PuzzleKV: Page-Wise Low-Rank Decomposition for KV Cache Compression"
-    note: "preprint; arXiv first posted 2026-08-24"
+    note: "newest verified ledger item by arXiv id; inbox lists SemKV 2608.28911 (first posted 2026-08-28) as unverified and later"
 
 papers:
   - id: kivi
@@ -706,3 +706,348 @@ papers:
       - "https://arxiv.org/html/2605.13915v1"
     result_source: "abstract; Sec. 4.2-4.4, Sec. 5.1, Sec. 6 numerical simulation"
     notes: "BF16 activation decomposition into multiple low-precision passes; K scales absorbed into Q. Abstract claims about 16 effective bits for two INT8 passes, about 6.6 for MXFP4 vs 5.24 for MXFP8, error bound alpha/64, and up to 2.5x KV HBM reduction. Sec. 4.4.4 derives 5Md/2Md under a Vector-HBM-Cube round trip; not measured traffic on this ASIC or a fused baseline. Sec. 6 uses NumPy/PyTorch with FP32 golden; no full-model quality or end-to-end speed validation. abs calls INT8 weights W4A16, while HTML says W8A16; HTML title date is August 24 although arXiv history is May 13. Use arXiv version history for publication metadata, retain discrepancies."
+
+  # 2026-09-15 定向补录：研究计划中尚未入账的混合/低比特 KV 专名，以及易混的 OSCAR（与 OScaR 不是同一篇）
+  - id: kvmix
+    short_name: KVmix
+    source_type: paper
+    title_official: "KVmix: Gradient-Based Layer Importance-Aware Mixed-Precision Quantization for KV Cache"
+    title_arxiv: "KVmix: Gradient-Based Layer Importance-Aware Mixed-Precision Quantization for KV Cache"
+    authors:
+      - Fei Li
+      - Song Liu
+      - Weiguo Wu
+      - Shiqiang Nie
+      - Jinyu Wang
+    venue: "AAAI 2026"
+    venue_detail: "Proceedings of the AAAI Conference on Artificial Intelligence, 40(37):31563-31572"
+    venue_type: proceedings
+    year: 2026
+    arxiv_id: "2506.08018"
+    arxiv_first_posted: "2025-05-18"
+    arxiv_last_updated: "2026-02-02"
+    doi: "10.1609/aaai.v40i37.40422"
+    canonical_url: "https://ojs.aaai.org/index.php/AAAI/article/view/40422"
+    code: "https://github.com/LfLab-AI/KVmix"
+    bucket: algo_gpu
+    status: verified
+    verified_on: "2026-09-15"
+    reviewed_version: "AAAI 2026 proceedings PDF; arXiv v3 metadata"
+    verify_sources:
+      - "https://ojs.aaai.org/index.php/AAAI/article/view/40422"
+      - "https://doi.org/10.1609/aaai.v40i37.40422"
+      - "https://arxiv.org/abs/2506.08018"
+    bibtex_key: "kvmix2026"
+    result_source: "abstract; Table 1-3; Fig. 7-8; Experimental Setup"
+    notes: "Layer-wise mixed bits from L2 gradient norms of K/V projections; recent pivotal tokens kept full precision (RPC). Experimental Setup: RTX 4090 24GB for efficiency; LongBench max length 4096 due to GPU memory. Table 1 Llama-2-7B LongBench avg FP16 33.839 vs k2.19v2.38 33.714. Table 3 GSM8K 13.25 vs FP16 13.52; Wikitext-2 ppl 8.71 vs 8.71. Fig. 8: Llama-2-7B-hf, input 688 / gen 1024, FP16 OOM at BS=4, KVmix max BS=30 at 1032 tok/s (figure 5.32x; abstract 5.3x). Fig. 7 memory about 4.9x vs FP16 at BS=4. Not a fused no-FP16-expand ASIC path; RPC is an explicit high-precision window."
+
+  - id: pm_kvq
+    short_name: PM-KVQ
+    source_type: paper
+    title_official: "PM-KVQ: Progressive Mixed-precision KV Cache Quantization for Long-CoT LLMs"
+    authors:
+      - Tengxuan Liu
+      - Shiyao Li
+      - Jiayi Yang
+      - Tianchen Zhao
+      - Feng Zhou
+      - Xiaohui Song
+      - Guohao Dai
+      - Shengen Yan
+      - Huazhong Yang
+      - Yu Wang
+    venue: "ICLR 2026"
+    venue_detail: "ICLR 2026 Poster; OpenReview forum id Vem6FQvRvq"
+    venue_type: proceedings
+    year: 2026
+    arxiv_id: "2505.18610"
+    arxiv_first_posted: "2025-05-24"
+    arxiv_last_updated: "2026-07-11"
+    doi: null
+    canonical_url: "https://openreview.net/forum?id=Vem6FQvRvq"
+    code: "https://github.com/thu-nics/PM-KVQ"
+    bucket: algo_gpu
+    status: verified
+    verified_on: "2026-09-15"
+    reviewed_version: "ICLR 2026 OpenReview PDF; arXiv v2 metadata"
+    verify_sources:
+      - "https://openreview.net/forum?id=Vem6FQvRvq"
+      - "https://openreview.net/pdf?id=Vem6FQvRvq"
+      - "https://iclr.cc/virtual/2026/poster/10009118"
+      - "https://arxiv.org/abs/2505.18610"
+    bibtex_key: "pmkvq2026"
+    result_source: "abstract; Table 2-3; Sec. 4.1-4.3"
+    notes: "Progressive 16->8->4->2 shrinking plus block-wise integer-program bit tables; RoPE positional interpolation in calibration. Quality in Sec. 4.1 is fake quantization on 8x A100-80G; do not treat as fused decode quality. Table 2 DeepSeek-R1-Distill-Qwen-7B on 1x 4090-24G, AIME-2024 pass@1: 16-bit 41.04, KIVI 2-2 32.08, PM-KVQ BS=40 2-2 40.00 (about +7.92 points vs KIVI; abstract 'up to 8%' is this point gap, not a relative percent). Table 3 A100-80G tokens/s, official KIVI engine: Qwen-7B orig BS=18 vs quantized BS=110, 32K 52.06 vs PM-KVQ 269.51; Qwen-32B orig BS=1 vs quantized BS=4, 16K 12.34 vs 33.74. Body 2.73-5.18x vs 16-bit matches those two endpoints. Starts from 16-bit occupancy then shrinks; not 'never materialize FP16 KV'."
+
+  - id: mixkvq
+    short_name: MixKVQ
+    source_type: paper
+    title_official: "MixKVQ: Query-Aware Mixed-Precision KV Cache Quantization for Long-Context Reasoning"
+    authors:
+      - Tao Zhang
+      - Ziqian Zeng
+      - Hao Peng
+      - Huiping Zhuang
+      - Cen Chen
+    venue: "ACL 2026"
+    venue_detail: "Proceedings of the 64th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers), pages 7189-7204, San Diego"
+    venue_type: proceedings
+    year: 2026
+    arxiv_id: "2512.19206"
+    arxiv_first_posted: "2025-12-22"
+    arxiv_last_updated: "2025-12-22"
+    doi: "10.18653/v1/2026.acl-long.326"
+    canonical_url: "https://aclanthology.org/2026.acl-long.326/"
+    code: null
+    bucket: algo_gpu
+    status: verified
+    verified_on: "2026-09-15"
+    reviewed_version: "ACL 2026 Anthology PDF; arXiv v1 metadata"
+    verify_sources:
+      - "https://aclanthology.org/2026.acl-long.326/"
+      - "https://doi.org/10.18653/v1/2026.acl-long.326"
+      - "https://aclanthology.org/2026.acl-long.326.bib"
+      - "https://arxiv.org/abs/2512.19206"
+    bibtex_key: "mixkvq2026"
+    result_source: "abstract; Table 3-4; Sec. 5.1-5.4"
+    notes: "Query-aware key-channel salience A_d=I_d*S_d; K mixed BF16/UINT4/UINT2 per channel, V uniform 2-bit per token; recent buffer of length R then group quantize (G=32, R=128 in main tables). Single A800 80GB. Table 3 DeepSeek-R1-Distill-Qwen-32B avg: BF16 67.84, MixKVQ-C2.3 66.04, KIVI KV2 58.89, RotateKV KV4 64.51. Table 4 Llama-3.1-8B-Instruct LongBench avg MixKVQ C2.7 53.71 vs BF16 54.00. Fig. 5 Llama2-13B-chat ShareGPT, vLLM-style memory saturation: up to 2.25x batch and 2.63-2.81x throughput vs FP16. Limitations: non-contiguous mixed-precision blocks may add decode latency; no vLLM integration in this paper. Residual window is explicit high precision, not a claim of zero FP16 KV."
+
+  - id: oscar_spectral
+    short_name: OSCAR
+    source_type: paper
+    title_official: "OSCAR: Offline Spectral Covariance-Aware Rotation for 2-bit KV Cache Quantization"
+    authors:
+      - Zhongzhu Zhou
+      - Donglin Zhuang
+      - Jisen Li
+      - Ziyan Chen
+      - Shuaiwen Leon Song
+      - Ben Athiwaratkun
+      - Xiaoxia Wu
+    venue: "preprint (arXiv)"
+    venue_type: preprint
+    year: 2026
+    arxiv_id: "2605.17757"
+    arxiv_first_posted: "2026-05-18"
+    arxiv_last_updated: "2026-05-18"
+    doi: null
+    canonical_url: "https://arxiv.org/abs/2605.17757"
+    code: "https://github.com/FutureMLS-Lab/OSCAR"
+    bucket: algo_gpu
+    status: verified
+    verified_on: "2026-09-15"
+    reviewed_version: "arXiv v1 HTML"
+    verify_sources:
+      - "https://arxiv.org/abs/2605.17757"
+      - "https://arxiv.org/html/2605.17757"
+    bibtex_key: "zhou2026oscar"
+    result_source: "abstract; Table 1-2; Fig. 4; Sec. 5.1-5.2"
+    notes: "Distinct from OScaR (su2026oscar / 2605.19660). Offline attention-aware covariance rotations, INT2 history plus BF16 sink=64 and recent=256, paged SGLang kernels. Table 2 mean-gap to BF16 at 2.28 BPE: Qwen3-4B-Thinking-2507 -3.78, Qwen3-8B -1.42, Qwen3-32B -0.02, GLM-4.7-FP8 +0.27. Table 1 AIME25 32K: Qwen3-8B OSCAR 66.67 vs BF16 66.00 (BPE 2.38 in that table). Fig. 4 Qwen3-4B BS=1 prefix-hit decode vs BF16: 1.98x/2.52x/3.08x at 30k/60k/100k; GLM-4.7-FP8 2.83x at BS=1 and 7.83x at BS=32 (100k). Abstract says about 8x KV memory, up to 7x throughput, up to 3x BS=1 decode; body 7.83x exceeds the abstract '7x' cap, cite Fig. 4 not the abstract cap. H100; Qwen3-32B/GLM use TP."
+
+  - id: oscar_occam
+    short_name: OScaR
+    source_type: paper
+    title_official: "OScaR: The Occam's Razor for Extreme KV Cache Quantization in LLMs and Beyond"
+    authors:
+      - Zunhai Su
+      - Rui Yang
+      - Chao Zhang
+      - Yaxiu Liu
+      - Yifan Zhang
+      - Wei Wu
+      - Jing Xiong
+      - Dayou Du
+      - Xialie Zhuang
+      - Yulei Qian
+      - Yuchen Xie
+      - Yik-Chung Wu
+      - Hongxia Yang
+      - Ngai Wong
+    venue: "preprint (arXiv)"
+    venue_type: preprint
+    year: 2026
+    arxiv_id: "2605.19660"
+    arxiv_first_posted: "2026-05-19"
+    arxiv_last_updated: "2026-05-19"
+    doi: null
+    canonical_url: "https://arxiv.org/abs/2605.19660"
+    code: "https://github.com/ZunhaiSu/OScaR-KV-Quant"
+    bucket: algo_gpu
+    status: verified
+    verified_on: "2026-09-15"
+    reviewed_version: "arXiv v1 HTML"
+    verify_sources:
+      - "https://arxiv.org/abs/2605.19660"
+      - "https://arxiv.org/html/2605.19660v1"
+    bibtex_key: "su2026oscar"
+    result_source: "abstract; Table 1; Sec. 5.3 / Fig. 6"
+    notes: "Distinct from OSCAR (zhou2026oscar / 2605.17757). Canalized Hadamard rotation plus Omni-Token Scaling against Token Norm Imbalance; training-free INT2; CUDA on BitDecoding/HadaCore. Table 1 LongBench-E INT2 g=32: Llama-3.1-8B avg OScaR 41.75 vs 16-bit 41.70; Qwen3-8B 48.74 vs 49.56. Sec. 5.3 single H20 141GB, Qwen3-8B vs BF16 FlashDecoding-v2: 128K decode up to 3.0x; BS=48 memory 5.3x and throughput 4.1x. These three efficiency numbers match the abstract when bound to that GPU/model/shape. Does not by itself prove a mixed-format paged path without FP16 expansion."
+
+  # 2026-09-15 第二轮定向：混合精度 paged 内核 + 计划点名的 FA-native 硬件 + 低比特 KV 脉动阵列
+  - id: kitty
+    short_name: Kitty
+    source_type: paper
+    title_official: "Kitty: Accurate and Efficient 2-bit KV Cache Quantization with Dynamic Channel-wise Precision Boost"
+    title_arxiv: "Kitty: Accurate and Efficient 2-bit KV Cache Quantization with Dynamic Channel-wise Precision Boost"
+    authors:
+      - Haojun Xia
+      - Xiaoxia Wu
+      - Jisen Li
+      - Tsai-chuan Wu
+      - Junxiong Wang
+      - Jue Wang
+      - Chenxi Li
+      - Aman Singhal
+      - Alay Dilipbhai Shah
+      - Alpay Ariyak
+      - Donglin Zhuang
+      - Zhongzhu Zhou
+      - Ben Athiwaratkun
+      - Zhen Zheng
+      - Shuaiwen Leon Song
+    venue: "MLSys 2026"
+    venue_detail: "Proceedings of the 9th MLSys Conference, Bellevue, WA, USA, 2026; Oral"
+    venue_type: proceedings
+    year: 2026
+    arxiv_id: "2511.18643"
+    arxiv_first_posted: "2025-11-23"
+    arxiv_last_updated: "2025-11-23"
+    doi: null
+    canonical_url: "https://proceedings.mlsys.org/paper_files/paper/2026/hash/e4d8d1b5120be349d3fff8878650cf45-Abstract-Conference.html"
+    code: "https://github.com/Summer-Summer/Kitty"
+    bucket: algo_gpu
+    status: verified
+    verified_on: "2026-09-15"
+    reviewed_version: "MLSys 2026 proceedings PDF; arXiv v1 metadata"
+    verify_sources:
+      - "https://proceedings.mlsys.org/paper_files/paper/2026/hash/e4d8d1b5120be349d3fff8878650cf45-Abstract-Conference.html"
+      - "https://proceedings.mlsys.org/paper_files/paper/2026/file/e4d8d1b5120be349d3fff8878650cf45-Paper-Conference.pdf"
+      - "https://mlsys.org/virtual/2026/oral/3746"
+      - "https://arxiv.org/abs/2511.18643"
+    bibtex_key: "kitty2026"
+    result_source: "abstract; Table 3-5; Fig. 5; Sec. 4.1-4.3; Sec. 5.1-5.5; Eq. 7"
+    notes: "Key channels mostly INT2 with dynamic INT4 boost (Kitty 12.5%, Kitty-Pro 25%); V per-token 2-bit; FP16 sink S=32 and local R=128; page size G=128. Mixed-precision Key page split into two unified 2-bit tensors; Triton page dequant reconstructs an on-chip FP16 page (Alg. 1) then qk/sv kernels plus a PyTorch softmax, not a single fused online-softmax kernel. Table 3 Qwen3-8B avg: K16V16 77.15, KIVI-K2V2 61.39, Kitty 74.97, Kitty-Pro 76.18. Fig. 5 A100-80GB Qwen3-8B gen 8192, prompts about 100 tokens: Kitty-Pro up to 8x batch and 2.1x-4.1x throughput vs FP16 under the same memory budget. Eq. 7 effective bits 2200/N+2.357; at 32K about 2.44 bits (6.6x). No Crossref DOI at verification. arXiv metadata names 'Robert Wu' where the proceedings PDF lists Tsai-chuan Wu."
+
+  - id: mant
+    short_name: M-ANT
+    source_type: paper
+    title_official: "M-ANT: Efficient Low-bit Group Quantization for LLMs via Mathematically Adaptive Numerical Type"
+    title_arxiv: "M-ANT: Efficient Low-bit Group Quantization for LLMs via Mathematically Adaptive Numerical Type"
+    authors:
+      - Weiming Hu
+      - Haoyan Zhang
+      - Cong Guo
+      - Yu Feng
+      - Renyang Guan
+      - Zhendong Hua
+      - Zihan Liu
+      - Yue Guan
+      - Minyi Guo
+      - Jingwen Leng
+    venue: "HPCA 2025"
+    venue_detail: "2025 IEEE International Symposium on High Performance Computer Architecture (HPCA), Las Vegas, NV, USA, March 1-5, 2025, pp. 1112-1126"
+    venue_type: proceedings
+    year: 2025
+    arxiv_id: "2502.18755"
+    arxiv_first_posted: "2025-02-26"
+    arxiv_last_updated: "2025-02-26"
+    doi: "10.1109/HPCA61900.2025.00086"
+    canonical_url: "https://doi.org/10.1109/HPCA61900.2025.00086"
+    code: "https://github.com/SJTU-ReArch-Group/MANT_HPCA25"
+    bucket: hw_asic_fpga
+    status: verified
+    verified_on: "2026-09-15"
+    reviewed_version: "HPCA 2025 Crossref metadata; arXiv v1 HTML body"
+    verify_sources:
+      - "https://doi.org/10.1109/HPCA61900.2025.00086"
+      - "https://api.crossref.org/works/10.1109/HPCA61900.2025.00086"
+      - "https://arxiv.org/abs/2502.18755"
+      - "https://arxiv.org/html/2502.18755v1"
+    bibtex_key: "mant2025"
+    result_source: "abstract; Sec. VII; Table III-IV; Fig. 12-13"
+    notes: "Group-wise mathematically adaptive numeric type for weights and KV; spatial real-time quant for K and temporal for V; PE plus RQU on a systolic array. Verilog + Design Compiler TSMC 28 nm; SRAM via CACTI; cycle sim on DNNWeaver. Baselines Tender/OliVe/ANT do not quantize attention, so long-seq gains vs them mix KV quantization with baseline FP16 attention. Fig. 13 LLaMA-7B 2K-128K: average 2.99x (up to 4.46x) speedup and 2.81x (up to 4.10x) energy reduction vs Tender; those two pairs match the abstract. Table III LLaMA-2-7B: TruthfulQA BLEU FP16 27.88, W4A8+MANT-KV4 26.19; TriviaQA F1 87.72 vs 86.86. Whole-model W+A+KV PPL loss stated below 0.3. Not mixed-format paged online-softmax merge; not FA-native plumbing; weight+KV jointly quantized so not KV-only comparable."
+
+  - id: streamattention
+    short_name: StreamAttention
+    source_type: paper
+    title_official: "StreamAttention: Energy-Efficient and High-Utilization Attention on Systolic Hardware"
+    authors:
+      - Olav Førland
+      - H. T. Kung
+    venue: "ICML 2026 Workshop AdaptFM"
+    venue_detail: "AdaptFM: Resource-Adaptive Foundation Model Inference, ICML 2026 workshop poster; OpenReview forum SRQuPOMzkX"
+    venue_type: workshop
+    year: 2026
+    arxiv_id: null
+    first_posted: "2026-06-01"
+    doi: null
+    canonical_url: "https://icml.cc/virtual/2026/75239"
+    code: null
+    bucket: hw_asic_fpga
+    status: verified
+    verified_on: "2026-09-15"
+    reviewed_version: "ICML 2026 virtual abstract; AdaptFM accepted-paper list; OpenReview listing"
+    verify_sources:
+      - "https://icml.cc/virtual/2026/75239"
+      - "https://icml.cc/virtual/2026/workshop/54100"
+      - "https://adaptfm.gitlab.io/accepted-papers/"
+      - "https://openreview.net/forum?id=SRQuPOMzkX"
+    bibtex_key: "streamattention2025"
+    result_source: "abstract (ICML virtual page); body tables not retrieved (OpenReview PDF 403)"
+    notes: "Not ICML 2026 main conference. Single systolic array FlashAttention-2 with Chebyshev exp on MACs and a four-stage streaming schedule. Abstract: 95-98% utilization vs about 40% for SystolicAttention; up to about 2.8x per-layer attention energy and 2.9x average attention power vs the authors' baseline; about 34% area and +6% matmul power vs a standard systolic matrix unit. SkyWater 130 nm synthesis for area/power; SRAM energy from CACTI 7 at 90 nm (mixed process). No systematic low-bit KV. Existing bib key streamattention2025 retained; previous anonymous OpenReview-under-review note is obsolete."
+
+  - id: cosa_plus
+    short_name: COSA+
+    source_type: paper
+    title_official: "COSA Plus: Enhanced Co-Operative Systolic Arrays for Attention Mechanism in Transformers"
+    authors:
+      - Zhican Wang
+      - Gang Wang
+      - Guanghui He
+    venue: "IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems"
+    venue_detail: "vol. 44, no. 2, pp. 723-736, February 2025"
+    venue_type: journal
+    year: 2025
+    arxiv_id: null
+    doi: "10.1109/TCAD.2024.3434447"
+    canonical_url: "https://doi.org/10.1109/TCAD.2024.3434447"
+    code: null
+    bucket: hw_asic_fpga
+    status: verified
+    verified_on: "2026-09-15"
+    reviewed_version: "Crossref journal record; IEEE/DOI abstract"
+    verify_sources:
+      - "https://doi.org/10.1109/TCAD.2024.3434447"
+      - "https://api.crossref.org/works/10.1109/TCAD.2024.3434447"
+      - "https://ieeexplore.ieee.org/document/10612833/"
+    bibtex_key: "wang2023cosa"
+    result_source: "abstract (Crossref/DOI landing); full-text tables not retrieved (IEEE timeout)"
+    notes: "Cooperative systolic arrays with hybrid weight/output-stationary dataflow, fusion across cascaded GEMMs, and softmax latency hiding. Abstract: 2.29-2.60x throughput vs a traditional SA with the same MAC count, up to 94.7% PE utilization, 8.2x less off-chip access; 7.6-12.4x energy efficiency vs GeForce 3090 and 35.2-80.9x vs Intel 6226R. GPU/CPU energy ratios are cross-platform. No systematic low-bit KV. Existing bib key wang2023cosa retained although the journal issue is 2025."
+
+  - id: desa
+    short_name: DESA
+    source_type: paper
+    title_official: "DESA: Dataflow Efficient Systolic Array for Acceleration of Transformers"
+    authors:
+      - Zhican Wang
+      - Hongxiang Fan
+      - Guanghui He
+    venue: "IEEE Transactions on Computers"
+    venue_detail: "vol. 74, no. 6, pp. 2058-2072, June 2025"
+    venue_type: journal
+    year: 2025
+    arxiv_id: null
+    doi: "10.1109/TC.2025.3549621"
+    canonical_url: "https://doi.org/10.1109/TC.2025.3549621"
+    code: null
+    bucket: hw_asic_fpga
+    status: verified
+    verified_on: "2026-09-15"
+    reviewed_version: "Crossref journal record; Computer.org / DOI abstract"
+    verify_sources:
+      - "https://doi.org/10.1109/TC.2025.3549621"
+      - "https://api.crossref.org/works/10.1109/TC.2025.3549621"
+      - "https://www.computer.org/csdl/journal/tc/2025/06/10918723/251y0TiNn3O"
+    bibtex_key: "desa2025"
+    result_source: "abstract (DOI/Computer.org); full-text tables not retrieved (IEEE timeout)"
+    notes: "Paper states it focuses on Encoder-Only Transformers. Reconfigurable VPU/IPU fused into a hybrid-stationary array; fused attention tiling claimed to cut attention memory from O(N^2 H) to O(N). Abstract: 5.0-8.3x energy saving vs 3090 GPU and 25.6-88.4x vs Intel 6226R; 11.6-15.0x speedup and up to 2.3x energy saving vs SOTA accelerators. GPU/CPU energy is cross-platform. No systematic low-bit KV; not a long-context decode KV study."

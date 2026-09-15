@@ -86,12 +86,12 @@
 }
 
 @misc{streamattention2025,
-  title         = {StreamAttention: Energy-Efficient and High-Utilization Attention on Systolic Hardware},
-  author        = {{Anonymous authors}},
-  howpublished  = {OpenReview preprint (under review)},
-  year          = {2025},
-  url           = {https://openreview.net/forum?id=SRQuPOMzkX},
-  note          = {Author identities withheld on OpenReview as of verification date}
+  title        = {StreamAttention: Energy-Efficient and High-Utilization Attention on Systolic Hardware},
+  author       = {F{\o}rland, Olav and Kung, H. T.},
+  howpublished = {{ICML} 2026 Workshop on Resource-Adaptive Foundation Model Inference ({AdaptFM})},
+  year         = {2026},
+  url          = {https://icml.cc/virtual/2026/75239},
+  note         = {Workshop poster, not ICML main conference; OpenReview SRQuPOMzkX; published 2026-06-01; no DOI at verification; quantitative claims from abstract only; verified 2026-09-15}
 }
 
 @article{wang2023cosa,
@@ -416,4 +416,85 @@
   archivePrefix = {arXiv},
   url           = {https://arxiv.org/abs/2605.13915v1},
   note          = {Preprint v1; analytical models and numerical simulation; verified 2026-09-11}
+}
+
+% ===== 2026-09-15 directed increment: plan-named mixed/low-bit KV =====
+
+@inproceedings{kvmix2026,
+  title     = {{KVmix}: Gradient-Based Layer Importance-Aware Mixed-Precision Quantization for {KV} Cache},
+  author    = {Li, Fei and Liu, Song and Wu, Weiguo and Nie, Shiqiang and Wang, Jinyu},
+  booktitle = {Proceedings of the {AAAI} Conference on Artificial Intelligence},
+  volume    = {40},
+  number    = {37},
+  pages     = {31563--31572},
+  year      = {2026},
+  doi       = {10.1609/aaai.v40i37.40422},
+  url       = {https://doi.org/10.1609/aaai.v40i37.40422},
+  note      = {arXiv:2506.08018v3; verified 2026-09-15}
+}
+
+@inproceedings{pmkvq2026,
+  title     = {{PM-KVQ}: Progressive Mixed-precision {KV} Cache Quantization for Long-{CoT} {LLMs}},
+  author    = {Liu, Tengxuan and Li, Shiyao and Yang, Jiayi and Zhao, Tianchen and Zhou, Feng and Song, Xiaohui and Dai, Guohao and Yan, Shengen and Yang, Huazhong and Wang, Yu},
+  booktitle = {International Conference on Learning Representations ({ICLR})},
+  year      = {2026},
+  url       = {https://openreview.net/forum?id=Vem6FQvRvq},
+  note      = {ICLR 2026 Poster; arXiv:2505.18610v2; no Crossref DOI at verification; verified 2026-09-15}
+}
+
+@inproceedings{mixkvq2026,
+  title     = {{MixKVQ}: Query-Aware Mixed-Precision {KV} Cache Quantization for Long-Context Reasoning},
+  author    = {Zhang, Tao and Zeng, Ziqian and Peng, Hao and Zhuang, Huiping and Chen, Cen},
+  booktitle = {Proceedings of the 64th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)},
+  pages     = {7189--7204},
+  year      = {2026},
+  address   = {San Diego, California, United States},
+  publisher = {Association for Computational Linguistics},
+  doi       = {10.18653/v1/2026.acl-long.326},
+  url       = {https://aclanthology.org/2026.acl-long.326/},
+  note      = {arXiv:2512.19206v1; verified 2026-09-15}
+}
+
+@article{zhou2026oscar,
+  title         = {{OSCAR}: Offline Spectral Covariance-Aware Rotation for 2-bit {KV} Cache Quantization},
+  author        = {Zhou, Zhongzhu and Zhuang, Donglin and Li, Jisen and Chen, Ziyan and Song, Shuaiwen Leon and Athiwaratkun, Ben and Wu, Xiaoxia},
+  journal       = {arXiv preprint arXiv:2605.17757},
+  year          = {2026},
+  eprint        = {2605.17757},
+  archivePrefix = {arXiv},
+  url           = {https://arxiv.org/abs/2605.17757},
+  note          = {Preprint v1; distinct from OScaR (su2026oscar); verified 2026-09-15}
+}
+
+@article{su2026oscar,
+  title         = {{OScaR}: The Occam's Razor for Extreme {KV} Cache Quantization in {LLMs} and Beyond},
+  author        = {Su, Zunhai and Yang, Rui and Zhang, Chao and Liu, Yaxiu and Zhang, Yifan and Wu, Wei and Xiong, Jing and Du, Dayou and Zhuang, Xialie and Qian, Yulei and Xie, Yuchen and Wu, Yik-Chung and Yang, Hongxia and Wong, Ngai},
+  journal       = {arXiv preprint arXiv:2605.19660},
+  year          = {2026},
+  eprint        = {2605.19660},
+  archivePrefix = {arXiv},
+  url           = {https://arxiv.org/abs/2605.19660},
+  note          = {Preprint v1; distinct from OSCAR (zhou2026oscar); verified 2026-09-15}
+}
+
+% ===== 2026-09-15 directed increment: mixed-precision paged KV + FA-native / systolic hardware =====
+
+@inproceedings{kitty2026,
+  title     = {Kitty: Accurate and Efficient 2-bit {KV} Cache Quantization with Dynamic Channel-wise Precision Boost},
+  author    = {Xia, Haojun and Wu, Xiaoxia and Li, Jisen and Wu, Tsai-chuan and Wang, Junxiong and Wang, Jue and Li, Chenxi and Singhal, Aman and Shah, Alay Dilipbhai and Ariyak, Alpay and Zhuang, Donglin and Zhou, Zhongzhu and Athiwaratkun, Ben and Zheng, Zhen and Song, Shuaiwen Leon},
+  booktitle = {Proceedings of Machine Learning and Systems},
+  year      = {2026},
+  url       = {https://proceedings.mlsys.org/paper_files/paper/2026/hash/e4d8d1b5120be349d3fff8878650cf45-Abstract-Conference.html},
+  note      = {MLSys 2026 Oral; arXiv:2511.18643; no Crossref DOI at verification; proceedings PDF lists Tsai-chuan Wu where arXiv metadata lists Robert Wu; verified 2026-09-15}
+}
+
+@inproceedings{mant2025,
+  title     = {{M-ANT}: Efficient Low-bit Group Quantization for {LLMs} via Mathematically Adaptive Numerical Type},
+  author    = {Hu, Weiming and Zhang, Haoyan and Guo, Cong and Feng, Yu and Guan, Renyang and Hua, Zhendong and Liu, Zihan and Guan, Yue and Guo, Minyi and Leng, Jingwen},
+  booktitle = {2025 {IEEE} International Symposium on High Performance Computer Architecture ({HPCA})},
+  pages     = {1112--1126},
+  year      = {2025},
+  doi       = {10.1109/HPCA61900.2025.00086},
+  url       = {https://doi.org/10.1109/HPCA61900.2025.00086},
+  note      = {arXiv:2502.18755; verified 2026-09-15}
 }
