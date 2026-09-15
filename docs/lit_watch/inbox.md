@@ -16,11 +16,86 @@
 
 ## 待审列表
 
-（当前无未核实候选。2026-09-15 定向检索的计划专名均已入库，见下方检索记录。）
+### 2026-09-15 | SemKV
+- link: https://arxiv.org/abs/2608.28911
+- why: 混合精度 KV 与质量悬崖设定，可能收窄通道/token 混合精度对照。
+- suggested_bucket: algo_gpu
+- status: pending
+
+### 2026-09-15 | RotateKV
+- link: https://arxiv.org/abs/2501.16383
+- why: MixKVQ 等旋转 2-bit 基线族；IJCAI 2025 会刊页待核验入库。
+- suggested_bucket: algo_gpu
+- status: pending
+
+### 2026-09-15 | SKVQ
+- link: https://arxiv.org/abs/2405.06219
+- why: 滑动窗口 KV 量化，静态低比特与时间窗机制近邻。
+- suggested_bucket: algo_gpu
+- status: pending
+
+### 2026-09-15 | KVQuant
+- link: https://arxiv.org/abs/2401.18079
+- why: 亚 4-bit KV 与长上下文服务内核，静态低比特近邻。
+- suggested_bucket: algo_gpu
+- status: pending
+
+### 2026-09-15 | VitaLLM（两个 arXiv 标识）
+- link: https://arxiv.org/abs/2604.27396
+- why: 三值权重 + 稀疏 KV 取数加速器，相邻硬件；另见 https://arxiv.org/abs/2605.00320，须先核验是否同一工作的版本。
+- suggested_bucket: adjacent
+- status: pending
+
+### 2026-09-15 | VEDA
+- link: https://arxiv.org/abs/2507.00797
+- why: 投票驱逐 KV + 数据流加速器，稀疏 decode 相邻对照。
+- suggested_bucket: adjacent
+- status: pending
+
+### 2026-09-15 | SA-ANT
+- link: https://doi.org/10.23919/date69613.2026.11539270
+- why: DATE 2026 符号非对称自适应数值类型，与 M-ANT 同族，须核验是否覆盖 KV 还是仅权重。
+- suggested_bucket: hw_asic_fpga
+- status: pending
 
 ## 最近一次检索记录
 
-本次 2026-09-15 按冻结范围做定向补录（decode × 混合/低比特 KV，单芯片推理对照），不是全领域重新检索。查询了研究计划中尚未入账的 OScaR、PM-KVQ、KVmix、MixKVQ，以及题名相近的 OSCAR。
+本次 2026-09-15 第二轮按冻结范围做定向补录（decode × 混合/低比特 KV 流式 Attention，单芯片推理对照），不是全领域重新检索。核验了 Kitty、M-ANT、StreamAttention、COSA+、DESA；下列计划或检索中碰到的近邻未完成核实，留待审。
+
+### 2026-09-15 | Kitty
+
+- link: https://proceedings.mlsys.org/paper_files/paper/2026/hash/e4d8d1b5120be349d3fff8878650cf45-Abstract-Conference.html
+- why: 通道混合精度 + paged 反量化，收窄混合格式/通道 paged 对照。
+- suggested_bucket: algo_gpu
+- status: verified → ledger；MLSys 2026 Oral；bibtex_key `kitty2026`
+
+### 2026-09-15 | M-ANT
+
+- link: https://doi.org/10.1109/HPCA61900.2025.00086
+- why: 脉动阵列上的组级实时 KV 量化，硬件对照而非 KV-only 主行。
+- suggested_bucket: hw_asic_fpga
+- status: verified → ledger；HPCA 2025；bibtex_key `mant2025`
+
+### 2026-09-15 | StreamAttention
+
+- link: https://icml.cc/virtual/2026/75239
+- why: 计划点名的 FA-native plumbing；须标清 workshop 而非主会。
+- suggested_bucket: hw_asic_fpga
+- status: verified → ledger；ICML 2026 AdaptFM workshop；bibtex_key `streamattention2025`
+
+### 2026-09-15 | COSA+
+
+- link: https://doi.org/10.1109/TCAD.2024.3434447
+- why: 计划点名的合作脉动阵列注意力加速器。
+- suggested_bucket: hw_asic_fpga
+- status: verified → ledger；摘要级定量；bibtex_key `wang2023cosa`
+
+### 2026-09-15 | DESA
+
+- link: https://doi.org/10.1109/TC.2025.3549621
+- why: 计划点名的脉动注意力加速器；摘要声明 encoder-only。
+- suggested_bucket: hw_asic_fpga
+- status: verified → ledger；摘要级定量；bibtex_key `desa2025`
 
 ### 2026-09-15 | KVmix
 

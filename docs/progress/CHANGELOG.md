@@ -4,6 +4,10 @@
 
 ---
 
+## 2026-09-15（文献定向补录）
+
+- 对比手册与台账补入 Kitty、M-ANT、StreamAttention、COSA+、DESA；修订记录见 [lit_watch/CHANGELOG](../lit_watch/CHANGELOG.md)。未改综述正文，未运行实验。
+
 ## 2026-09-11（相关文献补录与引用登记）
 
 - 补齐[近年成果对比手册](../recent_works_comparison.md)中 R2 的相关来源，统一核验信息、台账及引用键；具体变更见[文献修订记录](../lit_watch/CHANGELOG.md)。

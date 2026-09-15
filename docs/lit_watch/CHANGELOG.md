@@ -4,6 +4,12 @@
 
 ---
 
+## 2026-09-15（混合精度 paged / FA-native 硬件定向补录）
+
+- 按冻结范围做第二轮定向核验（不是全领域检索）：Kitty（MLSys 2026 Oral）、M-ANT（HPCA 2025）、StreamAttention（ICML 2026 AdaptFM **workshop**）、COSA+、DESA。未改综述 `.tex` 正文。
+- Venue：Kitty 无 Crossref DOI，以 MLSys 会刊页为准；M-ANT DOI 10.1109/HPCA61900.2025.00086；StreamAttention 复用键 `streamattention2025` 并去掉匿名 under-review 注记；COSA+ / DESA 复用 `wang2023cosa` / `desa2025`，定量目前只核到摘要（IEEE 全文超时）。
+- 手册补总览行与卡片 §3.21–§3.25；§5 对照入口加入 Kitty 与 FA-native / M-ANT。Inbox 留下 SemKV、RotateKV、SKVQ、KVQuant、VitaLLM、VEDA、SA-ANT 待核验，不写入主表。
+
 ## 2026-09-15（计划专名定向补录）
 
 - 按冻结范围定向核验研究计划中尚未入账的 OScaR、PM-KVQ、KVmix、MixKVQ，并补入题名相近、必须分列的 OSCAR（arXiv:2605.17757）。不是全领域检索，也不把 Cutoff 写成穷尽声称。

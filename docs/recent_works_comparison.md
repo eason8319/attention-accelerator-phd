@@ -8,6 +8,7 @@
 
 | 日期 | 变更 |
 |------|------|
+| 2026-09-15 | 第二轮定向：补录 Kitty（MLSys 2026，混合精度 paged 反量化）、M-ANT（HPCA 2025，脉动阵列实时 KV 量化），以及计划点名的 FA-native 对照 StreamAttention（ICML 2026 AdaptFM **workshop**）、COSA+、DESA。不是全领域穷尽。 |
 | 2026-09-15 | 定向补录研究计划中尚未入账的 OScaR、PM-KVQ、KVmix、MixKVQ，以及易混的同类工作 OSCAR（与 OScaR 不是同一篇）；不重建总览表，不宣称全领域穷尽。 |
 | 2026-09-11 | §2.1/§2.2 按首次公开时间升序排列；三个新增条目的来源标签统一为英文，并保留全部条目和结果口径。 |
 | 2026-09-11 | 补录 Flash-Decoding、QServe、Multi-Scale Dequant，补全 R2 七项来源的元数据、实现入口与证据边界；建立全项目引用前核对和缺项补录规则，纠正旧建议编号与 R1 协议的冲突。 |
@@ -22,7 +23,7 @@
 
 ## 检索截止
 
-- **Cutoff 日期**：2026-09-15（本次为计划专名与同类 2-bit 旋转的定向增量；上一轮为 2026-09-11 的 R2 七项来源核验与 2026-09-03 广泛检索，不表示截至本日的文献已穷尽）
+- **Cutoff 日期**：2026-09-15（同日第二轮定向增量：混合精度 paged / FA-native 硬件对照；上一轮为同日计划专名补录、2026-09-11 的流式通路对照来源核验与 2026-09-03 广泛检索，不表示截至本日的文献已穷尽）
 - **窗口内最新收录**：Wang et al., *PuzzleKV: Page-Wise Low-Rank Decomposition for KV Cache Compression*，[arXiv:2608.23843](https://arxiv.org/abs/2608.23843)（预印本；首发 2026-08-24）
 - **使用约定**：摘要中的数字全部记录，并由正文表/图补齐口径；**不可跨平台直接比绝对倍数**。`状态` 列：`会议/期刊/Workshop` = 已核实正式 venue；`预印本` = 仅 arXiv（或仅有 submitted 声明）；`作者技术说明` = 原始博客/技术说明，不视为同行评审论文。作者代码作为对应条目的实现证据单列。
 
@@ -45,8 +46,8 @@
 ### 1.2 默认对照锚点
 
 1. **算法精度**：KIVI、SAW-INT4（+BDR）、KVTuner / PM-KVQ / KVmix / MixKVQ / Block-GTQ；新近理论参照 AATC / SPECTRA
-2. **GPU 系统**：BitDecoding、QServe；KV-split 基线 Flash-Decoding；2-bit 旋转对照 OScaR / OSCAR（二者不是同一篇）；混合格式对照 Minima-KV；（可选）UltraQuant
-3. **硬件**：SystolicAttention、PLENA、AccLLM；稀疏上界 Salca（非主路径）
+2. **GPU 系统**：BitDecoding、QServe；KV-split 基线 Flash-Decoding；2-bit 旋转对照 OScaR / OSCAR（二者不是同一篇）；混合格式对照 Minima-KV、Kitty；（可选）UltraQuant
+3. **硬件**：SystolicAttention、StreamAttention、COSA+、DESA 作 softmax/$PV$ plumbing；M-ANT 作脉动阵列上的实时 KV 量化；PLENA、AccLLM；稀疏上界 Salca（非主路径）
 4. **尺度处理**：InnerQ、Multi-Scale Dequant；区分微基准与分析/数值仿真。具体实验角色见 [R2 计划](../research/r2_streaming_attention/PLAN.md#r2-related-work)。
 
 ### 1.3 更新流程（摘要）
@@ -75,6 +76,7 @@ queries → inbox → 核实 venue/DOI → ledger.yaml → 改本手册表/卡�
 | BitDecoding | HPCA 2026 | 会议 | DOI [10.1109/HPCA68181.2026.11408481](https://doi.org/10.1109/HPCA68181.2026.11408481)；[arXiv:2503.18773](https://arxiv.org/abs/2503.18773) | Ampere–Blackwell GPU | TC 友好布局 + warp dequant + CUDA/TC 流水；MXFP4 | §VI：相对 FP16 FlashDecoding-v2，Blackwell/Hopper/Ada 最高 $8.6/8.0/7.5\times$；相对 QServe 最高 $4.3\times$；A100、Llama-3.1-8B@128K 单请求端到端约 $3\times$ | “最高/平均”须绑定 GPU 与 shape |
 | KVmix | AAAI 2026；40(37):31563–31572 | 会议 | DOI [10.1609/aaai.v40i37.40422](https://doi.org/10.1609/aaai.v40i37.40422)；[OJS](https://ojs.aaai.org/index.php/AAAI/article/view/40422)；[arXiv:2506.08018](https://arxiv.org/abs/2506.08018) | RTX 4090 | 层间梯度重要性混合比特；近期 RPC 保持全精度 | Table 1 Llama-2-7B LongBench 均分 33.714 vs FP16 33.839；Fig. 8 最大 BS=30、1032 tok/s（图注 $5.32\times$，摘要 $5.3\times$）；Fig. 7 内存约 $4.9\times$ | LongBench 最长 4096；RPC 是显式高精度窗 |
 | PM-KVQ | ICLR 2026 Poster | 会议 | [OpenReview](https://openreview.net/forum?id=Vem6FQvRvq)；[ICLR 日程](https://iclr.cc/virtual/2026/poster/10009118)；[arXiv:2505.18610](https://arxiv.org/abs/2505.18610) | 精度：假量化 8×A100；吞吐：A100-80G | 16→8→4→2 渐进降比特 + 块级整数规划 | Table 2 Qwen-7B AIME-2024 pass@1：16-bit 41.04、KIVI 32.08、PM-KVQ BS=40 为 40.00；Table 3 相对 16-bit 为 $2.73\times$（32B@16K）–$5.18\times$（7B@32K） | 摘要「最高 8%」是百分点；先占 16-bit 再收缩 |
+| Kitty | MLSys 2026 Oral | 会议 | [MLSys 摘要](https://proceedings.mlsys.org/paper_files/paper/2026/hash/e4d8d1b5120be349d3fff8878650cf45-Abstract-Conference.html)；[Paper](https://proceedings.mlsys.org/paper_files/paper/2026/file/e4d8d1b5120be349d3fff8878650cf45-Paper-Conference.pdf)；[arXiv:2511.18643](https://arxiv.org/abs/2511.18643) | A100-80GB；更大模型精度在 H100 | Key 通道 INT2 + 动态 INT4 boost；页分解为两个 2-bit 张量；片上重建 FP16 页 | Table 3 Qwen3-8B 均分 Kitty-Pro 76.18 vs K16V16 77.15；Fig. 5 同显存下最高 $8\times$ batch、$2.1\times$–$4.1\times$ 吞吐 | 片上物化 FP16 页；softmax 仍走 PyTorch 算子 |
 | MixKVQ | ACL 2026；pp. 7189–7204 | 会议 | DOI [10.18653/v1/2026.acl-long.326](https://doi.org/10.18653/v1/2026.acl-long.326)；[Anthology](https://aclanthology.org/2026.acl-long.326/)；[arXiv:2512.19206](https://arxiv.org/abs/2512.19206) | A800 80GB | 查询感知 Key 通道混合比特；V 均匀 2-bit；残差窗 $R$ | Table 3 Distill-Qwen-32B 均分 MixKVQ-C2.3 66.04 vs BF16 67.84、KIVI-KV2 58.89；Fig. 5 Llama2-13B 吞吐 $2.63\times$–$2.81\times$ | 非连续混合精度块可能增加 decode 延迟 |
 | InnerQ | arXiv（首发 2026-02-26） | 预印本 | [arXiv:2602.23200](https://arxiv.org/abs/2602.23200) | Jetson Xavier NX 微基准 | 内维分组；recent+sink 高精度 | Table 3–4：有效位宽 3.0–3.5 bit/number；单层 fused dequant-GEMV 平均约 $2.7\times$ vs FP16，32K Hybrid 为 3180µs vs FP16 9516µs、KIVI 4331µs | 非端到端 token latency；Hybrid 假定量化模式掩码 M 为 99% 稀疏 |
 | Don’t Waste Bits! | **CVPR 2026 Workshops（LoViF）**；pp. 4957–4966 | Workshop | [CVF Open Access](https://openaccess.thecvf.com/content/CVPR2026W/LoViF/html/Boroujeni_Dont_Waste_Bits_Adaptive_KV-Cache_Quantization_for_Lightweight_On-Device_LLMs_CVPRW_2026_paper.html)；[arXiv:2604.04722](https://arxiv.org/abs/2604.04722) | 端侧小模型 | 动态 $\{2,4,8,\mathrm{FP16}\}$ | SmolLM-360M/HellaSwag：相对静态 KV 量化，ms/token $-17.75\%$、准确率 $+7.60$ points，距 FP16 0.30 points | 已正式发表，但不是 CVPR main；动态控制开销需计入 |
@@ -95,12 +97,16 @@ queries → inbox → 核实 venue/DOI → ledger.yaml → 改本手册表/卡�
 | 工作 | Venue / 时间 | 状态 | 来源 | 平台 | 核心做法 | 报告结果（按所列来源与边界） | 结论要点 |
 |------|--------------|------|------|------|----------|------------------|----------|
 | FlightLLM | **FPGA 2024** | 会议 | DOI [10.1145/3626202.3637562](https://doi.org/10.1145/3626202.3637562)；[arXiv:2401.03868](https://arxiv.org/abs/2401.03868) | U280 / VHK158 | 稀疏 DSP、片上 decode | Fig. 13–15：batch=1 时 U280 相对 V100S 能效最高约 $6.0\times$、成本效率约 $1.8\times$；VHK158 对 A100 吞吐约 $1.2\times$ | 区分 naive/optimized GPU 基线 |
+| COSA+ | **IEEE TCAD 44(2), 2025；pp. 723–736** | 期刊 | DOI [10.1109/TCAD.2024.3434447](https://doi.org/10.1109/TCAD.2024.3434447) | 合作脉动阵列（摘要级） | 双阵列混合 dataflow + softmax 潜伏隐藏 | 摘要：同 MAC 相对传统 SA 吞吐 $2.29$–$2.60\times$，PE 利用率最高 $94.7\%$，片外访问少 $8.2\times$；相对 3090 / 6226R 能效 $7.6$–$12.4\times$ / $35.2$–$80.9\times$ | GPU/CPU 能效跨平台；无系统化低比特 KV；正文表未取到 |
+| M-ANT | **HPCA 2025；pp. 1112–1126** | 会议 | DOI [10.1109/HPCA61900.2025.00086](https://doi.org/10.1109/HPCA61900.2025.00086)；[arXiv:2502.18755](https://arxiv.org/abs/2502.18755) | TSMC 28 nm 综合 + DNNWeaver 周期模拟 | 组级自适应数值类型；K 空间 / V 时间实时量化；脉动 PE+RQU | Fig. 13 相对 Tender 平均 $2.99\times$（最高 $4.46\times$）加速、$2.81\times$（最高 $4.10\times$）能耗；Table III LLaMA-2-7B TriviaQA F1 86.86 vs FP16 87.72 | 基线不量化 attention；权重+KV 联合，不可与仅 KV 比 |
 | AccLLM | **IEEE TVLSI 34(4), 2026；pp. 1217–1227** | 期刊 | DOI [10.1109/TVLSI.2026.3658524](https://doi.org/10.1109/TVLSI.2026.3658524)；[arXiv:2505.03745](https://arxiv.org/abs/2505.03745) | Alveo U280 | 剪枝 + Λ-attention + W2A8KV4 | Table VII：164 token/s、33W、4.96 token/J；相对同 U280 FlightLLM 为 $2.98\times$ throughput、$4.07\times$ energy efficiency | 已由预印本升级为期刊 |
 | Titanus | **GLSVLSI 2025；pp. 71–77** | 会议 | DOI [10.1145/3716368.3735145](https://doi.org/10.1145/3716368.3735145)；[arXiv:2505.17787](https://arxiv.org/abs/2505.17787) | Chiplet + CIM | 在线 prune+quant | Fig. 14：相对 A100 为 $159.9\times$ energy / $49.6\times$ throughput；相对 FlightLLM 为 $34.8\times/29.2\times$ | 数量级依赖 CIM/跨平台设定，仅作相邻参照 |
+| DESA | **IEEE TC 74(6), 2025；pp. 2058–2072** | 期刊 | DOI [10.1109/TC.2025.3549621](https://doi.org/10.1109/TC.2025.3549621) | 混合静止脉动 + VPU/IPU（摘要级） | 融合 attention tiling；自称 encoder-only | 摘要：相对 3090 / 6226R 节能 $5.0$–$8.3\times$ / $25.6$–$88.4\times$；相对 SOTA 加速器 $11.6$–$15.0\times$ 加速、最高 $2.3\times$ 节能 | GPU/CPU 跨平台；无系统化低比特 KV；正文表未取到 |
 | SystolicAttention (FSA) | arXiv 首发 2025-07-15 | 预印本 | [arXiv:2507.11331](https://arxiv.org/abs/2507.11331) | $128\times128$；16 nm RTL | 单阵列融合 FlashAttention | Fig. 15/Table 4：利用率倍数为 $1.77\times/4.83\times$，附加面积占总面积 12.07%；但摘要与 §6.1 对 TPU/Neuron 的对应顺序冲突 | 数字映射待作者勘误；不可无条件引用 |
 | PLENA | **ISCA 2026** | 会议 | DOI [10.1109/ISCA66397.2026.00023](https://doi.org/10.1109/ISCA66397.2026.00023)；[arXiv:2509.09505](https://arxiv.org/abs/2509.09505) | 架构模拟 + RTL/ISA 栈 | 扁平阵列 + 非对称量化 + native FA | Table VIII：同 multiplier/HBM 设定下最高 TPS 为 A100 的 $2.23\times$、TPUv6e 的 $4.70\times$；相对 A100 最高 $4.04\times$ Token/J | 已由预印本正式发表；旧摘要数字已过时 |
 | FlatAttention | arXiv 2026-04-02；**submitted to IEEE TC** | 预印本（在投） | [arXiv:2604.02110](https://arxiv.org/abs/2604.02110) | Tile 架构模拟/RTL 校准 | tiling + fabric collectives | Fig. 9/13：32×32 tile、S=4096 为 92.3% utilization；同模拟 tile 对 FA3 最高 $4.1\times$、HBM traffic $\downarrow16\times$；64-chip 模型对 FlashMLA 最高系统吞吐 $2.1\times$ | 非实测硅片；短序列利用率下降 |
 | Salca | arXiv 2026-04-27 | 预印本 | [arXiv:2604.24820](https://arxiv.org/abs/2604.24820) | 28nm RTL 综合（稀疏 decode） | 动态稀疏 + 近似 Top-$K$ | §5.2/Table 5–6：6.4mm²、0.933W；相对 A100 $3.82\times$ speed、$74.19\times$ energy efficiency | 非流片、跨平台；相邻上界 |
+| StreamAttention | **ICML 2026 Workshop AdaptFM** Poster | Workshop | [ICML 页](https://icml.cc/virtual/2026/75239)；[AdaptFM 录用](https://adaptfm.gitlab.io/accepted-papers/)；[OpenReview](https://openreview.net/forum?id=SRQuPOMzkX) | SkyWater 130 nm 综合；SRAM 能量 CACTI 7 @ 90 nm | 单阵列 FA-2；Chebyshev $\exp$；四段流水 | 摘要：利用率 95–98% vs SystolicAttention 约 40%；相对作者基线层能量最高约 $2.8\times$、平均功率约 $2.9\times$；面积约 $+34\%$ | **不是 ICML 主会**；无系统化低比特 KV；正文表未取到 |
 
 ### 2.3 本仓库学习结果（内部基线，非论文 SOTA）
 
@@ -350,6 +356,108 @@ queries → inbox → 核实 venue/DOI → ledger.yaml → 改本手册表/卡�
 - **对本课题**：计划「极限 2-bit + 旋转」专名的已核实条目；与 OSCAR 题名相近必须分列。
 - **核实**：2026-09-15；arXiv abs + HTML v1
 
+<a id="kitty"></a>
+
+### 3.21 Kitty（通道混合精度 + paged 反量化）
+
+- **来源类型**：论文
+- **题名（正式）**：*Kitty: Accurate and Efficient 2-bit KV Cache Quantization with Dynamic Channel-wise Precision Boost*
+- **作者**：Haojun Xia, Xiaoxia Wu, Jisen Li, Tsai-chuan Wu, Junxiong Wang, Jue Wang, Chenxi Li, Aman Singhal, Alay Dilipbhai Shah, Alpay Ariyak, Donglin Zhuang, Zhongzhu Zhou, Ben Athiwaratkun, Zhen Zheng, Shuaiwen Leon Song（会刊 PDF；arXiv 元数据第四作者作 Robert Wu）
+- **Venue / 状态**：MLSys 2026 Oral
+- **标识**：[MLSys 摘要](https://proceedings.mlsys.org/paper_files/paper/2026/hash/e4d8d1b5120be349d3fff8878650cf45-Abstract-Conference.html)；[Paper](https://proceedings.mlsys.org/paper_files/paper/2026/file/e4d8d1b5120be349d3fff8878650cf45-Paper-Conference.pdf)；[arXiv:2511.18643](https://arxiv.org/abs/2511.18643)（v1 2025-11-23）；本次无 Crossref DOI
+- **代码**：[Summer-Summer/Kitty](https://github.com/Summer-Summer/Kitty)
+- **引用键 / 版本**：`kitty2026`；MLSys 2026 proceedings PDF
+- **平台**：系统效率 A100-80GB；更大模型精度另在 H100
+- **方法要点**：Key 多数通道 INT2，按灵敏度动态升 INT4（Kitty 12.5%、Kitty-Pro 25%）；V 逐 token 2-bit；FP16 sink $S=32$、local $R=128$、页 $G=128$。混合 Key 页拆成两个统一 2-bit 张量；Alg. 1 片上重建 FP16 页后走 Triton qk/sv + **PyTorch softmax**，不是 fused online-softmax。
+- **实验设置**：精度 Table 3 覆盖 Qwen3 / LLaMA3 族，最大生成 4096；Fig. 5 为 Qwen3-8B 生成 8192，prompt 约 100 token。
+- **摘要定量主张**：近 $8\times$ KV 内存；同显存下最高 $8\times$ batch、$2.1\times$–$4.1\times$ 吞吐。
+- **正文复核结果**：Table 3 Qwen3-8B 均分 K16V16 77.15、KIVI-K2V2 61.39、Kitty 74.97、Kitty-Pro 76.18。Fig. 5 同显存预算下 Kitty-Pro 相对 FP16 最高 $8\times$ batch、$2.1\times$–$4.1\times$ 吞吐。Eq. 7 有效比特 $2200/N+2.357$；32K 约 2.44 bit（$6.6\times$）。
+- **口径边界**：片上物化 FP16 页；sink/local 是显式高精度窗；吞吐是同显存服务结果，不是单 kernel 固定倍数。
+- **冲突或缺口**：arXiv 作者名 Robert Wu vs 会刊 PDF Tsai-chuan Wu；引用以会刊 PDF 为准。
+- **对本课题**：可对齐通道混合精度与 paged 反量化布局；不可写成无展开流式 FA，也不可比 ASIC energy/token。
+- **核实**：2026-09-15；MLSys 摘要/PDF、虚拟 Oral 页、arXiv abs
+
+<a id="mant"></a>
+
+### 3.22 M-ANT（脉动阵列上的组级实时 KV 量化）
+
+- **来源类型**：论文
+- **题名（正式）**：*M-ANT: Efficient Low-bit Group Quantization for LLMs via Mathematically Adaptive Numerical Type*
+- **作者**：Weiming Hu, Haoyan Zhang, Cong Guo, Yu Feng, Renyang Guan, Zhendong Hua, Zihan Liu, Yue Guan, Minyi Guo, Jingwen Leng
+- **Venue / 状态**：HPCA 2025；pp. 1112–1126
+- **标识**：DOI [10.1109/HPCA61900.2025.00086](https://doi.org/10.1109/HPCA61900.2025.00086)；[arXiv:2502.18755](https://arxiv.org/abs/2502.18755)（v1 2025-02-26）
+- **代码**：[SJTU-ReArch-Group/MANT_HPCA25](https://github.com/SJTU-ReArch-Group/MANT_HPCA25)
+- **引用键 / 版本**：`mant2025`；HPCA 记录 + arXiv v1 HTML
+- **平台**：Verilog + Design Compiler TSMC 28 nm；SRAM 用 CACTI；周期模拟 DNNWeaver
+- **方法要点**：组级自适应数值类型同时用于权重与 KV；K 空间实时量化、V 时间实时量化；PE + RQU 挂在脉动阵列上。
+- **实验设置**：质量 Table III 为 LLaMA-2-7B；能效 Fig. 13 为 LLaMA-7B、序列 2K–128K。
+- **摘要定量主张**：相对 SOTA 加速器平均 $2.99\times$（最高 $4.46\times$）加速、$2.81\times$（最高 $4.10\times$）能耗下降。
+- **正文复核结果**：Fig. 13 / §VII 将上述两对倍数绑定为相对 **Tender**。Table III：TruthfulQA BLEU FP16 27.88 vs W4A8+4-bit MANT KV 26.19；TriviaQA F1 87.72 vs 86.86。正文写明 Tender/OliVe/ANT **不量化 attention**。
+- **口径边界**：权重+激活+KV 联合，不可与仅 KV 比；长序列收益混入「基线仍用 FP16 attention」。不是混合格式 paged FA，也不是 FA-native plumbing。
+- **冲突或缺口**：无（摘要两对倍数与 Fig. 13 vs Tender 一致）
+- **对本课题**：可对齐阵列上的组级实时 KV 量化与 PE 代价；不可与 GPU serving 或本课题 energy/token 横比。
+- **核实**：2026-09-15；Crossref DOI、arXiv abs + HTML
+
+<a id="streamattention"></a>
+
+### 3.23 StreamAttention（workshop；FA-native plumbing）
+
+- **来源类型**：论文（workshop）
+- **题名（正式）**：*StreamAttention: Energy-Efficient and High-Utilization Attention on Systolic Hardware*
+- **作者**：Olav Førland, H. T. Kung
+- **Venue / 状态**：ICML 2026 Workshop AdaptFM Poster；**不是** ICML 主会
+- **标识**：[ICML 页](https://icml.cc/virtual/2026/75239)；[AdaptFM 录用](https://adaptfm.gitlab.io/accepted-papers/)；[OpenReview `SRQuPOMzkX`](https://openreview.net/forum?id=SRQuPOMzkX)（PDF 本次 403，正文表未取到）；无 DOI、未找到 arXiv
+- **代码**：未核实到作者仓库
+- **引用键 / 版本**：复用既有键 `streamattention2025`；匿名 under-review 注记已过时
+- **平台**：SkyWater 130 nm 综合（面积/功耗）；SRAM 能量 CACTI 7 @ 90 nm（混工艺）
+- **方法要点**：单阵列 FlashAttention-2；Chebyshev 多项式算 $\exp$；四段流水使 tile 间 MAC 不空转。
+- **摘要定量主张**：利用率 95–98% vs SystolicAttention 约 40%；相对作者基线层能量最高约 $2.8\times$、平均功率约 $2.9\times$；相对标准脉动矩阵单元面积约 $+34\%$、纯 matmul 功耗 $+6\%$。Chebyshev 对 Llama-3.2-1B / ViT-Base / BERT-Large 影响标为可忽略（摘要，无表号）。
+- **正文复核结果**：未能打开 OpenReview PDF；定量停留在 ICML 摘要。
+- **口径边界**：workshop；混工艺；无系统化低比特 KV。
+- **冲突或缺口**：旧 bib 匿名作者已过时，以会刊页署名 Førland / Kung 为准。
+- **对本课题**：可对齐单阵列 online-softmax plumbing；不可比本课题倍数，也不可升格为主会或低比特 KV 主行。
+- **核实**：2026-09-15；ICML 虚拟页、AdaptFM 录用名单、OpenReview 列表（PDF 403）
+
+<a id="cosa-plus"></a>
+
+### 3.24 COSA+（合作脉动阵列；摘要级）
+
+- **来源类型**：论文
+- **题名（正式）**：*COSA Plus: Enhanced Co-Operative Systolic Arrays for Attention Mechanism in Transformers*
+- **作者**：Zhican Wang, Gang Wang, Guanghui He
+- **Venue / 状态**：IEEE TCAD 44(2):723–736，2025-02
+- **标识**：DOI [10.1109/TCAD.2024.3434447](https://doi.org/10.1109/TCAD.2024.3434447)；无 arXiv
+- **代码**：未核实到
+- **引用键 / 版本**：复用既有键 `wang2023cosa`（期刊年 2025，键名保留）
+- **平台**：合作脉动阵列（摘要级；IEEE 全文本次超时）
+- **方法要点**：双阵列混合 weight/output-stationary；级联 GEMM 融合；softmax 潜伏隐藏。
+- **摘要定量主张**：同 MAC 相对传统 SA 吞吐 $2.29$–$2.60\times$，PE 利用率最高 $94.7\%$，片外访问少 $8.2\times$；相对 GeForce 3090 / Intel 6226R 能效 $7.6$–$12.4\times$ / $35.2$–$80.9\times$。
+- **正文复核结果**：未能取到正文表；定量标 `result_source: abstract`。
+- **口径边界**：GPU/CPU 能效跨平台；无系统化低比特 KV。
+- **冲突或缺口**：无（会刊元数据与摘要一致；缺正文表）
+- **对本课题**：可对齐注意力脉动 dataflow 与 softmax 缓冲；不可比 GPU 能效或当作 decode KV 压缩证据。
+- **核实**：2026-09-15；Crossref + DOI/ADS 摘要；IEEE 全文超时
+
+<a id="desa"></a>
+
+### 3.25 DESA（encoder-only 脉动；摘要级）
+
+- **来源类型**：论文
+- **题名（正式）**：*DESA: Dataflow Efficient Systolic Array for Acceleration of Transformers*
+- **作者**：Zhican Wang, Hongxiang Fan, Guanghui He
+- **Venue / 状态**：IEEE Transactions on Computers 74(6):2058–2072，2025-06
+- **标识**：DOI [10.1109/TC.2025.3549621](https://doi.org/10.1109/TC.2025.3549621)；[Computer.org](https://www.computer.org/csdl/journal/tc/2025/06/10918723/251y0TiNn3O)；无 arXiv
+- **代码**：未核实到
+- **引用键 / 版本**：复用既有键 `desa2025`
+- **平台**：混合静止脉动 + 可重构 VPU/IPU（摘要级；IEEE 全文本次超时）
+- **方法要点**：摘要声明聚焦 Encoder-Only；融合 attention tiling，工作区从 $O(N^2 H)$ 收到 $O(N)$。
+- **摘要定量主张**：相对 3090 / 6226R 节能 $5.0$–$8.3\times$ / $25.6$–$88.4\times$；相对 SOTA 加速器 $11.6$–$15.0\times$ 加速、最高 $2.3\times$ 节能。
+- **正文复核结果**：未能取到正文表；定量标 `result_source: abstract`。
+- **口径边界**：encoder-only；GPU/CPU 跨平台；无系统化低比特 KV，不是长上下文 decode KV 研究。
+- **冲突或缺口**：无（DOI 摘要与 Computer.org 摘要一致；缺正文表）
+- **对本课题**：可作稀疏/融合注意力硬件边界；不可升格为 decode × 低比特 KV 主对照。
+- **核实**：2026-09-15；Crossref + DOI/Computer.org 摘要；IEEE 全文超时
+
 ---
 
 ## 4. 跨工作对比维度
@@ -371,10 +479,10 @@ queries → inbox → 核实 venue/DOI → ledger.yaml → 改本手册表/卡�
 
 | 对照角色 | 相关来源 | 使用边界 |
 |---|---|---|
-| 公开 GPU 系统与内核 | BitDecoding、SAW-INT4、QServe、Flash-Decoding、OSCAR | 固定版本、模型、几何和指标；区分 KV-only 与全模型量化；OSCAR 不是 OScaR |
-| 混合 / 结构感知比特（算法） | KVTuner、PM-KVQ、KVmix、MixKVQ、Block-GTQ、OScaR | 精度或服务数字不直接填入本项目结果；注意残差窗、假量化与渐进 16-bit 收缩 |
+| 公开 GPU 系统与内核 | BitDecoding、SAW-INT4、QServe、Flash-Decoding、OSCAR、Kitty | 固定版本、模型、几何和指标；区分 KV-only 与全模型量化；OSCAR 不是 OScaR；Kitty 片上重建 FP16 页 |
+| 混合 / 结构感知比特（算法） | KVTuner、PM-KVQ、KVmix、MixKVQ、Block-GTQ、OScaR、Kitty | 精度或服务数字不直接填入本项目结果；注意残差窗、假量化、渐进 16-bit 收缩与通道 boost |
 | 尺度处理与复用 | InnerQ、Multi-Scale Dequant | 区分微基准、数值仿真、分析模型与本项目实测 |
-| 专用架构 | PLENA | 核对资源、数值格式和模拟/RTL 层级 |
+| 专用架构 | PLENA、StreamAttention、COSA+、DESA、M-ANT | 核对资源、数值格式和模拟/RTL 层级；workshop/摘要级与跨平台能效不得当成本课题倍数；M-ANT 不可与仅 KV 比 |
 | 项目功能与性能基线 | 同 codec 高精度参考、先展开再计算、优化 FP16、共享流式解码 | 具体对照、消融与否定条件在 R2 计划维护 |
 
 相关文献的机制、证据和限制由本手册卡片维护；R2 计划说明实验如何使用这些对照。
