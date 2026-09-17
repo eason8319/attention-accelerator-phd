@@ -1,0 +1,201 @@
+{
+  "schema_version": 1,
+  "layout_id": "r2-mapping-cost-v2",
+  "purpose": "R2 步骤 6 公平映射与周期/能耗模型的实现参数；不是质量门、RTL 综合频率或硅片实测",
+  "protocol_id": "r2-evaluation-v2",
+  "pack_layout_id": "r2-pack-layout-v1",
+  "page_access_id": "r2-page-access-v2",
+  "stream_layout_id": "r2-stream-attention-v3",
+  "mac_budget": 1024,
+  "pe_rows": 32,
+  "pe_cols": 32,
+  "reference_frequency_hz": 1000000000,
+  "frequency_note": "1 GHz 是协议理论参考。步骤 2 的 Nangate45 整数乘加 1 ns 未通过，不得把本模型周期写成已综合频率下的墙钟。",
+  "dma": {
+    "engines": 1,
+    "queue_depth": 4,
+    "setup_cycles": 16,
+    "align_bytes": 32,
+    "beat_bytes": 32,
+    "note": "引擎数、队列深度与 16 周期启动是本步冻结的未校准实现假设，敏感性取 0/16/64。事务量子沿用步骤 4 的 32 B，不是测量得到的 HBM 突发。"
+  },
+  "sram": {
+    "banks": 32,
+    "rw_ports": 2,
+    "width_bits": 256,
+    "latency_cycles": 2,
+    "source": "learning/p3_arch_eval/timeloop/arch_accelergy.yaml GlobalBuffer：16 MiB、256-bit、32 banks、2 rw ports、45nm CACTI class",
+    "conflict_model": "sequential_page_scan_conflict_free",
+    "note": "32 bank、2 rw、256 bit 冻结不变；一个 rw 端口给 DMA，一个给计算。2 周期访问延迟未校准，顺序无 bank 冲突。"
+  },
+  "operand": {
+    "tokens": 16,
+    "kv_heads_live": 1,
+    "ports_default": 1,
+    "ports_allowed": [
+      1,
+      2,
+      4
+    ],
+    "note": "新增端口显式增加操作数组缓冲、地址队列和路由控制；2/4 端口仅列资源变体，不与单端口作等面积收益宣称。"
+  },
+  "mapping_modes": {
+    "gqa_shared": "按 KV head 供给，GQA 组内查询行复用同一操作数",
+    "gqa_expand": "把 KV 按查询头重复供给，只作不公平对照，不进入优化搜索",
+    "cross_kv_head": "P 个 KV head 并行；MAC 空间均分，操作数端口不得超过 operand.ports",
+    "kv_split": "沿序列切分后 log-sum-exp 归并；切分本身沿用 Flash-Decoding，不作为新贡献"
+  },
+  "search_space": {
+    "tile": [
+      128,
+      512
+    ],
+    "tile_capacity_only": [
+      2048
+    ],
+    "buffering": [
+      "single",
+      "double"
+    ],
+    "kv_pass": [
+      "separate",
+      "fused_tile"
+    ],
+    "kv_split": [
+      1,
+      2,
+      4
+    ],
+    "gqa_mode": [
+      "gqa_shared"
+    ],
+    "parallel_kv_heads": [
+      1,
+      2,
+      4
+    ],
+    "note": "优化 FP16 与同格式共享流式解码使用同一搜索空间。gqa_expand 只登记对照。tile=2048 仅作容量边界。"
+  },
+  "energy": {
+    "process": "45nm Accelergy PAT / CACTI class，与 P3 及步骤 2 Nangate45 同节点家族",
+    "voltage_v": 1.1,
+    "temperature_c": 25,
+    "hbm2_pJ_per_bit": 3.9,
+    "hbm2_source": "Accelergy CACTI plug-in DRAM_estimate_energy，type=HBM2，energy=3.9*width_bits pJ；提交 9cf48b12e8be8f3acd0b505fac4aa663e5c31273。这是插件常数，不是本项目 HBM 硅片测量。",
+    "mac_fp16_pJ": 5.0,
+    "mac_fp16_source": "Accelergy ICCAD 2019 / ISPASS 2020 tutorial 的 45nm 16-bit MAC compute≈5 pJ 示例；不是本仓库 1024-MAC 阵列的综合功耗。",
+    "sram_pJ_per_bit": 0.05,
+    "sram_pJ_per_bit_source": "本步未运行 CACTI。0.05 pJ/bit 是 16 MiB/32-bank 的未校准一阶缺省；敏感性必须同时报告 0.01 与 0.2。",
+    "dequant_pJ_per_element": 1.0,
+    "dequant_source": "未校准整数尺度乘法，敏感性 0.5/1/2。",
+    "softmax_pJ_per_score": 5.0,
+    "softmax_source": "与 16-bit MAC 示例同量级的未校准指数/归约；不是精确 softmax RTL。",
+    "broadcast_pJ_per_byte": 0.005,
+    "broadcast_source": "未校准片上广播，取缺省 SRAM 能量的 0.1 倍。",
+    "leakage_mw": null,
+    "leakage_note": "本步没有 CACTI/Liberty 漏电。漏电不按零计入主结果；绝对 energy/token 只含动态项，并给出漏电 0/10/50 mW 的时间积分带。",
+    "sensitivity": {
+      "sram_pJ_per_bit": [
+        0.01,
+        0.05,
+        0.2
+      ],
+      "mac_fp16_pJ": [
+        2.5,
+        5.0,
+        10.0
+      ],
+      "hbm2_pJ_per_bit": [
+        2.0,
+        3.9,
+        7.8
+      ],
+      "dma_setup_cycles": [
+        0,
+        16,
+        64
+      ],
+      "leakage_mw": [
+        0.0,
+        10.0,
+        50.0
+      ],
+      "quant_pJ_per_element": [
+        3.0,
+        6.0,
+        12.0
+      ],
+      "pack_pJ_per_byte": [
+        0.5,
+        1.0,
+        2.0
+      ],
+      "control_pJ_per_event": [
+        0.5,
+        1.0,
+        2.0
+      ],
+      "convert_pJ_per_element": [
+        0.5,
+        1.0,
+        2.0
+      ],
+      "dequant_pJ_per_element": [
+        0.5,
+        1.0,
+        2.0
+      ],
+      "softmax_pJ_per_score": [
+        2.5,
+        5.0,
+        10.0
+      ],
+      "broadcast_pJ_per_byte": [
+        0.0025,
+        0.005,
+        0.01
+      ]
+    },
+    "quant_pJ_per_element": 6.0,
+    "pack_pJ_per_byte": 1.0,
+    "control_pJ_per_event": 1.0,
+    "convert_pJ_per_element": 1.0,
+    "auxiliary_source": "量化 6 pJ/元素、打包 1 pJ/字节、控制 1 pJ/事件、转换 1 pJ/元素均为未校准实现假设；各自扫描半值/缺省/两倍。量化含统计、尺度及舍入夹紧；打包含位操作。"
+  },
+  "held_defaults": {
+    "group_buffers": 4,
+    "merge_tokens": 128,
+    "metadata_placement": "separate",
+    "note": "组缓冲与归并范围保持协议开发缺省，供步骤 7/8 探索；本步计入其占用与动作，但不把其消融写成创新结论。"
+  },
+  "c3_hybrid_costs": {
+    "write_side_rotation": true,
+    "key_inverse_on_read": true,
+    "output_inverse": true,
+    "pad_inverse_and_qk_to_4": true,
+    "note": "混合功能路径：满页写侧 K/V 旋转、已量化 K 读侧逆旋转、FP16 V 尾部读侧旋转、最终 O 逆旋转及短块补零。"
+  },
+  "not_claimed": [
+    "silicon_absolute_energy",
+    "synthesized_clock_achieved",
+    "calibrated_hbm_burst",
+    "quality_gate",
+    "pure_qo_success"
+  ],
+  "execution": {
+    "array_dataflow": "output_stationary_q_rows_output_columns",
+    "array_startup_cycles": 2,
+    "softmax_scores_cycle": 32,
+    "quant_elements_cycle": 128,
+    "pack_bytes_cycle": 32,
+    "control_events_cycle": 1,
+    "convert_elements_cycle": 128,
+    "broadcast_bytes_cycle": 128,
+    "rate_note": "冻结的一阶吞吐假设，非 RTL 校准；辅助吞吐整体取 0.5/1/2 敏感性，阵列启动取 0/2/16。PE 行为 query，列为 QK token 或 PV channel；尾部 PE 闲置。",
+    "sram_dma_ports": 1,
+    "sram_compute_note": "1 个 rw 端口保留给 DMA，其余端口按活动 split lane 均分；逻辑访问按每类 32 B 字取整后计能耗和服务时间。",
+    "split_note": "活动 lane=min(split,operand_ports)，均分 PE 行和计算侧供给吞吐；超出端口的逻辑分段在 lane 上复用完整份额。共享 DMA 按依赖调度，单/双缓冲约束释放。",
+    "contiguous_read_note": "连续 K/V 地址按实际计算块发 DMA，不要求整侧历史驻留；物理流量为模型事务，并非 Python append 块的 scan_read 事务重放。",
+    "metadata_note": "分页 payload/metadata 各计事务。C5 Key group 元数据在页对内驻留复用；跨 split 边界重新供给需计重复。"
+  }
+}

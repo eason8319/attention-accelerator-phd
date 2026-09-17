@@ -44,6 +44,7 @@ condaenv.*.requirements.txt
 /tmp/
 /output/
 node_modules/
+# 仓库内不得再放模型缓存；各机权重只在 HF_HOME（见 AGENTS.md）
 /.hf-cache/
 
 # 本机凭据（可共享的示例不含真实凭据）

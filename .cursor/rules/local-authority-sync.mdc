@@ -5,4 +5,4 @@ alwaysApply: true
 
 # 项目协作约束
 
-遵守项目根目录 [AGENTS.md](../../AGENTS.md)。本地优先、回收范围、冲突另存、报告撰写及文档入口均以根规则为准；本规则不复制条款，避免多处维护发生冲突。
+遵守项目根目录 [AGENTS.md](../../AGENTS.md)。本地优先、回收范围、冲突另存、报告撰写、文档入口、[模型权重缓存](../../AGENTS.md#model-weight-cache)及[隔离 GPU 运行时](../../AGENTS.md#isolated-gpu-runtimes)均以根规则为准；本规则不复制条款，避免多处维护发生冲突。

@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "layout_id": "r2-pack-layout-v1",
+  "purpose": "R2 物理打包布局实现参数；本文件不是分页、残差刷窗、流式 Attention 或能耗结论",
+  "protocol_id": "r2-evaluation-v2",
+  "int4_symmetric": {
+    "bits": 4,
+    "elements_per_byte": 2,
+    "nibble_order": "low_even",
+    "signed_encoding": "twos_complement",
+    "qmin": -7,
+    "qmax": 7,
+    "note": "低半字节存偶数下标、高半字节存奇数下标。C2/C3 网格沿用 R1 对称 [-7,7]，不写入 -8。"
+  },
+  "kivi_unsigned": {
+    "int4_qmin": 0,
+    "int4_qmax": 15,
+    "int2_qmin": 0,
+    "int2_qmax": 3,
+    "bit_order": "low_first",
+    "note": "C5 为无符号 4-bit；C4 仅作 2-bit 打包原语边界。低位先填该字节内最先的元素。"
+  },
+  "fp16": {
+    "storage_dtype": "float16",
+    "note": "C0 不做量化，按 IEEE float16 位型连续存放。"
+  },
+  "int8": {
+    "storage_dtype": "int8",
+    "note": "C1 已按字节对齐，打包为位型恒等，仅作对照。"
+  },
+  "dma": {
+    "align_bytes": 32,
+    "scope": "whole_side_buffers",
+    "note": "K/V 两侧的 packed payload、scale、offset 各自作为整段缓冲按 32 B 向上取整。这是步骤 3 冻结的实现对齐量子，不是已校准 HBM 突发或 SRAM bank 宽度。不对每个 group 单独垫齐；group 记录共址留到后续布局实验。"
+  },
+  "metadata": {
+    "scale_dtype": "float16",
+    "c5_offset_dtype": "float16",
+    "c5_offset_semantics": "additive_min_not_integer_zero_point",
+    "placement": "dense_side_arrays",
+    "note": "scale/min 计数与 group 对齐，存放为与载荷分离的密数组。物理 pack 只改表示，不重算统计量。"
+  },
+  "group": {
+    "size": 32,
+    "c2_c3_axis": "channel",
+    "c5_key_axis": "token",
+    "c5_value_axis": "channel"
+  },
+  "page_tokens": 16,
+  "page_note": "页长仅用于边界 token 数检查；本布局不实现页表、尾页池或 DMA 页事务。",
+  "append": {
+    "do_not_requantize_committed": true,
+    "c5_key_open_group_max_tokens": 31,
+    "c5_key_open_group_note": "C5 Key 未满 32 token 的开口组暂存 FP16，满组后用 R1 encode_kivi_key 一次性编码再打包。开口组不是 residual_length=128 的 KIVI 刷窗，也不把近期 token 长期留在 FP16。"
+  }
+}

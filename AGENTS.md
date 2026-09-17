@@ -5,7 +5,7 @@
 - 本地 `F:\attention-accelerator-phd` 是项目权威版本；WSL 的 `/mnt/f/attention-accelerator-phd` 是同一目录。
 - 服务器 `myserver:/cluster/home/zengy/attention-accelerator-phd` 用于实验执行，GitHub 用于版本共享；二者不得自动覆盖本地已有文件。
 - 本地每个实验必须同时保有实验源码、必要运行依赖、原始结果和唯一正式报告。从服务器补齐缺失的实验源码、可移植配置/依赖声明，以及结果目录中的数据、图、必要日志和参数元数据；不能把实验源码误当作服务器专用文件排除。
-- 不回收 Slurm/任务提交文件、服务器私有环境配置、集群说明、虚拟环境、模型缓存、凭据或 Git 内部数据。服务器报告不直接作为本地正式报告；以结果为依据在本地撰写。
+- 不回收 Slurm/任务提交文件、服务器私有环境配置、集群说明、虚拟环境、模型缓存、凭据或 Git 内部数据。模型缓存留在各机 `HF_HOME`，见[模型权重缓存](#model-weight-cache)；CUDA/BitDecoding/SAW 隔离环境见[隔离 GPU 运行时](#isolated-gpu-runtimes)；不得把集群或本机权重或这些运行时复制进仓库或 `.server-sync/`。服务器报告不直接作为本地正式报告；以结果为依据在本地撰写。
 - 本地不存在的文件按原相对路径补齐；同名同内容保留本地；同名异内容保留本地原文件，将服务器原件存入 `.server-sync/<同步用途>/conflicts/<原相对路径>`，登记差异，不自动合并。
 - 回收前核对 `experiment.json` 的 `results.retired_files`：旧路径与 SHA-256 均匹配，且权威副本、归档成员或已验证的替代结果及其删除依据仍可核验时，跳过已去重、已归档、已淘汰内容，不重新补回。相同旧路径出现新内容时仍按新增证据核查并保全，不按目录名或日期直接忽略。
 - 不得使用删除式镜像、强制重置或服务器到本地的覆盖式拉取。处理符号链接和路径冲突时必须先确保目标仍位于本地项目内。
@@ -14,6 +14,30 @@
 - 缺失的通用实验依赖应补齐；若所需版本与本地共享模块冲突，将必要版本放在实验内的 `runtime/` 并明确入口引用，不覆盖本地主版本。运行入口使用项目相对路径，不能依赖服务器绝对路径。软件版本与资源要求必须注明，本地源码完整不等于无需安装依赖或无需 GPU。
 - 本地完整回收不等于 GitHub 备份；GitHub 同步范围遵守下节及 `.gitignore`。
 - Cursor 同时遵守 `.cursor/rules/local-authority-sync.mdc`；本规则适用于整个项目及后续所有同步任务。
+
+<a id="model-weight-cache"></a>
+
+## 模型权重缓存（本机与集群）
+
+本节对本地 WSL/Windows 与集群 `myserver` 同等有效；作业、交互会话与回收任务均须遵守。
+
+- 每台机器只使用一个 Hugging Face 缓存根目录，由环境变量 `HF_HOME` 指定。布局为 `$HF_HOME/hub/models--<org>--<name>/`。模型身份是仓库 ID 与 revision，不是某台机器上的绝对路径。
+- 默认路径：本机 WSL `/mnt/f/hf-cache`（Windows `F:\hf-cache`）；集群 `$HOME/hf-cache`（当前账号即 `/cluster/home/zengy/hf-cache`）。登录节点预热、计算节点离线读取，均指向该机 `HF_HOME`。已设置的 `HF_HOME` 不得被脚本改写到另一台机器的路径（例如集群作业不得指向 `/mnt/f/hf-cache`）。
+- 该目录维护 `INVENTORY.json`，登记 `id`、`revision`、用途角色、`hub_dir` 与权重哈希。新增、核验或删除快照后更新该机清单。本机与集群各有一份清单，不以同步文件代替下载。
+- 权重、分词器快照与 Hub 数据集缓存不入库，不写入实验 `runtime/`、`.tools/`、仓库内 `.hf-cache/` 或 `.server-sync/`。服务器到本地的回收不得复制 `HF_HOME`；本机与集群需要同一模型时，按 ID 与 revision 在该机缓存中下载或核验，不靠复制权重复制对齐。
+- 不得用 Instruct 快照代替 base，也不得用 base 代替 Instruct。R1 开发/冒烟使用 `Qwen/Qwen2.5-0.5B-Instruct`；R2 开发检查使用 `Qwen/Qwen2.5-0.5B`。正式评测模型按其协议 revision 放入同一 `HF_HOME`。残缺分片可删；仍被 R1/R2 使用的完整快照不得整理掉。不在仓库内再放一份平行模型目录。
+
+<a id="isolated-gpu-runtimes"></a>
+
+## 隔离 GPU 运行时（本机与集群）
+
+本节对本地与集群 `myserver` 同等有效。步骤 9 口径以 R2 共享配置 `gpu_kernels` 为准，本规则管环境与文件，不替代该协议。
+
+- CUDA 扩展编译、BitDecoding、SAW-INT4 不得装入 `r1-kv-baseline` 或步骤 2 探测所用 `torch 2.5.1+cu121`。不得为“对齐 CUDA”升级上述环境。作业不得在 `source research/r1_kv_baseline/activate.sh` 之后于同一 conda 里安装或编译这三者。
+- 三者在**该机**各自使用隔离环境；虚拟环境、toolkit 与编译产物不入库，不写入 `.tools/`、实验 `runtime/` 或 `.server-sync/`，不从一台机器复制到另一台。本机与集群需要同一内核时，按协议固定提交在该机隔离环境中构建。
+- CUDA：新建只用于编扩展的环境，`CUDA_HOME` 指向 nvcc 12.4，或换一套 toolkit 与**该隔离环境** PyTorch 一致的组合。
+- BitDecoding：隔离 venv，固定提交见协议；补 `flash-attn` / `ninja`，按作者 `setup.py` 编 sm80。先最小 shape 功能冒烟，再执行协议 `gpu_timing`。量化网格若对不上项目 C2/C3，标成同 GPU 的作者格式，不得改名为 C2。
+- SAW-INT4 官方 FA3 仅 H100/H800。无该设备时步骤 9 不报官方 kernel 时延或 TPS；C3 与本仓库旋转及 Q/O 变换对拍，论文与作者文档只作机制参照。更换 FA2 等后端必须标为适配，不能称官方复现。Flash-Decoding 与本仓库 C0 的 GPU 时延可在已核验 Ada 上测，不依赖 SAW。
 
 ## GitHub 同步范围
 

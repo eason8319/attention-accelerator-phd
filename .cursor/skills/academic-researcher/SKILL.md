@@ -36,8 +36,7 @@ description: >-
 
 ```text
 queries.md → inbox.md → 打开原文/会刊页核实 → ledger.yaml
-  → recent_works_comparison.md 总览表/卡片 → lit_watch/CHANGELOG.md
-  → 手册顶部修订记录；必要时改 cutoff
+  → recent_works_comparison.md 总览表/卡片   → lit_watch/CHANGELOG.md；必要时改 cutoff
 ```
 
 1. 先按题名、DOI/arXiv ID/规范 URL 核对手册、ledger 和所属 .bib；已给出来源则定向核验，广泛检索使用 [`queries.md`](../../../docs/lit_watch/queries.md)，并说明本次范围。
@@ -46,7 +45,7 @@ queries.md → inbox.md → 打开原文/会刊页核实 → ledger.yaml
 4. 与 `ledger.yaml` 的 `id` / `arxiv_id` / `doi` 去重；已有条目则更新字段，不另造 id。
 5. 核实后追加或修改 `ledger.yaml`（`status: verified`，`verified_on`，`verify_sources`）。
 6. 同步手册总览/卡片与所用 .bib，复用既有引用键；交付前检查本次引用覆盖。Cutoff 不早于本次核验日，并标明定向增量或广泛检索，不能冒充全表复核。
-7. `docs/lit_watch/CHANGELOG.md` 与手册「修订记录」各记一行。
+7. 在 `docs/lit_watch/CHANGELOG.md` 记一行；手册不另设修订记录。
 
 未完成核实的条目留在 inbox，**不要**写入总览表主行。
 

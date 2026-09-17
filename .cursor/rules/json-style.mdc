@@ -1,0 +1,35 @@
+---
+description: 人手维护的 JSON 配置格式；结果 JSON 不当源码重排
+globs: "**/*.json"
+alwaysApply: false
+---
+
+# JSON 风格
+
+## 范围
+
+- 约束人手维护的配置：实验 `experiment.json`、`experiments/configs/`、可移植 `runtime/dependencies.json`。
+- **不要**为风格重排或改写 `results/`、`outputs/`、清单哈希副本等已核验机器记录。
+- Verilator/工具生成的 JSON 只作结果登记，不当时手工源码。
+
+## 格式
+
+- 2 空格缩进；UTF-8；LF；文件末换行；无尾逗号。
+- JSON 无注释语法，禁止 `//` 或 `/* */`。
+- 键名英文 `snake_case`，顶层放 `schema_version`（整数）以便演进。
+- 枚举与协议取值保持稳定英文字符串（如 `C2`、`float16`）；不要翻译键名或枚举。
+- 说明性字段（`note`、`purpose`、`scope`、`limits`）用中文写约束与口径。
+- 新文件用 `ensure_ascii=False` 的 UTF-8 写出，与 `evidence.save` 一致。
+
+## 哈希与登记
+
+- 源码变更后只更新 `experiment.json` 中对应 `sha256`/`bytes`，不重写历史 `run_config.json`。
+- 已随完成实验登记哈希的协议/依赖说明字段，不因中文化单独改写。
+- 路径用正斜杠相对实验或仓库根；不写入本机绝对路径或凭据。
+
+```json
+{
+  "schema_version": 1,
+  "purpose": "R2 评测协议参数；不是实验结果或批准记录"
+}
+```

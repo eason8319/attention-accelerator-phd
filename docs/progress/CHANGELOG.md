@@ -4,6 +4,174 @@
 
 ---
 
+## 2026-09-17（R2 步骤 6 审核通过）
+
+- 用户确认步骤 6 审核通过；依据为[公平映射与周期、能耗基线报告](../../research/r2_streaming_attention/experiments/fair_mapping_cost/REPORT.md)，审核范围及适用边界以报告为准。[里程碑](milestones.md#r2-review)登记为已通过，步骤 7 待开始。
+- 按 R1 既有 GitHub 范围整理本次版本：各实验子目录仅发布唯一 `REPORT.md`，共享配置、通用源码与研究文档正常入库；实验运行入口、原始结果及本地运行依赖保留在本地。
+
+## 2026-09-17（R2 公平映射与成本基线核验）
+
+- 完成 GQA 计算守恒、资源受限 split/跨头调度、独立访存事件对拍、写侧与工作缓冲成本闭合；2048-token 预约单列容量检查，复现入口保留淘汰记录并登记实际结果目录。
+- 最终源码全网格复跑：660/660 检查通过，4,248 条结果通过守恒核验，4,096 个压力步骤完整保留；容量 62/64 可行，超限点保留。权威结果仍为 `results/mapping_cost_accounted/`，旧批次按哈希和替代依据登记后替换。
+- 阅读机器结果后撰写[唯一正式报告](../../research/r2_streaming_attention/experiments/fair_mapping_cost/REPORT.md)，记录供给敏感性及资源比较边界。下方旧批次数字仅属历史记录；当前结果以报告为准。[步骤 6](milestones.md#r2-review)维持待审核，未进入步骤 7，未提交或推送。
+
+## 2026-09-16（R2 步骤 6 提交审核）
+
+- 冻结 SRAM bank/端口/延迟、DMA 队列和每动作能量来源，建立优化 FP16、共享流式解码及 GQA/跨头/KV-split 对照。C3 混合路径计入读侧 K 逆旋转、写侧旋转、输出逆旋转和短块补零，不称为纯 Q/O。
+- WSL CPU 冒烟 157/157、占用 144/144；缺省/对照/单因素/优化/压力格均可放。权威结果 `results/mapping_cost_accounted/`。C2 相对优化前 C0 减少 HBM 字节与动态能量、缺省解量化下更慢；C3 相对 C2 周期约 $2.13\times$、动态能量约 $3.06\times$。依据机器结果撰写[唯一正式报告](../../research/r2_streaming_attention/experiments/fair_mapping_cost/REPORT.md)，[步骤 6](milestones.md#r2-review)提交待审核，未标已通过，未进入步骤 7，未提交或推送。
+
+## 2026-09-16（R2 步骤 5 审核通过）
+
+- 用户确认第五步审核通过；依据为[单头操作数与 C3 混合功能基线报告](../../research/r2_streaming_attention/experiments/streaming_attention/REPORT.md)：混合 DUT 主网格 233/233、契约 106/106、C3 输出 305/305，保留读侧 K 逆旋转，不称为纯 Q/O 优化成功。[里程碑](milestones.md#r2-review)将步骤 5 登记为已通过，步骤 6 待开始。未启动成本比较，未提交或推送。
+
+## 2026-09-16（C3 混合功能基线提交审核）
+
+- 保持 FP32、独立原域参考、原误差门槛和旋转定义；将 C3 验收对象调整为原域 QK＋旋转域 PV/O。流式实现配置升为 `r2-stream-attention-v3`，关闭整遍数值保护，默认 DUT 保留读侧 K 逆旋转，不得称为纯 Q/O 优化成功。
+- WSL CPU 混合主网格 233/233、冒烟 8/8、操作数契约 106/106、边界 121/121 通过；既有 305/305 混合输出验收继续作为 C3 功能证据。纯 Q/O 仍为 47/53 与结合律 0/6，只作延期诊断。依据机器结果改写[唯一正式报告](../../research/r2_streaming_attention/experiments/streaming_attention/REPORT.md)，[步骤 5](milestones.md#r2-review)提交待审核，未标已通过，未进入步骤 6，未提交或推送。
+
+## 2026-09-16（C3 结论范围与审核方案）
+
+- 将纯 Q/O 结论限定为当前实现和已测试变体，撤回“无法补齐”的一般性断言；修正 softmax 权重变化和逐元素联合容差的解释。
+- 在[现有报告 §6](../../research/r2_streaming_attention/experiments/streaming_attention/REPORT.md#6-结论与后续工作)提出混合路径作为 C3 功能基线候选的具体审核方案。未启动新实验、未改共享配置及计算实现，步骤 5 保持待审核。
+
+## 2026-09-15（C3 纯 Q/O 原域开发验证）
+
+- 在固定 FP32 门槛与独立原域参考下，本轮已测试的查询侧分块/补偿求值尚未全部通过原 6 个纯 Q/O 用例；$T{=}129/257$ 仍未过 allclose。本轮对照中，逆旋转 K 的补充混合路径通过，定义与纯 Q/O 不同。
+- 负结果见 `results/c3_qo_fp32_association/`。已修订唯一报告的范围、原因与审核建议；步骤 5 维持待审核，未改门槛、未进入步骤 6、未提交或推送。
+
+## 2026-09-15（流式实验测试与报告收敛）
+
+- 将流式实验 `smoke/` 从 16 个源码文件收敛为 2 个验收入口和 2 个共享辅助文件；边界检查并入通用验收，扩展种子与短尾检查并入 C3 验收。通用 106 项、边界 121 项、C3 输出 305 项、内存 2 项与短尾 10 项完成复跑及原字段一致性核对。
+- 报告证据集中为三个结果批次，完整覆盖的重复副本按校验依据去重，独有开发记录与源码按原字节归档。映射、哈希及范围见[实验清单](../../research/r2_streaming_attention/experiments/streaming_attention/experiment.json)。
+- 按用户要求人工重写[唯一报告](../../research/r2_streaming_attention/experiments/streaming_attention/REPORT.md)，聚焦当前方法、有效结果、分析与局限。未改计算实现、FP32 门槛或阶段审核状态。
+
+## 2026-09-15（C3 短矩阵一致性）
+
+- 将混合候选剩余误差定位到短 Key 逆旋转和短 QK 的 FP32 求值形状；二者不足 4 行/列时补零至 4，只让有效 token 进入后续运算。固定参考、原阈值及纯 Q/O 默认路径不变，填充运算和存储另行计数。
+- 现行候选通过原登记 53/53、扩展离群值 48/48、新增种子 160/160，边界与归并 44/44、分配检查 2/2、短尾契约 10/10。默认契约回归 106/106、边界回归 121/121。现行方法的结果与局限见[正式报告](../../research/r2_streaming_attention/experiments/streaming_attention/REPORT.md)。
+- 原纯 Q/O 仍为 47/53，全部历史失败及对应源版本保留。修订唯一报告、清单及索引；步骤 5 保持待审核，未提交、推送或进入步骤 6。
+
+## 2026-09-15（C3 QK 误差定位与修正候选）
+
+- 保持 FP32、固定参考和全部门槛，逐段替换分数与输出，确认原 C3 outlier 失败主要来自旋转域 QK 求值重排。查询/输出旋转及点积组合的原始记录由[实验清单](../../research/r2_streaming_attention/experiments/streaming_attention/experiment.json)定位。
+- 新增显式原域 QK、旋转域 PV/O 候选，无整遍 Attention 回退：原登记 C3 53/53，扩展离群值 47/48，边界 28/28、归并 16/16、内存检查 2/2。默认契约回归 106/106，纯 Q/O 的原六项仍失败；扩展集也保留全部未过项。
+- 短块形状方案在不同种子间转移失败，保留结果与对应源版本，未采用到现行候选。原默认通路、共享协议和阈值不变；唯一报告、实验清单与索引同步更新，步骤 5 仍待审核且未全部完成。未提交、推送或进入步骤 6。
+
+## 2026-09-15（R2 单头操作数与 FP32 验收补齐）
+
+- 按用户要求保持全部 FP32 要求及原功能阈值。新增单头单侧操作数供给，落实独立段边界，补齐非有限值/近零门与独立原域参考；C3 启用显式原域数值保护并单列额外读取和计算。
+- WSL CPU 保护输出网格 233/233、冒烟 8/8、操作数契约 106/106、补充边界 121/121 通过；纯 C3 Q/O 仍有 6 个 outlier 未过，两个相关入口维持非零退出状态。依据原始结果人工修订[唯一正式报告](../../research/r2_streaming_attention/experiments/streaming_attention/REPORT.md)，[步骤 5](milestones.md#r2-review)保持待审核且未满足全部要求，未进入步骤 6。
+- 实验配置更新为 `r2-stream-attention-v2`，父评测协议与 R1 语义未改。保留失败、数值诊断及所用源版本，新增空 C5 独立参考的边界分支并做专项复核；批次原始记录不改写，来源与哈希统一登记于实验清单。未提交或推送。
+
+## 2026-09-15（R2 流式功能完成性评估）
+
+- 核对登记源码、配置与原始结果哈希，完整复跑现有流式检查；三份机器结果与原批次逐字节一致。新增独立契约检查、范围解码故障注入及 FP32 参考数值诊断，源码和结果保存在所属实验内。
+- 依据机器证据更新[唯一正式报告](../../research/r2_streaming_attention/experiments/streaming_attention/REPORT.md)与实验有效性清单；[里程碑](milestones.md#r2-review)仍为步骤 5 待审核，需补齐所列缺口。未修改通路实现或协议，未进入步骤 6；原始批次保留，未提交或推送。
+
+## 2026-09-15（R2 流式 Attention 与优化 C3）
+
+- 完成有界 tile 流式 QK / online softmax / PV、跨分段归并与 C3 Q/O 变换，入口见[流式 Attention 与优化 C3 报告](../../research/r2_streaming_attention/experiments/streaming_attention/REPORT.md)。流式参数冻结为 [`stream_attention.json`](../../research/r2_streaming_attention/experiments/configs/stream_attention.json)；不修改 R1 源码。
+- WSL CPU 上冒烟 8/8、登记格子 233/233 通过：工作缓冲不超过 tile，DUT 未调用 `load()`；尾页、非整齐分组、C5 刷窗、全掩码与背压单独通过。未实现周期或能耗，未跑质量门，未使用集群。旧口径 `results/stream_attention_verified/` 已按清单淘汰，哈希与替代结果见实验 `experiment.json`。
+- [里程碑](milestones.md#r2-review)将步骤 5 登记为待审核。未提交或推送 GitHub。
+
+## 2026-09-15（R2 步骤 4 审核通过）
+
+- 用户确认第四步审核通过；依据为[分页、残差与访存事件报告](../../research/r2_streaming_attention/experiments/paged_residual_access/REPORT.md)及分层计量、独立验收和故障注入的完整结果。[里程碑](milestones.md#r2-review)将步骤 4 登记为已通过，步骤 5 待开始；审核范围以报告为准。
+
+## 2026-09-15（R2 旧结果副本去重）
+
+- 经用户明确授权，删除分页与残差实验 `page_access_verified/`、`access_accounting_review/`、`access_contract_smoke/` 三个结果目录中的 11 个散装 JSON 及空目录，共 7,098,671 B。前九个文件与历史归档成员逐字节一致，另两个预检文件由完整正式结果覆盖。
+- 保留 `results/page_access_accounted/` 与 `results/archive/accounting_incomplete_evidence.zip`，复核归档全部 28 个成员及现行源码、报告和结果哈希。旧路径、旧哈希、归档成员或替代结果及删除依据已登记于[实验清单](../../research/r2_streaming_attention/experiments/paged_residual_access/experiment.json)，先前淘汰记录的引用已改为可核验的归档定位；原始记录内部的历史路径保持原字节。
+
+## 2026-09-15（R2 分层访存计量与独立验收）
+
+- 分页计量配置登记为 `r2-page-access-v2`，补齐满页编码、C5 刷窗读取及紧凑残差重排读写，控制覆盖字节与实际流量分列；尾页转为 HBM 时更新 PTE/标签，一次追加只读改写已有 Value 量化尾页一次。R1 与评测协议保持原版本。
+- 完整重跑主网格、刷窗轨迹、非连续混合追加及逐类故障注入；现行通过条件包括独立事件预期与 packed/scale/min 内容核对。依据机器结果人工更新[唯一正式报告](../../research/r2_streaming_attention/experiments/paged_residual_access/REPORT.md)，[步骤 4](milestones.md#r2-review)恢复为实现与机器核验完成、待用户审核。
+- 当前结果位于本实验 `results/page_access_accounted/`；旧功能检查的逐字段覆盖证据及源码/结果哈希登记于实验清单。历史缺陷与所用源码保存在经成员哈希核验的 `results/archive/accounting_incomplete_evidence.zip`。自动审批拒绝删除旧结果副本，原目录继续保留并登记为历史证据；未提交或推送 GitHub。
+
+## 2026-09-15（R2 分页与残差计量评估）
+
+- 核对步骤 4 登记文件哈希并完整复跑既有格子，缓存、存储、元数据和刷窗结果一致；新增尾页读取及写事件故障注入检查，发现写侧计量与验收覆盖缺口。证据及有效范围更新至[唯一正式报告](../../research/r2_streaming_attention/experiments/paged_residual_access/REPORT.md#35-写侧计量与验收覆盖)与实验清单，原始结果保留，缓存实现未改动。
+- [步骤 4](milestones.md#r2-review)仍待审核，须先补齐报告所列计量项；步骤 3 状态不变。
+
+## 2026-09-15（R2 步骤 3 审核通过）
+
+- 用户确认第三步审核通过；依据为[物理打包与追加报告](../../research/r2_streaming_attention/experiments/physical_pack_append/REPORT.md)及其存储核验后的完整结果。步骤 3 登记为已通过，步骤 4 保持既有待审核状态。
+- 核对报告与结果哈希；共享 `r1_bridge.py` 仅增加分页辅助入口，移除新增文本后的哈希与第三步原执行版本一致。实验清单登记当前源码及该核验依据，历史运行配置和原始结果保持原字节。
+
+## 2026-09-15（R2 分页、残差与访存事件）
+
+- 完成物理 packed 分页、C5 `residual_length=128` 四池刷窗，以及读写、刷窗、页表和元数据事件计量。入口见[分页、残差与访存事件报告](../../research/r2_streaming_attention/experiments/paged_residual_access/REPORT.md)。分页参数冻结为 [`page_access.json`](../../research/r2_streaming_attention/experiments/configs/page_access.json)；不修改 R1 源码。
+- WSL CPU 上 1674/1674 格子通过：页数与 R1 公式一致；C5 量化载荷加残差 FP16 等于 R1 payload；均匀 paged 尾页按 FP16 单独记账。元数据共址保持编码不变。未实现流式 Attention、周期或能耗，未使用集群。
+- [里程碑](milestones.md#r2-review)将步骤 4 登记为待审核；步骤 3 仍待审核。未提交或推送 GitHub。
+
+## 2026-09-15（R2 物理打包存储核验）
+
+- C5 开口组改为独立紧凑存储，避免借用调用方输入或保留已提交前缀的 FP16 底层内存；K/V 的 payload、scale、min 分侧对齐。缓存底层实测与整段对齐预算分开登记。
+- 新增输入复用、非连续输入、底层存储与分侧边界检查，完整重跑原网格后按结果修订[正式报告](../../research/r2_streaming_attention/experiments/physical_pack_append/REPORT.md)。保留专项失败观测与原源码快照；旧网格在逐字段覆盖核验后淘汰，旧哈希、替代证据及核验依据登记于实验清单。
+- 统一本实验相关文本为 UTF-8/LF，刷新源码、依赖、结果与报告哈希。步骤 3 仍待用户审核，步骤 4 待开始。
+
+## 2026-09-14（R2 步骤 3 物理打包与追加）
+
+- 完成连续布局的物理 nibble/bit 打包与追加，入口见[物理打包与追加报告](../../research/r2_streaming_attention/experiments/physical_pack_append/REPORT.md)。布局参数冻结为 [`pack_layout.json`](../../research/r2_streaming_attention/experiments/configs/pack_layout.json)；不修改 R1 源码，语义文件哈希与协议一致。
+- WSL CPU 上 1878/1878 格子通过：packed 载荷等于 R1 名义字节，INT4 相对 R1 int8 暂存缩小一半；C5 开口组与 32 B 整段对齐浪费单独记账。未实现分页、残差窗 128 或流式 Attention。
+- [里程碑](milestones.md#r2-review)将步骤 3 登记为待审核。未提交或推送 GitHub。
+
+## 2026-09-14（R2 步骤 2 文档口径对齐）
+
+- 明确 v1 全程逐 token 前缀算量（89.90 GPU 天）只属于[资源与最小算术报告](../../research/r2_streaming_attention/experiments/arithmetic_feasibility/REPORT.md)，现行质量门为 `r2-evaluation-v2`，不按新口径重算该表。实验清单分开登记当时协议哈希与当前协议文件哈希；源码注释/格式刷新后的哈希写入 `source.files`，产出结果时的哈希留在 `comment_refresh_prior_files` 与历史 `run_config.json`。
+- 计划表写明开发模型为 `Qwen/Qwen2.5-0.5B` base；实验索引标明该实验预算不是 v2 质量门成本。未改原始结果，未进入步骤 3。
+
+## 2026-09-14（R2 实验源码分层）
+
+- 将结果登记助手从 `arithmetic_feasibility/evidence.py` 上移到 [`research/r2_streaming_attention/evidence.py`](../../research/r2_streaming_attention/evidence.py)，供后续实验复用；实验入口、整数乘加 RTL 与对拍测试台仍留在本实验目录。
+- 报告已引用的 Windows/WSL/GPU 清单、原生 Llama 短测、语料计数、预算和 2,176 组 RTL/映射对拍均保留。无未写入报告的一次性测试。历史 `run_config.json` 与原始结果不改写；路径映射记入实验清单 `relocated_files`。
+
+## 2026-09-14（GPU 对照隔离写入本机与集群约定）
+
+- 根规则 [AGENTS.md](../../AGENTS.md#isolated-gpu-runtimes) 新增「隔离 GPU 运行时」：CUDA 扩展、BitDecoding、SAW-INT4 不得装入 `r1-kv-baseline` 或步骤 2 的 `torch 2.5.1+cu121`；隔离环境留在该机，不入库、不跨机复制。
+- 协议 `gpu_kernels` 写明 CUDA_HOME/toolkit 对齐、BitDecoding 先最小 shape 冒烟再 20/100/5、量化网格不对齐时标作者格式，以及 SAW 官方 FA3 在 H100/H800 与放弃官方时延之间的二选一。未构建内核，未进入步骤 3 或 9。
+
+## 2026-09-14（模型权重缓存在本机与集群统一约定）
+
+- 根规则 [AGENTS.md](../../AGENTS.md#model-weight-cache) 新增「模型权重缓存」：每台机器只使用该机 `HF_HOME`，身份是仓库 ID 与 revision；集群默认 `$HOME/hf-cache`，不得把本机路径写进作业，也不得把权重复制进仓库或 `.server-sync/`。
+- `activate.sh` 在已导出 `HF_HOME` 时不再覆盖；冒烟脚本按环境选择本机或 `~/hf-cache`。协议 JSON 改为环境变量约定，不再把 `/mnt/f/hf-cache` 写成唯一根。
+
+## 2026-09-14（本地模型缓存集中到 HF_HOME）
+
+- 将已核验的 R2 开发模型 `Qwen/Qwen2.5-0.5B` base 写入 R1 既有 `HF_HOME=/mnt/f/hf-cache` 的 Hub 布局；`Qwen/Qwen2.5-0.5B-Instruct` 的 blob 哈希、`refs/main` 与 config 字节未改。R1 仍只使用 Instruct。
+- 协议缓存根改为该 `HF_HOME`；清单在缓存目录的 `INVENTORY.json`。未改 R1 模型 ID、实验源码或历史结果。
+
+## 2026-09-14（R2 协议 v2 与依赖收缩）
+
+- 用户授权将共享配置升为 `r2-evaluation-v2`：质量门 PPL 改为每窗 prefill 建立压缩 KV、仅对计分 token 走流式读路径；全程逐 token 改为冻结小集，不进入 5%/3% 分母。官方 SAW-INT4 FA3 时延限于 H100/H800；BitDecoding 与 CUDA 扩展改为步骤 9 的隔离环境，不升级已完成探测用的 PyTorch 12.1 运行时。1 ns 负结果不回头优化。步骤 3 按用户要求未开始。
+- 开发模型 `Qwen/Qwen2.5-0.5B` revision `060db6499f32faf8b98477b0a26969ef7d8b9987` 的忽略缓存快照已核验：`model.safetensors` SHA-256 `88c142557820ccad55bb59756bfcfcf891de9cc6202816bd346445188a0ed342`，配置与分词文件与 Hub git blob 一致；权重不入库。未完成的 7B 分片已删除，不作为可用快照。
+- 删除未登记的下载/隔离环境脚本、Hub API 整包摘录、可重建的 `build/` 与 `tmp/r2-gpu-setup`。步骤 2 正式报告与 `dependencies.json` 保持原证据，不改写。
+
+## 2026-09-14（R2 步骤 2 审核通过）
+
+- 用户确认 Llama 原生 FP16 已覆盖 4K–32K；步骤 2 登记为已通过。Qwen 正式/开发权重与 BitDecoding、SAW-INT4 公开内核仍为待补依赖，须在步骤 9 前补齐，不作为本步失败，也不视为已安装或已测。
+- 未修改 `r2-evaluation-v1` 的 PPL 口径；1 ns 单元时序未通过仍只作为算术探针的负结果。步骤 3 尚未开始。
+
+## 2026-09-14（失败算术尝试清理）
+
+- 核验后删除 `arithmetic_feasibility` 中三次未完成的工具接口尝试：`results/integer_madd`（Yosys `check -assert` 失败）、`results/integer_madd_mapped_cells`（OpenROAD 未读工艺）、`results/integer_madd_nangate45`（OpenROAD STA 参数不兼容），并清除对应 `build/`。
+- 成功批次 `results/integer_madd_cell_timing` 使用相同 seed=42、2000 随机向量及相同 RTL/测试台/单元库哈希；golden、inputs、rtl_dut 与后两次失败尝试的 mapped 网表/对拍输出逐字节一致。正式证据仍为 2,176 组 RTL/映射对拍与单元时序；1 ns 约束未通过作为有效负结果保留。
+- 46 个旧文件的路径与 SHA-256 记入实验清单 `retired_files`，不另建归档副本。报告正文未改，仍只引用成功批次。
+
+## 2026-09-14（R2 资源与最小算术审核）
+
+- 用户“继续”通过首轮协议审核；完成[资源与最小算术实验](../../research/r2_streaming_attention/experiments/arithmetic_feasibility/REPORT.md)的资源探测、原生 FP16 Llama 短测、完整语料计数、RTL/映射网表对拍和单元时序分析，人工撰写唯一报告。执行版本、原始结果与来源哈希由实验清单及 `.server-sync/r2-resource-recovery/` 登记；本地原有文件未被服务器覆盖。
+- 固定公开内核及综合库来源，补充必要依赖声明和容器入口；公开内核仅完成依赖核对，相关来源更新见[文献记录](../lit_watch/CHANGELOG.md)。时序未达标、未安装依赖和成本情景在正式报告如实说明。
+- 初期 Yosys 单元声明、OpenROAD 工艺读取及命令版本检查曾失败，原始配置、源码快照和日志完整保留；自动审批拒绝删除这些目录，本次未清理或覆盖其证据。成功的完整工具运行独立登记，不将前期失败计为通过。
+- [里程碑](milestones.md#r2-review)登记步骤 2 待审核。未修改已批准的 PPL 协议，未进入步骤 3，未提交或推送 GitHub。
+
+## 2026-09-14（R2 协议与首步审核）
+
+- 核对 R1 验收边界和 R2 的 12 步依赖，在现有 [R2 计划](../../research/r2_streaming_attention/PLAN.md#r2-protocol-review)补齐版本、采样/模板、统计、公平成本与独立配置规则；新增可共享的协议参数 JSON，固定公开模型/评测版本及 R1 格式源码哈希。RULER 和原版 LongBench 的登记见[文献修订记录](../lit_watch/CHANGELOG.md)。
+- 检查共享配置解析、任务生成预算/评分入口、独立组合分区、文档链接及九项来源的台账/引用键覆盖；三份 R1 格式源码及七份选定结果汇总/独立检查文件与登记哈希一致。本次不重跑 R1，也不把哈希匹配当作 R2 功能验收。
+- [里程碑](milestones.md#r2-review)将步骤 1 登记为待审核，步骤 2–12 仍待开始；未执行 GPU/RTL/综合实验，未创建实验报告或结果目录，未改动 R1 源码与结果。下一步须等用户审核本轮协议后开展。
+
 ## 2026-09-11（相关文献补录与引用登记）
 
 - 补齐[近年成果对比手册](../recent_works_comparison.md)中 R2 的相关来源，统一核验信息、台账及引用键；具体变更见[文献修订记录](../lit_watch/CHANGELOG.md)。

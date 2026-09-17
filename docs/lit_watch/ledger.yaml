@@ -4,7 +4,7 @@
 # source_type: paper (default) | technical_post; author code is attached to its source record
 # bucket: algo_gpu | hw_asic_fpga | survey | adjacent
 #
-# Latest incremental verification: 2026-09-11 (seven R2 sources; not a full-ledger re-audit)
+# Latest incremental verification: 2026-09-16 (Accelergy adjacent energy methodology for R2 step 6; not a full-ledger re-audit)
 
 quantitative_audit:
   date: "2026-09-03"
@@ -13,14 +13,88 @@ quantitative_audit:
   scope: "all 21 ledger entries; latest public full text or official proceedings"
 
 cutoff:
-  date: "2026-09-11"
-  scope: "R2 seven-source incremental check; previous full search 2026-09-03; not an exhaustive search through this date"
+  date: "2026-09-16"
+  scope: "directed Accelergy ICCAD 2019 plus CACTI plug-in HBM2 constant and ISPASS 2020 tutorial MAC example for R2 mapping-cost sources; prior 2026-09-15 KIVI/SAW-INT4/BitDecoding/PLENA figure check; previous full search 2026-09-03; not an exhaustive search or complete historical performance re-audit"
   latest_seen:
     arxiv_id: "2608.23843"
     title: "PuzzleKV: Page-Wise Low-Rank Decomposition for KV Cache Compression"
     note: "preprint; arXiv first posted 2026-08-24"
 
 papers:
+  - id: ruler
+    short_name: RULER
+    source_type: paper
+    title_official: "RULER: What's the Real Context Size of Your Long-Context Language Models?"
+    authors:
+      - Cheng-Ping Hsieh
+      - Simeng Sun
+      - Samuel Kriman
+      - Shantanu Acharya
+      - Dima Rekesh
+      - Fei Jia
+      - Yang Zhang
+      - Boris Ginsburg
+    venue: "COLM 2024"
+    venue_type: proceedings
+    year: 2024
+    arxiv_id: "2404.06654"
+    arxiv_first_posted: "2024-04-09"
+    arxiv_last_updated: "2024-08-06"
+    doi: null
+    canonical_url: "https://openreview.net/forum?id=kIoBbc76Sy"
+    code: "https://github.com/NVIDIA/RULER"
+    code_revision: "c3f5e3b4f87f97e048793bb510a3a6b19a46bf3a"
+    bibtex_key: hsieh2024ruler
+    bucket: adjacent
+    status: verified
+    verified_on: "2026-09-14"
+    reviewed_version: "COLM proceedings PDF; arXiv v3; pinned original scripts pipeline"
+    verify_sources:
+      - "https://openreview.net/pdf?id=kIoBbc76Sy"
+      - "https://arxiv.org/abs/2404.06654v3"
+      - "https://github.com/NVIDIA/RULER/blob/c3f5e3b4f87f97e048793bb510a3a6b19a46bf3a/scripts/synthetic.yaml"
+      - "https://github.com/NVIDIA/RULER/blob/c3f5e3b4f87f97e048793bb510a3a6b19a46bf3a/scripts/data/synthetic/constants.py"
+    result_source: "abstract benchmark scope; task definitions in paper Sec. 2 and pinned scripts; no project performance reproduction"
+    notes: "Abstract: 17 models, 13 representative tasks; models claim at least 32K but only about half maintain satisfactory 32K performance; Yi-34B claims 200K. These are historical benchmark claims, not R2 results or thresholds. R2 uses niah_multikey_1, niah_multiquery, vt, fwe; output budgets 128,128,30,50 from constants.py. prepare.py defines max_seq_length as input plus generation. Repository now also advertises newer pipelines; R2 deliberately pins original v1 task semantics. Current review covers task/version alignment, not every historical score."
+
+  - id: longbench
+    short_name: LongBench
+    source_type: paper
+    title_official: "LongBench: A Bilingual, Multitask Benchmark for Long Context Understanding"
+    authors:
+      - Yushi Bai
+      - Xin Lv
+      - Jiajie Zhang
+      - Hongchang Lyu
+      - Jiankai Tang
+      - Zhidian Huang
+      - Zhengxiao Du
+      - Xiao Liu
+      - Aohan Zeng
+      - Lei Hou
+      - Yuxiao Dong
+      - Jie Tang
+      - Juanzi Li
+    venue: "ACL 2024"
+    venue_detail: "Proceedings of the 62nd Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers), pp. 3119-3137"
+    venue_type: proceedings
+    year: 2024
+    arxiv_id: "2308.14508"
+    doi: "10.18653/v1/2024.acl-long.172"
+    canonical_url: "https://aclanthology.org/2024.acl-long.172/"
+    code: "https://github.com/THUDM/LongBench"
+    code_revision: "2e00731f8d0bff23dc4325161044d0ed8af94c1e"
+    bibtex_key: bai2024longbench
+    bucket: adjacent
+    status: verified
+    verified_on: "2026-09-14"
+    reviewed_version: "ACL 2024 proceedings; original LongBench subdirectory at pinned author commit"
+    verify_sources:
+      - "https://aclanthology.org/2024.acl-long.172/"
+      - "https://github.com/THUDM/LongBench/tree/2e00731f8d0bff23dc4325161044d0ed8af94c1e/LongBench"
+    result_source: "ACL abstract benchmark scope; LongBench/config/dataset2prompt.json, dataset2maxlen.json, pred.py, eval.py"
+    notes: "Abstract: 21 datasets, 6 categories, mean English length 6711 words and Chinese length 13386 characters; 8 evaluated LLMs. These are dataset-level historical counts, not token budgets or this project's measured quality. R2 uses original qasper/gov_report/hotpotqa/lcc full test sets, output caps 128/512/32/64; QA F1/ROUGE-L/code similarity as defined by official scoring. Root repository now documents v2; original code is under LongBench/. Original pred.py does not directly support R2 Llama-3.1/Qwen2.5, so model chat/cache adapters need explicit validation. Not LongBench-E; no old paper score imported into R2."
+
   - id: kivi
     short_name: KIVI
     title_official: "KIVI: A Tuning-Free Asymmetric 2bit Quantization for KV Cache"
@@ -51,6 +125,11 @@ papers:
       - "https://proceedings.mlr.press/v235/liu24bz.html"
       - "arXiv API 2402.02750"
     notes: "Author Hongye Jin (not Hongbin). arXiv DOI field may list non-Crossref RG id; prefer PMLR URL."
+    result_verified_on: "2026-09-15"
+    result_reviewed_version: "ICML 2024 text; local PDF SHA-256 df31ef32d71bfb280c533c5db8220cadf5ef42076bf45d82ba4c8da8e50ea5f4"
+    bibtex_key: "liu2024kivi"
+    result_source: "Figure 3, Table 3, Section 4.2.4/Figure 5"
+    result_notes: "Llama-2-7B CoQA/TruthfulQA/GSM8K: FP16 63.88/30.76/13.50; KIVI-4 63.78/30.80/13.80; KIVI-2 63.05/33.95/12.74. Throughput 2.35-3.47x: single A100 80GB, synthetic ShareGPT length distribution, increasing batch to memory limit; residual32/128 curves. Not a fixed-shape kernel speedup. Selected results only, no project reproduction."
 
   - id: bitdecoding
     short_name: BitDecoding
@@ -72,6 +151,9 @@ papers:
     doi: "10.1109/HPCA68181.2026.11408481"
     canonical_url: "https://doi.org/10.1109/HPCA68181.2026.11408481"
     code: "https://github.com/OpenBitSys/BitDecoding"
+    code_revision: "ae0d83630d6292453355ced498db2ac87f56ec62"
+    implementation_verified_on: "2026-09-14"
+    implementation_evidence: "Pinned README, requirements.txt and setup.py: README Python 3.10; CUDA >=11.6; sm80 and conditional sm90; unpinned flash-attn/ninja. Dependency inspection only; no project installation or benchmark."
     bucket: algo_gpu
     status: verified
     verified_on: "2026-09-11"
@@ -81,10 +163,16 @@ papers:
     notes: "R2 source review: arXiv v3 Sec. V-A/V-B covers GQA query reshaping, residual append, online quantization/packing and both scaling directions. Do not claim earlier GPU work omits write-side handling. Metadata verified against IEEE record; this update does not re-audit all performance points."
     bibtex_key: "bitdecoding2026"
     reviewed_version: "HPCA 2026 metadata; arXiv v3 mechanism"
+    result_verified_on: "2026-09-15"
+    result_reviewed_version: "Retained author PDF SHA-256 7db2ed2f23940ab44c610c880594a14ea3d11c46f7c3f599f9604d8b19f3fca8"
+    result_source: "Sections IV/V; Figure 12, local PDF page 11"
+    result_notes: "Figure 12: single A100 Llama-3.1-8B; left is model generation speedup across32K/64K/128K, right fixed4K input with batch sweep. Original graph/OOM retained, no new values digitized. Distinct from other GPUs' kernel maxima; no project reproduction."
     r2_verify_sources:
       - "https://ieeexplore.ieee.org/document/11408481/"
       - "https://arxiv.org/html/2503.18773v3"
       - "https://github.com/OpenBitSys/BitDecoding"
+      - "https://github.com/OpenBitSys/BitDecoding/blob/ae0d83630d6292453355ced498db2ac87f56ec62/setup.py"
+      - "https://github.com/OpenBitSys/BitDecoding/blob/ae0d83630d6292453355ced498db2ac87f56ec62/requirements.txt"
 
   - id: saw_int4
     short_name: SAW-INT4
@@ -111,6 +199,9 @@ papers:
     doi: null
     canonical_url: "https://arxiv.org/abs/2604.19157"
     code: "https://github.com/togethercomputer/saw-int4"
+    code_revision: "e51bfa7291d52cd14b86e4c6ded6c002d0444ff0"
+    implementation_verified_on: "2026-09-14"
+    implementation_evidence: "Pinned README and SUBMODULE_VERSIONS.md: fast-rotation fork https://github.com/jindajia/sglang-fork at 0fcc241961f9c79c27f6bad9a456bf10c8554a84, fa3 prefill and triton decode. FA dependency README at 8d3a3b80d4758ebde5a867c50d24d4351443cf2b requires H100/H800 and CUDA >=12.3 for FA3. Runtime requirements only, not a new paper or project reproduction."
     bucket: algo_gpu
     status: verified
     verified_on: "2026-09-11"
@@ -119,9 +210,16 @@ papers:
     notes: "Preprint v1. Author BDR environment reference: HADAMARD rotates K with Q correction; ROTATE_V also rotates V and inversely transforms output. main is mutable; pin a commit when running. R1 C3 is not automatically the official configuration."
     bibtex_key: "sawint42026"
     reviewed_version: "arXiv v1; author main documentation"
+    result_verified_on: "2026-09-15"
+    result_reviewed_version: "arXiv:2604.19157v1; local PDF SHA-256 781b13f4b92459a8b91c8cb97076bb7c7fa276001186fa1681fbe01b1337ae88"
+    result_source: "Figure 1, Section 4.1, Tables 3 and 4; https://arxiv.org/html/2604.19157v1"
+    result_notes: "Table3 Qwen3-8B five-task means: BF16 70.84, INT4 0, BDR16 67.88, BDR64 69.16, BDR128 69.97; zero is setting-specific. Table4 uses a different model, Qwen3-32B,2xH100,TP2,batch32: plain/fused/unfused single-decode-step kernel-category profiling totals533146/529918/540609ns; fused vs plain -0.605%. Not request wall-clock or serving TPS. K rotation pairs with Q transformation; V rotation requires output inverse. No project reproduction."
     r2_verify_sources:
       - "https://arxiv.org/abs/2604.19157"
       - "https://github.com/togethercomputer/saw-int4/blob/main/docs/bdr_env_vars.md"
+      - "https://github.com/togethercomputer/saw-int4/blob/e51bfa7291d52cd14b86e4c6ded6c002d0444ff0/README.md"
+      - "https://github.com/togethercomputer/saw-int4/blob/e51bfa7291d52cd14b86e4c6ded6c002d0444ff0/SUBMODULE_VERSIONS.md"
+      - "https://github.com/Dao-AILab/flash-attention/blob/8d3a3b80d4758ebde5a867c50d24d4351443cf2b/README.md#flashattention-3-beta-release"
 
   - id: minikv
     short_name: MiniKV
@@ -472,6 +570,10 @@ papers:
     notes: "ISCA 2026 confirmed by official program; system name PLENA. R2 compares asymmetric arithmetic, flattened-array mapping and native FlashAttention with matched resources; simulation/RTL evidence is not measured silicon. Existing citation key plena2025 is retained for compatibility although publication year is 2026. This update reviews metadata and mechanism, not every historical numeric claim."
     bibtex_key: "plena2025"
     reviewed_version: "ISCA 2026 metadata; arXiv v3 mechanism"
+    result_verified_on: "2026-09-15"
+    result_reviewed_version: "Retained author PDF SHA-256 9e807820ed611a296725b8127c384dcfc52d9143689c7cdce6b186938dc48c6f; no explicit arXiv revision embedded, do not infer it from local filename"
+    result_source: "Figure 4 page4; Table XII page13 of retained author PDF"
+    result_notes: "Llama-3.3-70B,90K prefill/8K output: A100 batch4 normalized TPS1,TTFT29.67s; PLENA maximum-fitting batch16 TPS2.21,TTFT43.43s; equal batch4 TPS1.34,TTFT21.68s. Simulation comparing16 accelerators with4GPUs in the paper system configuration; includes weight/activation/KV quantization. Not same device count or KV-only benefit. Older handbook TableVIII and peak2.23x/4.70x/4.04x have unresolved version correspondence and are not used in this presentation. Selected rows only, not all historical numbers re-audited."
     r2_verify_sources:
       - "https://www.iscaconf.org/isca2026/program/"
       - "https://arxiv.org/abs/2509.09505"
@@ -706,3 +808,34 @@ papers:
       - "https://arxiv.org/html/2605.13915v1"
     result_source: "abstract; Sec. 4.2-4.4, Sec. 5.1, Sec. 6 numerical simulation"
     notes: "BF16 activation decomposition into multiple low-precision passes; K scales absorbed into Q. Abstract claims about 16 effective bits for two INT8 passes, about 6.6 for MXFP4 vs 5.24 for MXFP8, error bound alpha/64, and up to 2.5x KV HBM reduction. Sec. 4.4.4 derives 5Md/2Md under a Vector-HBM-Cube round trip; not measured traffic on this ASIC or a fused baseline. Sec. 6 uses NumPy/PyTorch with FP32 golden; no full-model quality or end-to-end speed validation. abs calls INT8 weights W4A16, while HTML says W8A16; HTML title date is August 24 although arXiv history is May 13. Use arXiv version history for publication metadata, retain discrepancies."
+
+  - id: accelergy
+    short_name: Accelergy
+    source_type: paper
+    title_official: "Accelergy: An Architecture-Level Energy Estimation Methodology for Accelerator Designs"
+    authors:
+      - Yannan Nellie Wu
+      - Joel S. Emer
+      - Vivienne Sze
+    venue: "IEEE/ACM ICCAD 2019"
+    venue_detail: "2019 IEEE/ACM International Conference on Computer-Aided Design (ICCAD), Westminster, CO, USA, November 4-7, 2019, pp. 1-8"
+    venue_type: proceedings
+    year: 2019
+    arxiv_id: null
+    doi: "10.1109/ICCAD45719.2019.8942149"
+    canonical_url: "https://doi.org/10.1109/ICCAD45719.2019.8942149"
+    code: "https://github.com/Accelergy-Project/accelergy-cacti-plug-in"
+    code_revision: "9cf48b12e8be8f3acd0b505fac4aa663e5c31273"
+    bibtex_key: wu2019accelergy
+    bucket: adjacent
+    status: verified
+    verified_on: "2026-09-16"
+    reviewed_version: "ICCAD 2019 IEEE record; author PDF; CACTI plug-in commit 9cf48b12; ISPASS 2020 tutorial slides Part 2"
+    verify_sources:
+      - "https://doi.org/10.1109/ICCAD45719.2019.8942149"
+      - "https://ieeexplore.ieee.org/document/8942149"
+      - "https://people.csail.mit.edu/emer/media/papers/2019.11.iccad.accelergy.pdf"
+      - "https://github.com/Accelergy-Project/accelergy-cacti-plug-in/blob/9cf48b12e8be8f3acd0b505fac4aa663e5c31273/cacti_wrapper.py"
+      - "https://accelergy.mit.edu/ispass2020/2020_08_23_timeloop_accelergy_tutorial_part2.pdf"
+    result_source: "abstract 95% on Eyeriss; Sec. 5.1 65nm post-layout setup; Fig. 7 / Sec. 5.4.2 PE-array total energy; plug-in DRAM_estimate_energy HBM2 constant; tutorial 45nm 16-bit MAC compute example"
+    notes: "Abstract: 95% accuracy on Eyeriss and component-granularity breakdown. Validation uses 65nm RTL synthesized and PnR Eyeriss, not 45nm Nangate45 or this project's 1024-MAC array. HBM2 3.9 pJ/bit is energy=3.9*width in the frozen plug-in, with no paper table cited at that assignment; LPDDR4 in the same function is marked Public data. 5 pJ 16-bit MAC is an ISPASS 2020 tutorial example, not an ICCAD 2019 measured MAC. R2 mapping cost uses the action-count method and these constants; it did not rerun Accelergy/CACTI. Not a KV compression result and not entered in handbook section 2 tables."

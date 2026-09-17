@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "layout_id": "r2-page-access-v2",
+  "purpose": "R2 分页、残差刷窗与访存事件实现参数；不是流式 Attention、周期模型或能耗结论",
+  "protocol_id": "r2-evaluation-v2",
+  "pack_layout_id": "r2-pack-layout-v1",
+  "page_tokens": 16,
+  "pte_bytes": 8,
+  "tag_bytes": 1,
+  "tag_note": "格式标签与页表分开放置，不占用 PTE 空余位。每页 1 B，仅区分 FP16 残差/尾页与已打包格式。",
+  "residual_length": 128,
+  "residual_note": "C5 沿用 R1 KIVI：Key 按 residual_length 的整数倍整窗刷入；Value 保留最近 residual_length 为 FP16，溢出立即量化。不得为凑页推迟 Value 刷写。",
+  "invariants": {
+    "page_divides_group": true,
+    "page_divides_residual": true,
+    "group_divides_residual": true,
+    "no_mixed_fp16_and_quant_page": true,
+    "key_group_contiguous_pages": true
+  },
+  "dma": {
+    "align_bytes": 32,
+    "scope": "per_page_or_chunk_buffers",
+    "note": "每个可独立寻址的 packed 页或 contiguous 已提交块按 32 B 取整。这是步骤 4 冻结的事务量子，不是已校准 HBM 突发或 SRAM bank 宽度。contiguous 另保留分侧整段对齐预算，与步骤 3 口径对照，不把预算写成实测事务。"
+  },
+  "residency": {
+    "packed_history": "hbm",
+    "residual_fp16": "sram",
+    "tail_fp16": "sram",
+    "pte": "sram",
+    "tags": "sram",
+    "scale_min_separate": "hbm",
+    "note": "残差与均匀路径未满页尾缓冲视为片上 FP16；已打包历史视为片外。PTE 与标签在 SRAM。本假设用于事件分层，不是 bank/端口校准。"
+  },
+  "metadata_placement": {
+    "default": "separate",
+    "allowed": ["separate", "colocated"],
+    "note": "separate：页载荷与 scale/min 分两次 HBM 事务。colocated：同一页的载荷与该页持有的元数据打成一次事务；KIVI Key 的 group 统计量只挂在 group 第一页。两种放置必须保持编码不变。本步采集事务差异，不把共址写成已证实的周期收益。"
+  },
+  "events": {
+    "counted": [
+      "append_capture",
+      "sram_write",
+      "sram_read",
+      "residual_flush",
+      "hbm_write",
+      "hbm_read",
+      "hbm_rmw_read",
+      "pte_write",
+      "pte_lookup",
+      "tag_write",
+      "tag_read"
+    ],
+    "not_in_this_step": [
+      "broadcast",
+      "backpressure",
+      "partial_o_rescale",
+      "output_merge",
+      "attention_mac"
+    ],
+    "note": "scan_read 按页/残差读取当前缓存并记账，不展开完整高精度 KV tile，也不做 QK/softmax/PV。load 仅供与 R1 对拍，不计入访存事件。",
+    "accounting_contract": {
+      "controls": "append_capture 与 residual_flush 的 level=control，logical_bytes 只表示所覆盖的数据量，physical_bytes=0；总流量不累加控制事件。",
+      "uniform_paged": "新 token 写入 SRAM 尾缓冲；每个满页从 SRAM 读取全部占用 token 后编码并提交 HBM。输入 token 也已写入尾缓冲，不假定旁路。",
+      "uniform_contiguous": "每次 append 的输入直接送编码器，控制捕获不代表另一个 SRAM 暂存副本；仅记录提交块的 HBM 事务。",
+      "residual": "C5 追加先写 SRAM；刷出部分按 fp16_residual 记录一次 SRAM 读取。紧凑残差布局对保留部分按 fp16_compaction 记录一次读和一次写；当前未实现环形残差缓冲。",
+      "page_table": "新建页槽时写 PTE 与标签；均匀尾页从 SRAM 转为 HBM 时两者均改写。追加直接持有活动页描述符，scan_read 每个存活页查一次 PTE 与标签；释放的尾部条目由池长度失效，无额外清零事务。保留残差重排沿用池内页槽，PTE 不因 Python 张量地址改变而重写。",
+      "value_rmw": "一个 append 最多读改写一次已有未满 Value 量化页；其余新 token 直接成页。载荷与元数据分别按 placement 和 32 B 量子计量。",
+      "scope": "计量对象是声明布局上的逻辑数据移动；不模拟 Python clone/cat 的分配器成本、量化器内部多遍统计、SRAM bank/端口或真实 HBM 突发。控制覆盖字节与实际读写分列。"
+    }
+  },
+  "r1_layout_sources": [
+    {
+      "path": "research/r1_kv_baseline/cache_path/paged_cache.py",
+      "sha256": "6505dfbf4dca34c1d153124dc35298adc2c24f0e7370b3fb350c3bca0837015b",
+      "role": "paged 页数、四池与刷窗参照；不修改"
+    },
+    {
+      "path": "research/r1_kv_baseline/cache_path/kv_cache.py",
+      "sha256": "8c64e3b767c29bba35cdcdaf1fa2ef6f2aaa974271368d3dee510f960d261638",
+      "role": "contiguous KIVI 残差语义参照；不修改"
+    }
+  ]
+}

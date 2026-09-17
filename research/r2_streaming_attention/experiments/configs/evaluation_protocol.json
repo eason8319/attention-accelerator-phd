@@ -1,0 +1,300 @@
+{
+  "schema_version": 1,
+  "protocol_id": "r2-evaluation-v2",
+  "supersedes": "r2-evaluation-v1",
+  "prepared_on": "2026-09-14",
+  "purpose": "R2 protocol parameters; not an experiment result or approval record",
+  "amendment": "v2 withdraws full-prefix tokenwise PPL as the quality gate after step-2 cost evidence; official SAW kernel latency is H100/H800-only; CUDA, BitDecoding, and SAW stay out of R1/probe cu121",
+  "plan": "research/r2_streaming_attention/PLAN.md#r2-protocol-review",
+  "review_state_owner": "docs/progress/milestones.md#r2-review",
+  "models": {
+    "formal": [
+      {
+        "id": "meta-llama/Llama-3.1-8B-Instruct",
+        "revision": "0e9e39f249a16976918f6564b8830bc894c89659",
+        "geometry": {"layers": 32, "q_heads": 32, "kv_heads": 8, "head_dim": 128, "gqa_ratio": 4}
+      },
+      {
+        "id": "Qwen/Qwen2.5-7B-Instruct",
+        "revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+        "geometry": {"layers": 28, "q_heads": 28, "kv_heads": 4, "head_dim": 128, "gqa_ratio": 7}
+      }
+    ],
+    "development": {
+      "id": "Qwen/Qwen2.5-0.5B",
+      "revision": "060db6499f32faf8b98477b0a26969ef7d8b9987"
+    },
+    "revision_source": "Public Hugging Face model API, inspected 2026-09-14; verify downloaded config geometry before execution",
+    "tokenizer_revision": "same_as_model",
+    "weights_not_in_git": true,
+    "weight_cache": {
+      "env_var": "HF_HOME",
+      "layout": "huggingface_hub",
+      "inventory_file": "INVENTORY.json",
+      "rule": "AGENTS.md#model-weight-cache",
+      "local_wsl_default": "/mnt/f/hf-cache",
+      "local_windows_default": "F:/hf-cache",
+      "cluster_default": "$HOME/hf-cache",
+      "do_not_store_in": [
+        "repository",
+        "experiments/**/runtime",
+        ".tools",
+        ".hf-cache",
+        ".server-sync"
+      ]
+    },
+    "development_weights_required_before": "development_model_runs",
+    "formal_qwen_weights_required_before": "step9_formal_evaluation",
+    "instruct_checkpoint_is_not_base_replacement": true,
+    "weights_dtype": "float16",
+    "activation_dtype": "float16",
+    "residual_dtype": "float16",
+    "weight_quantization": false,
+    "modify_rope_or_context_config": false
+  },
+  "formats": {
+    "primary": ["C0", "C2", "C3", "C5"],
+    "fallback_or_boundary_only": ["C1", "C4"],
+    "C0": {"storage_dtype": "float16"},
+    "C2": {"bits": 4, "group_size": 32, "group_axis": "channel", "symmetric": true, "qmin": -7, "qmax": 7, "scale_dtype": "float16"},
+    "C3": {"base_format": "C2", "bdr_block_size": 32, "bdr_seed": 0, "rotate_k": true, "rotate_v": true, "rotation_definition": "R1 BlockDiagonalRotation"},
+    "C5": {"bits": 4, "group_size": 32, "key_group_axis": "token", "value_group_axis": "channel", "residual_length": 128, "scale_dtype": "float16", "offset_dtype": "float16", "offset_semantics": "additive_min_not_integer_zero_point"},
+    "semantic_sources": [
+      {"path": "research/r1_kv_baseline/cache_path/kv_codecs.py", "sha256": "0f129aa242cfcf0b33d6a6394eb675e433c92ac7d9ee4eead0427a9a4b8abb6b"},
+      {"path": "research/r1_kv_baseline/cache_path/rotation.py", "sha256": "c0bfc69d350fc2b97fbcf0b514c2c1acafd7b56cd00e3d2d9a9c60a7ca8c149e"},
+      {"path": "research/r1_kv_baseline/cache_path/kv_cache.py", "sha256": "8c64e3b767c29bba35cdcdaf1fa2ef6f2aaa974271368d3dee510f960d261638"}
+    ]
+  },
+  "quality": {
+    "batch": 1,
+    "layouts": ["contiguous", "paged"],
+    "context_budgets": [4096, 8192, 16384, 32768],
+    "budget_includes_generation": true,
+    "ppl_relative_increase_max": 0.05,
+    "ppl_relative_increase_preferred": 0.03,
+    "suite_mean_drop_max_points": 2.0,
+    "individual_task_drop_max_points": 5.0,
+    "score_scale": [0, 100],
+    "aggregation": "equal_task_weight_within_each_suite_model_window_layout",
+    "bootstrap": {"replicates": 2000, "seed": 12345, "ci": 0.95, "method": "paired_sample_percentile_stratified_by_task", "noninferiority": "candidate_minus_C0_lower_bound_at_least_negative_margin"},
+    "nonfinite_policy": "fail_do_not_switch_dtype_or_drop_samples"
+  },
+  "numerics": {
+    "functional_reference_dtype": "float32",
+    "functional_atol": 0.00001,
+    "functional_rtol": 0.0001,
+    "metric_reduction_dtype": "float64",
+    "hardware_relative_l2_max_per_query_head": 0.01,
+    "near_zero_reference_rms_max": 0.000001,
+    "near_zero_max_absolute_error": 0.00001,
+    "zero_norm_relative_l2": null,
+    "all_masked_output": "zero",
+    "rtl_reference": "same_operation_order_rounding_and_approximations_fixed_before_implementation"
+  },
+  "generation": {
+    "do_sample": false,
+    "num_beams": 1,
+    "seed": 42,
+    "task_stop_policy": "pinned_model_generation_config_eos_and_eot_or_max_new_tokens",
+    "chat_system_message": "",
+    "chat_tools": false,
+    "llama_chat_date_string": "26 Jul 2024",
+    "repetition_penalty": 1.0,
+    "save_final_template_and_token_ids": true
+  },
+  "ppl": {
+    "dataset": "Salesforce/wikitext",
+    "revision": "b08601e04326c79dfdd32d625aee71d232d685c3",
+    "configuration": "wikitext-2-raw-v1",
+    "split": "test",
+    "row_join_separator": "\n\n",
+    "tokenization": "add_special_tokens_false_then_one_bos_if_defined",
+    "stride": 512,
+    "sample_limit": null,
+    "cache_reset": "each_window",
+    "window_context": "prefill_into_compressed_kv",
+    "scoring": "each_predictable_target_once_teacher_forcing_on_compressed_streaming_read",
+    "quality_gate": true,
+    "withdrawn_v1_quality_path": "full_prefix_tokenwise_from_window_start",
+    "forbidden": [
+      "native_hf_sdpa_as_c0",
+      "reuse_r1_contiguous_ppl_as_paged_or_streaming",
+      "silently_shorten_corpus",
+      "v1_full_prefix_tokenwise_as_quality_gate"
+    ]
+  },
+  "ppl_streaming_path_check": {
+    "role": "implementation_error_not_quality_gate",
+    "dataset_source": "ppl",
+    "tokenization_source": "ppl",
+    "mode": "reset_then_tokenwise_from_first_token_through_streaming_read",
+    "start_token_offsets": [0, 4096, 16384, 32768],
+    "sequence_tokens": 257,
+    "layouts": ["contiguous", "paged"],
+    "formats_source": "formats.primary",
+    "required_cases": ["tail_page", "group_unaligned", "kivi_residual_flush", "full_mask", "backpressure"],
+    "seed": 42,
+    "quality_gate": false
+  },
+  "ruler": {
+    "ledger_id": "ruler",
+    "repository": "https://github.com/NVIDIA/RULER",
+    "commit": "c3f5e3b4f87f97e048793bb510a3a6b19a46bf3a",
+    "pipeline": "original_scripts_v1",
+    "task_config": "scripts/synthetic.yaml",
+    "template_config": "scripts/data/synthetic/constants.py",
+    "context_budgets": [4096, 16384, 32768],
+    "samples_per_task_per_length_per_model": 100,
+    "sample_ids": {"first": 0, "last": 99},
+    "random_seed": 42,
+    "num_chunks": 1,
+    "chunk_idx": 0,
+    "remove_newline_tab": false,
+    "extra_task_argument_overrides": {},
+    "tasks": [
+      {"id": "niah_multikey_1", "max_new_tokens": 128},
+      {"id": "niah_multiquery", "max_new_tokens": 128},
+      {"id": "vt", "max_new_tokens": 30},
+      {"id": "fwe", "max_new_tokens": 50}
+    ],
+    "template_policy": "official_task_body_and_answer_prefix_with_pinned_model_chat_wrapper",
+    "length_policy": "reserve_generation_and_wrapper_before_data_creation_verify_final_token_count",
+    "development_sample_policy": "different_seed_and_saved_input_hashes_no_formal_sample_tuning"
+  },
+  "longbench": {
+    "ledger_id": "longbench",
+    "repository": "https://github.com/THUDM/LongBench",
+    "commit": "2e00731f8d0bff23dc4325161044d0ed8af94c1e",
+    "subdirectory": "LongBench",
+    "dataset": "THUDM/LongBench",
+    "dataset_revision": "5e628be450b7e67fb7ae6e201bd6d8f7056f7672",
+    "variant": "original_not_v2_not_LongBench_E",
+    "split": "test",
+    "sample_limit": null,
+    "window_source": "quality.context_budgets",
+    "tasks": [
+      {"id": "qasper", "max_new_tokens": 128, "metric": "qa_f1_score", "chat_wrapper": true},
+      {"id": "gov_report", "max_new_tokens": 512, "metric": "rouge_score", "chat_wrapper": true},
+      {"id": "hotpotqa", "max_new_tokens": 32, "metric": "qa_f1_score", "chat_wrapper": true},
+      {"id": "lcc", "max_new_tokens": 64, "metric": "code_sim_score", "chat_wrapper": false}
+    ],
+    "prompt_config": "LongBench/config/dataset2prompt.json",
+    "generation_config": "LongBench/config/dataset2maxlen.json",
+    "scorer": "LongBench/eval.py_and_metrics.py",
+    "truncation": "middle_keep_prefix_and_suffix_retokenize_until_final_prompt_plus_generation_fits",
+    "pad_short_prompts": false,
+    "development_split": "no_formal_test_score_tuning"
+  },
+  "continuous_decode": {
+    "layout": "paged",
+    "input_source": "ppl_token_stream",
+    "input_token_offsets": [0, 32768, 65536, 98304],
+    "input_tokens": 16384,
+    "generated_steps": 1024,
+    "minimum_context_budget": 17408,
+    "mode": "free_running_greedy",
+    "stop_at_eos": false,
+    "record_first_eos_and_label_following_steps": "pressure_suffix_not_natural_answer_quality",
+    "repeat_or_pad_input_if_short": false,
+    "save_every_step": true
+  },
+  "architecture": {
+    "mac_budget": 1024,
+    "reference_frequency_hz": 1000000000,
+    "bandwidth_unit": "decimal_TB_per_second",
+    "sram_unit": "MiB_1048576_bytes",
+    "page_tokens": 16,
+    "pte_bytes": 8,
+    "layouts_source": "quality.layouts",
+    "formats_source": "formats.primary",
+    "development_default": {
+      "geometry": "llama", "context": 4096, "batch": 1,
+      "bandwidth_tb_s": 1.0, "sram_mib": 16, "dequant_elements_cycle": 128,
+      "gqa_ratio": 4, "kv_split": 1, "tile": 128,
+      "group_buffers": 4, "merge_tokens": 128, "buffering": "single"
+    },
+    "development_one_factor_axes": {
+      "geometry": ["llama", "qwen"],
+      "context": [4096, 8192, 16384, 32768],
+      "bandwidth_tb_s": [0.25, 0.5, 1.0, 2.0],
+      "sram_mib": [4, 8, 16],
+      "dequant_elements_cycle": [64, 128, 256],
+      "gqa_ratio": [1, 2, 4, 7, 8],
+      "batch": [1, 4], "kv_split": [1, 2, 4],
+      "tile": [128, 512, 2048], "group_buffers": [2, 4, 8],
+      "merge_tokens": [16, 64, 128, 512], "buffering": ["single", "double"]
+    },
+    "geometry_rule": "llama=32Q_8KV_d128;qwen=28Q_4KV_d128;geometry_axis_sets_native_ratio;synthetic_ratio_axis_keeps_8KV_and_sets_Q=ratio*8",
+    "development_combination": {"name": "shared_bandwidth_balance", "geometry": "qwen", "context": 8192, "batch": 1, "bandwidth_tb_s": 0.5, "sram_mib": 8, "dequant_elements_cycle": 256, "gqa_ratio": 7, "kv_split": 2, "tile": 512, "group_buffers": 4, "merge_tokens": 64, "buffering": "double"},
+    "independent_combinations": [
+      {"name": "bandwidth_limited", "release": "merge_and_boundary_exploration", "geometry": "llama", "context": 8192, "batch": 1, "bandwidth_tb_s": 0.25, "sram_mib": 8, "dequant_elements_cycle": 256, "gqa_ratio": 4, "kv_split": 4, "tile": 512, "group_buffers": 4, "merge_tokens": 64, "buffering": "double"},
+      {"name": "supply_limited", "release": "merge_and_boundary_exploration", "geometry": "qwen", "context": 16384, "batch": 1, "bandwidth_tb_s": 2.0, "sram_mib": 8, "dequant_elements_cycle": 64, "gqa_ratio": 7, "kv_split": 2, "tile": 128, "group_buffers": 2, "merge_tokens": 128, "buffering": "single"},
+      {"name": "capacity_limited", "release": "merge_and_boundary_exploration", "geometry": "synthetic_64Q_8KV_d128", "context": 32768, "batch": 4, "bandwidth_tb_s": 0.5, "sram_mib": 4, "dequant_elements_cycle": 128, "gqa_ratio": 8, "kv_split": 4, "tile": 2048, "group_buffers": 8, "merge_tokens": 512, "buffering": "double"},
+      {"name": "qwen_shared_pressure", "release": "final_pressure_validation", "geometry": "qwen", "context": 65536, "batch": 4, "bandwidth_tb_s": 0.5, "sram_mib": 8, "dequant_elements_cycle": 256, "gqa_ratio": 7, "kv_split": 2, "tile": 512, "group_buffers": 4, "merge_tokens": 64, "buffering": "double", "evidence_role": "architecture_or_trace_only"},
+      {"name": "llama_long_pressure", "release": "final_pressure_validation", "geometry": "llama", "context": 131072, "batch": 1, "bandwidth_tb_s": 2.0, "sram_mib": 4, "dequant_elements_cycle": 64, "gqa_ratio": 4, "kv_split": 4, "tile": 128, "group_buffers": 2, "merge_tokens": 128, "buffering": "single", "evidence_role": "architecture_or_trace_only"}
+    ],
+    "seeds": {"development": 0, "independent": 1729, "final_pressure": 2718},
+    "boundary_lengths": [0, 1, 15, 16, 17, 31, 32, 33, 127, 128, 129, 255, 256, 257],
+    "infeasible_points": "retain_capacity_and_supply_failure_evidence",
+    "holdout_rule": "freeze_source_parameters_and_predictor_before_viewing_results_no_retuning_on_released_set"
+  },
+  "gpu_timing": {"warmup": 20, "measurements_per_round": 100, "independent_rounds": 5, "scope": "matched_device_and_supported_format_attention_only_separate_from_end_to_end"},
+  "gpu_kernels": {
+    "required_before": "step9_gpu_comparison",
+    "cross_platform_speedup": false,
+    "isolation_rule": "AGENTS.md#isolated-gpu-runtimes",
+    "do_not_install_into": [
+      "r1-kv-baseline",
+      "step2_resource_probe_torch_2.5.1_cu121"
+    ],
+    "cuda": {
+      "role": "compile_extensions_only",
+      "environment": "dedicated_not_r1_or_probe",
+      "cuda_home_policy": "nvcc_12.4_or_toolkit_matching_that_env_pytorch",
+      "forbidden": "upgrade_existing_r1_or_probe_env_to_align_cuda"
+    },
+    "bitdecoding": {
+      "repository": "https://github.com/OpenBitSys/BitDecoding",
+      "commit": "ae0d83630d6292453355ced498db2ac87f56ec62",
+      "environment": "isolated_venv",
+      "build_deps": ["flash-attn", "ninja"],
+      "sm_arch": "sm80",
+      "setup": "author_setup_py",
+      "device_policy": "try_sm80_on_verified_ada_first",
+      "smoke_before_formal_timing": "min_shape_functional",
+      "formal_timing_after_smoke": "gpu_timing",
+      "role": "same_gpu_author_kernel_timing_and_mechanism_check",
+      "format_policy": "if_quant_grid_differs_from_C2_C3_label_same_gpu_author_format_do_not_rename_as_project_C2",
+      "current_status": "not_built"
+    },
+    "saw_int4": {
+      "repository": "https://github.com/togethercomputer/saw-int4",
+      "commit": "e51bfa7291d52cd14b86e4c6ded6c002d0444ff0",
+      "environment": "isolated_from_r1_and_probe",
+      "official_path": "fa3_prefill_triton_decode",
+      "official_device_requirement": "H100_or_H800_and_cuda_ge_12.3",
+      "verified_ada_r6000": "does_not_satisfy_official_fa3",
+      "official_reproduction_fork": {
+        "with_h100_or_h800": "unmodified_fa3_prefill_and_triton_decode_is_only_unmodified_author_path",
+        "without_h100_or_h800": "omit_official_saw_kernel_latency_and_tps; c3_check_in_repo_rotation_and_qo_transform_only; papers_and_author_docs_as_mechanism_reference"
+      },
+      "ada_official_tps": "forbidden",
+      "fa2_or_other_backend": "label_adaptation_not_official_reproduction"
+    },
+    "flash_decoding_or_c0_gpu": {
+      "device_policy": "allowed_on_verified_ada",
+      "independent_of_saw": true,
+      "role": "same_gpu_fp16_attention_timing"
+    }
+  },
+  "required_before_experiment_execution": [
+    "user_approval_of_current_step_in_milestones",
+    "verified_resource_and_dependency_versions",
+    "actual_model_config_tokenizer_and_data_fingerprints",
+    "final_prompt_input_ids_and_source_hashes",
+    "resolved_memory_transaction_bank_port_queue_parameters_for_physical_cost_claims",
+    "energy_parameter_sources_and_sensitivity_for_energy_claims",
+    "rtl_arithmetic_rounding_and_approximation_definition_for_rtl_runs",
+    "run_config_with_protocol_sha256_and_actual_source_hashes"
+  ]
+}

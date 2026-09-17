@@ -1,0 +1,43 @@
+---
+description: C/C++ 与 Verilator 测试台的格式、命名与注释约定
+globs: "**/*.{c,cpp,h,hpp,cc,cxx}"
+alwaysApply: false
+---
+
+# C/C++ 与 Verilator 测试台风格
+
+## 范围
+
+- 约束手写源码（`smoke/`、`tb/`、宿主驱动）。
+- 不编辑、不按本规则重排 `build/`、Verilator 生成的 `V*`、`verilated*.cpp/h`。
+
+## 格式
+
+- 缩进 4 空格；行宽优先 ≤ 100；UTF-8；LF；文件末换行。
+- 头文件顺序：本 DUT 的 `V<top>.h` → `verilated.h` → C++ 标准库。
+- 禁止 `using namespace std;`；整数优先 `<cstdint>` 定宽类型。
+- 不用 `NULL`；不用可综合 DUT 里的 `reg`/`wire` 思维写测试台。
+
+## 命名
+
+- 函数/变量/文件：`snake_case`；宏：`UPPER_SNAKE`。
+- 测试台文件名与 DUT/用途对应（如 `madd_tb.cpp` ↔ `registered_madd`）。
+- 端口名与 RTL 一致；已核验 DUT 的 `rst`/`rst_n` 不借风格任务改名。
+
+## 注释
+
+- **一律中文**：文件头与 `//` 行注释用中文；标识符保持英文。
+- 文件头写：DUT 名、时钟推进方式、复位极性、激励/输出格式、与 golden 的对应。
+- 注释写 **协议**（哪一拍采样、CSV 列含义、退出码），不要逐行翻译语句。
+
+```cpp
+// ❌ BAD — 英文 / 复述
+dut.eval();  // evaluate the model
+
+// ✅ GOOD — 中文说明时序
+// 先拉低再拉高并 eval，使 always_ff posedge 采到本拍输入
+dut.clk = 0;
+dut.eval();
+dut.clk = 1;
+dut.eval();
+```

@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "layout_id": "r2-stream-attention-v3",
+  "purpose": "R2 流式 Attention 与 C3 功能基线的实现参数；不是周期模型、能耗、质量门或纯 Q/O 优化结论",
+  "protocol_id": "r2-evaluation-v2",
+  "pack_layout_id": "r2-pack-layout-v1",
+  "page_access_id": "r2-page-access-v2",
+  "tile_tokens_default": 128,
+  "tile_tokens": [
+    16,
+    128
+  ],
+  "merge_tokens": [
+    16,
+    64,
+    128
+  ],
+  "group_buffers": 1,
+  "working_dtype": "float32",
+  "c3": {
+    "dut_path": "original_qk_rotated_pv_output_inverse",
+    "tile_inverse_path": "inverse_per_head_operand",
+    "write_side": "encode_rotates_committed_pages",
+    "uncommitted_tail": "read_side_rotate_into_rotated_domain_without_rewriting_storage",
+    "note": "C3 流式功能基线为原域 QK、旋转域 PV/O，明确保留读侧 K 逆旋转与输出逆旋转，不得称为纯 Q/O 优化成功。纯 Q/O 仅在出现明确新机制时再验证。",
+    "numerical_guard": {
+      "enabled": false,
+      "reference_path": "bounded_original_domain_same_cache",
+      "functional_atol": 1E-05,
+      "functional_rtol": 0.0001,
+      "extra_attention_passes_per_query": 0,
+      "performance_claim": "none_before_explicit_cost_comparison"
+    }
+  },
+  "events_added": [
+    "backpressure",
+    "attention_mac",
+    "output_merge"
+  ],
+  "no_full_expand": {
+    "max_live_tokens": "at_most_16_tokens_for_one_kv_head_and_one_side",
+    "max_scratch_tokens": "operand_tokens",
+    "forbid_load_in_dut": true,
+    "tail_and_residual_fp16_allowed": true,
+    "note": "K 与 V 分两遍按单头操作数读取；禁用 DUT 的 load 和 decode_token_range，不创建全 KV head 的高精度 tile。独立跟踪读器内新增 FP32 存储；Q/分数/输出状态另计。",
+    "forbid_decode_token_range_in_dut": true
+  },
+  "required_cases": [
+    "tail_page",
+    "group_unaligned",
+    "kivi_residual_flush",
+    "full_mask",
+    "backpressure"
+  ],
+  "streaming_path_check": {
+    "role": "implementation_error_not_quality_gate",
+    "activation_source": "synthetic_seeded_from_protocol_offsets",
+    "start_token_offsets": [
+      0,
+      4096,
+      16384,
+      32768
+    ],
+    "sequence_tokens": 257,
+    "seed": 42,
+    "note": "使用协议冻结的起点与长度生成合成 QKV，核验全程逐 token 流式读路径。本步不加载开发模型，不把合成激活当作 WikiText 质量结果。"
+  },
+  "reference": {
+    "same_storage_same_domain": "independent_R1_codec_from_stored_pages_original_domain_once_FP32_softmax",
+    "c3_dut_gold": "independent_original_domain_fp32",
+    "c3_pure_qo": "deferred_until_new_mechanism",
+    "c3_cross_domain": "pure_qo_failures_remain_explicit_and_separate_from_hybrid_dut",
+    "not_used_as_gold": "PackedPhysicalCache.load_requantizes_paged_tail",
+    "note": "参考不调用 DUT 操作数读器、范围解码器或 QK/PV 助手；复用冻结 R1 codec 和原 GQA 运算顺序。FP32 与全部阈值不变。"
+  },
+  "operand_supply": {
+    "tokens": 16,
+    "kv_heads": 1,
+    "kv_sides_live": 1,
+    "policy": "qk_then_pv_separate_passes"
+  }
+}

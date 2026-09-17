@@ -11,6 +11,9 @@ alwaysApply: true
 |------|------|
 | Python | `python-style` |
 | SystemVerilog | `systemverilog-style` |
+| C/C++（含 Verilator 测试台） | `cpp-verilator-style` |
+| Bash / PowerShell | `shell-style` |
+| JSON | `json-style` |
 | Markdown | `markdown-docs-style` + 数学定界符规则 |
 | YAML/CFG/Makefile/TOML | `config-makefile-style` |
 

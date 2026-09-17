@@ -20,6 +20,17 @@
 
 ## 最近一次检索记录
 
+2026-09-16 定向核验 [Accelergy](https://doi.org/10.1109/ICCAD45719.2019.8942149)（ICCAD 2019）及 CACTI 插件 HBM2 常数、ISPASS 2020 教程 MAC 示例：供 R2 步骤 6 动态能量来源，已 `verified → ledger`，同步手册卡片与既有 `wu2019accelergy`；不属于全领域检索。
+
+### 2026-09-16 | Accelergy
+
+- link: https://doi.org/10.1109/ICCAD45719.2019.8942149
+- why: R2 步骤 6 按动作动态能量的方法来源；HBM2 常数在冻结的 CACTI 插件提交中。
+- suggested_bucket: adjacent
+- status: verified → ledger；已补手册卡片，复用 `wu2019accelergy`
+
+2026-09-14 定向核对 R2 协议中的 [RULER](https://arxiv.org/abs/2404.06654v3) 与[原版 LongBench](https://aclanthology.org/2024.acl-long.172/)：用于固定任务定义和评分入口，均已 `verified → ledger`，同步手册与既有 BibTeX；不属于全领域检索。
+
 本次 2026-09-11 定向核对 R2 的七项来源；补录以下三项，并更新已有 BitDecoding、SAW-INT4、InnerQ 和 PLENA 的引用信息。不是全领域重新检索。
 
 ### 2026-09-11 | Flash-Decoding

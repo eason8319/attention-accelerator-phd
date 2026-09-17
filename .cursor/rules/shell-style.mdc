@@ -1,0 +1,40 @@
+---
+description: Bash 与 PowerShell 脚本的格式、安全选项与注释约定
+globs: "**/*.{sh,bash,ps1}"
+alwaysApply: false
+---
+
+# Shell 风格
+
+## 范围
+
+- 约束仓库内手写入口（实验 `runtime/*.sh`、本机探测 `.ps1` 等）。
+- 不把服务器私有提交脚本、conda `activate` 生成物或 `.server-sync/` 当源码规范对象。
+
+## Bash
+
+- 首行 `#!/usr/bin/env bash`；随后 `set -euo pipefail`。
+- 缩进 4 空格；行宽优先 ≤ 100；UTF-8；LF；文件末换行。
+- 变量 `snake_case`；路径用引号；目录用 `$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)` 这类相对定位，禁止写死服务器绝对路径。
+- 用 `exec` 转交长期进程；需要诊断时再保留包装。
+
+## PowerShell
+
+- `$ErrorActionPreference = "Stop"`；参数用 `param(...)`。
+- 缩进 4 空格；路径拼接用 `Join-Path`；输出必须落在实验 `results/` 内。
+- 非空结果目录拒绝覆盖，与 Python `start_output` 同一口径。
+
+## 注释
+
+- **一律中文**：说明入口用途、依赖（conda/PATH/`CUDA_HOME`）与为何 `export`。
+- 不把密钥、主机名或个人绝对路径写进脚本。
+
+```bash
+# ❌ BAD
+# add tools to path
+export PATH=/cluster/home/zengy/bin:$PATH
+
+# ✅ GOOD
+# 仅把本仓库 .tools 下的 Yosys 放到 PATH；不覆盖系统其余工具
+export PATH="${project_root}/.tools/r2-synthesis/usr/bin:${PATH}"
+```

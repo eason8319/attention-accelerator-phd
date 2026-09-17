@@ -19,7 +19,7 @@
 | [docs/lit_watch/](docs/lit_watch/) | 文献监视（queries / inbox / ledger） |
 | [research/](research/) | **正式研究入口**（自 R1 起） |
 | [docs/experiments.md](docs/experiments.md) | 实验报告与原始结果索引 |
-| [AGENTS.md](AGENTS.md) | 本地优先、结果回收及文档约束 |
+| [AGENTS.md](AGENTS.md) | 本地优先、结果回收、模型缓存、隔离 GPU 运行时及文档约束 |
 
 ### 学习项目（P1–P5，已归档为 R0）
 | 目录 | 说明 |

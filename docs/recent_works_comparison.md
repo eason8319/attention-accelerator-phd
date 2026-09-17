@@ -2,26 +2,12 @@
 
 本手册服务 [`research_plan.md`](research_plan.md)。  
 **可更新基础设施**见 [`lit_watch/`](lit_watch/)（检索词、inbox、卡片模板、已核实台账）。  
-**Agent 更新本手册时**：默认先遵循 [academic-researcher skill](../.cursor/skills/academic-researcher/SKILL.md)（规则见 `.cursor/rules/lit-watch-academic-researcher.mdc`）。
-
-## 修订记录
-
-| 日期 | 变更 |
-|------|------|
-| 2026-09-11 | §2.1/§2.2 按首次公开时间升序排列；三个新增条目的来源标签统一为英文，并保留全部条目和结果口径。 |
-| 2026-09-11 | 补录 Flash-Decoding、QServe、Multi-Scale Dequant，补全 R2 七项来源的元数据、实现入口与证据边界；建立全项目引用前核对和缺项补录规则，纠正旧建议编号与 R1 协议的冲突。 |
-| 2026-09-03 | 将 academic-researcher 迁入仓库 `.cursor/skills/`，去掉云端 `/root/...` 绝对路径。 |
-| 2026-09-03 | 对台账全部 21 篇论文完成全文定量复核；新增逐篇审计报告；修正 PLENA→ISCA’26、AccLLM→IEEE TVLSI’26、Don’t Waste Bits→CVPRW’26，并补齐 Titanus DOI。 |
-| 2026-09-03 | 增量收录 SPECTRA、AATC、Minima-KV、PuzzleKV；Cutoff 更新至 2026-09-03；Minima-KV 升为 R2–R3 最近直接对照。 |
-| 2026-07-23 | 约定文献更新默认使用 academic-researcher skill（`.cursor/rules/lit-watch-academic-researcher.mdc`）。 |
-| 2026-07-23 | 建立 `lit_watch/`；按 arXiv API + PMLR/ACL/DOI **核实**核心条目的题名/Venue/时间；修正 MiniKV 正式题名、综述 ACL’26 Findings、Don’t Waste Bits→CVPR’26（accepted）、Titanus→GLSVLSI’25 等；总览表增加「状态」列。 |
-| 2026-07-23 | 初版对比手册（后续以本表为准）。 |
-
-元数据变更见 [`lit_watch/CHANGELOG.md`](lit_watch/CHANGELOG.md)，机器可读台账见 [`lit_watch/ledger.yaml`](lit_watch/ledger.yaml)。旧记录引用的 `AUDIT_2026-09-03.md` 当前不在项目中；不能将缺失附件作为已核实定量细节的证据，引用时须回到原文核对。
+**Agent 更新本手册时**：默认先遵循 [academic-researcher skill](../.cursor/skills/academic-researcher/SKILL.md)（规则见 `.cursor/rules/lit-watch-academic-researcher.mdc`）。  
+修订历史只记于 [`lit_watch/CHANGELOG.md`](lit_watch/CHANGELOG.md)，机器可读台账见 [`lit_watch/ledger.yaml`](lit_watch/ledger.yaml)。旧记录引用的 `AUDIT_2026-09-03.md` 当前不在项目中；不能将缺失附件作为已核实定量细节的证据，引用时须回到原文核对。
 
 ## 检索截止
 
-- **Cutoff 日期**：2026-09-11（本次为 R2 七项来源定向增量核验；上一轮广泛检索为 2026-09-03，不表示截至本日的文献已穷尽）
+- **Cutoff 日期**：2026-09-16（本次定向补录 Accelergy 作为 R2 步骤 6 能耗方法来源；2026-09-15 为 KIVI、SAW-INT4、BitDecoding、PLENA 汇报图表核对；广泛检索仍为 2026-09-03，不表示截至本日的文献已穷尽或历史性能均已复核）
 - **窗口内最新收录**：Wang et al., *PuzzleKV: Page-Wise Low-Rank Decomposition for KV Cache Compression*，[arXiv:2608.23843](https://arxiv.org/abs/2608.23843)（预印本；首发 2026-08-24）
 - **使用约定**：摘要中的数字全部记录，并由正文表/图补齐口径；**不可跨平台直接比绝对倍数**。`状态` 列：`会议/期刊/Workshop` = 已核实正式 venue；`预印本` = 仅 arXiv（或仅有 submitted 声明）；`作者技术说明` = 原始博客/技术说明，不视为同行评审论文。作者代码作为对应条目的实现证据单列。
 
@@ -53,7 +39,7 @@
 所有项目相关文献引用先按 [AGENTS.md 登记规则](../AGENTS.md#literature-registration)核对本手册；缺项在本次任务内核验并补录，不能只留在研究计划或对话中。完整步骤见[维护流程](lit_watch/README.md)，卡片字段见[模板](lit_watch/CARD_TEMPLATE.md)。
 
 ```text
-queries → inbox → 核实 venue/DOI → ledger.yaml → 改本手册表/卡片 → 写修订记录
+queries → inbox → 核实 venue/DOI → ledger.yaml → 改本手册表/卡片 → 写 lit_watch/CHANGELOG
 ```
 
 ---
@@ -92,7 +78,7 @@ queries → inbox → 核实 venue/DOI → ledger.yaml → 改本手册表/卡�
 | AccLLM | **IEEE TVLSI 34(4), 2026；pp. 1217–1227** | 期刊 | DOI [10.1109/TVLSI.2026.3658524](https://doi.org/10.1109/TVLSI.2026.3658524)；[arXiv:2505.03745](https://arxiv.org/abs/2505.03745) | Alveo U280 | 剪枝 + Λ-attention + W2A8KV4 | Table VII：164 token/s、33W、4.96 token/J；相对同 U280 FlightLLM 为 $2.98\times$ throughput、$4.07\times$ energy efficiency | 已由预印本升级为期刊 |
 | Titanus | **GLSVLSI 2025；pp. 71–77** | 会议 | DOI [10.1145/3716368.3735145](https://doi.org/10.1145/3716368.3735145)；[arXiv:2505.17787](https://arxiv.org/abs/2505.17787) | Chiplet + CIM | 在线 prune+quant | Fig. 14：相对 A100 为 $159.9\times$ energy / $49.6\times$ throughput；相对 FlightLLM 为 $34.8\times/29.2\times$ | 数量级依赖 CIM/跨平台设定，仅作相邻参照 |
 | SystolicAttention (FSA) | arXiv 首发 2025-07-15 | 预印本 | [arXiv:2507.11331](https://arxiv.org/abs/2507.11331) | $128\times128$；16 nm RTL | 单阵列融合 FlashAttention | Fig. 15/Table 4：利用率倍数为 $1.77\times/4.83\times$，附加面积占总面积 12.07%；但摘要与 §6.1 对 TPU/Neuron 的对应顺序冲突 | 数字映射待作者勘误；不可无条件引用 |
-| PLENA | **ISCA 2026** | 会议 | DOI [10.1109/ISCA66397.2026.00023](https://doi.org/10.1109/ISCA66397.2026.00023)；[arXiv:2509.09505](https://arxiv.org/abs/2509.09505) | 架构模拟 + RTL/ISA 栈 | 扁平阵列 + 非对称量化 + native FA | Table VIII：同 multiplier/HBM 设定下最高 TPS 为 A100 的 $2.23\times$、TPUv6e 的 $4.70\times$；相对 A100 最高 $4.04\times$ Token/J | 已由预印本正式发表；旧摘要数字已过时 |
+| PLENA | **ISCA 2026** | 会议 | DOI [10.1109/ISCA66397.2026.00023](https://doi.org/10.1109/ISCA66397.2026.00023)；[arXiv:2509.09505](https://arxiv.org/abs/2509.09505) | 架构模拟 + RTL/ISA 栈 | 扁平阵列 + 非对称量化 + native FA | 本地作者稿 Table XII：Llama-3.3-70B、90K 输入/8K 输出，最大 batch 为 16 vs A100 的 4，归一化 TPS $2.21\times$、TTFT 43.43 vs 29.67s；相同 batch=4 时 TPS $1.34\times$、TTFT 21.68s | 模拟结果；资源与版本见卡片，包含权重/激活/KV 量化，不能归因于 KV 一项 |
 | FlatAttention | arXiv 2026-04-02；**submitted to IEEE TC** | 预印本（在投） | [arXiv:2604.02110](https://arxiv.org/abs/2604.02110) | Tile 架构模拟/RTL 校准 | tiling + fabric collectives | Fig. 9/13：32×32 tile、S=4096 为 92.3% utilization；同模拟 tile 对 FA3 最高 $4.1\times$、HBM traffic $\downarrow16\times$；64-chip 模型对 FlashMLA 最高系统吞吐 $2.1\times$ | 非实测硅片；短序列利用率下降 |
 | Salca | arXiv 2026-04-27 | 预印本 | [arXiv:2604.24820](https://arxiv.org/abs/2604.24820) | 28nm RTL 综合（稀疏 decode） | 动态稀疏 + 近似 Top-$K$ | §5.2/Table 5–6：6.4mm²、0.933W；相对 A100 $3.82\times$ speed、$74.19\times$ energy efficiency | 非流片、跨平台；相邻上界 |
 
@@ -120,6 +106,7 @@ queries → inbox → 核实 venue/DOI → ledger.yaml → 改本手册表/卡�
 - **平台 / 方法 / 结果 / 结论**：见总览表；非对称 2-bit KV 经典锚  
 - **对本课题**：R1 必须真实 cache-path，禁止 proxy 冒充  
 - **核实**：2026-07-23；PMLR 页  
+- **汇报用图表复核（2026-09-15）**：原文 Fig. 3、Table 3、§4.2.4/Fig. 5。Llama-2-7B 的 CoQA/TruthfulQA/GSM8K：FP16 为 63.88/30.76/13.50，KIVI-4 为 63.78/30.80/13.80，KIVI-2 为 63.05/33.95/12.74。系统吞吐 2.35–3.47× 来自单 A100 80GB、ShareGPT 合成长度负载、逐步增加 batch 的比较；并非固定 shape 内核速度。保留原图残差长度 32/128，文件版本哈希见台账。
 
 <a id="bitdecoding"></a>
 
@@ -129,7 +116,9 @@ queries → inbox → 核实 venue/DOI → ledger.yaml → 改本手册表/卡�
 - **Venue / 标识**：HPCA 2026；[IEEE 正式记录](https://ieeexplore.ieee.org/document/11408481/)，DOI 10.1109/HPCA68181.2026.11408481；[arXiv v3](https://arxiv.org/html/2503.18773v3)，首发 2025-03-24、更新 2026-01-05。
 - **实现 / R2 对照**：[作者代码](https://github.com/OpenBitSys/BitDecoding)。§V-A/V-B 包含 GQA 查询重排、残差追加、在线量化/打包及不同尺度方向；作为共享供给和写侧处理的强基线，不能概括为 GPU 论文不处理这些问题。
 - **证据边界**：性能口径见总览；本次补核元数据和上述机制，未重新审计全部性能点，也未在本项目复现。
-- **核实 / 引用键**：2026-09-11；IEEE、arXiv 正文、作者仓库；`bitdecoding2026`。
+- **运行版本核对**：2026-09-14 固定作者提交 `ae0d83630d6292453355ced498db2ac87f56ec62`；[setup.py](https://github.com/OpenBitSys/BitDecoding/blob/ae0d83630d6292453355ced498db2ac87f56ec62/setup.py)要求 CUDA≥11.6，构建 sm80，并在 CUDA≥11.8 时加入 sm90；[依赖声明](https://github.com/OpenBitSys/BitDecoding/blob/ae0d83630d6292453355ced498db2ac87f56ec62/requirements.txt)未固定 flash-attn/ninja 版本。仅核对构建前提，本项目尚未安装或实测该内核。
+- **核实 / 引用键**：元数据/机制 2026-09-11，实现依赖 2026-09-14；IEEE、arXiv 正文、作者仓库；`bitdecoding2026`。
+- **汇报用图表复核（2026-09-15）**：本地作者稿 p.11 Fig. 12 是单 A100、Llama-3.1-8B 的整模生成与吞吐：左图扫描 32K/64K/128K，右图固定 4K 输入扫描 batch，并保留 OOM。本次用原图，不从曲线估算新数值；不得与其他 GPU 的 kernel 峰值混用。§IV/V 的布局、在线打包、warp 反量化及 GQA 查询变换用于机制讨论；未在本项目复现。
 
 <a id="saw-int4"></a>
 
@@ -139,7 +128,9 @@ queries → inbox → 核实 venue/DOI → ledger.yaml → 改本手册表/卡�
 - **状态 / 标识**：[arXiv:2604.19157v1](https://arxiv.org/abs/2604.19157)，2026-04-21；本次未核实到正式会刊，保持预印本。
 - **作者实现**：[togethercomputer/saw-int4](https://github.com/togethercomputer/saw-int4)；[BDR 参数说明](https://github.com/togethercomputer/saw-int4/blob/main/docs/bdr_env_vars.md)中 HADAMARD 对 K 写入旋转并修正 Q，ROTATE_V 可同时旋转 V 并逆变换输出。
 - **R2 对照 / 边界**：直接参照 Q/O 端变换；R1 C3 不自动等于官方配置。main 可变化，实际实验须固定提交；实现说明不替代论文质量结果，本次不重报历史性能数字。
-- **核实 / 引用键**：2026-09-11；arXiv 与作者文档；`sawint42026`。
+- **运行版本核对**：2026-09-14 固定作者提交 `e51bfa7291d52cd14b86e4c6ded6c002d0444ff0`，[版本表](https://github.com/togethercomputer/saw-int4/blob/e51bfa7291d52cd14b86e4c6ded6c002d0444ff0/SUBMODULE_VERSIONS.md)固定 fast-rotation fork 为 `0fcc241961f9c79c27f6bad9a456bf10c8554a84`。[README](https://github.com/togethercomputer/saw-int4/blob/e51bfa7291d52cd14b86e4c6ded6c002d0444ff0/README.md)使用 fa3 prefill/triton decode；其 FA3 依赖的[作者要求](https://github.com/Dao-AILab/flash-attention/blob/8d3a3b80d4758ebde5a867c50d24d4351443cf2b/README.md#flashattention-3-beta-release)是 H100/H800、CUDA≥12.3。更换后端或将 BF16 示例适配到项目 FP16 协议须另作验证，不能称为未改动官方复现；本项目尚未运行。
+- **核实 / 引用键**：元数据/机制 2026-09-11，实现依赖 2026-09-14；arXiv 与作者文档；`sawint42026`。
+- **汇报用图表复核（2026-09-15）**：v1 Table 3 中 Qwen3-8B 五任务均分为 BF16 70.84、plain INT4 0、BDR-16/64/128 为 67.88/69.16/69.97；零分只描述此设置。Table 4 另用 Qwen3-32B、2×H100、TP=2、batch=32，单 decode step 的内核类别累计时间 plain/fused/unfused 为 533146/529918/540609 ns（533.146/529.918/540.609 μs），融合值相对 plain 为 −0.605%。此处不是服务 TPS 或请求 wall-clock。机制核对 Fig. 1、§4.1，K 旋转与 Q 变换配对，V 旋转须有输出变换。
 
 ### 3.4 MiniKV
 
@@ -179,6 +170,7 @@ queries → inbox → 核实 venue/DOI → ledger.yaml → 改本手册表/卡�
 
 - **SystolicAttention**：预印本 [2507.11331](https://arxiv.org/abs/2507.11331)；作者 Jiawei Lin et al.（勿写 “Lin, Yu”）  
 - **PLENA**：系统名；正式题名 *Combating the Memory Walls: Optimization Pathways for Long-Context Agentic LLM Inference*，Haoran Wu, Can Xiao, Jiayi Nie 等，完整作者见台账。ISCA 2026，DOI [10.1109/ISCA66397.2026.00023](https://doi.org/10.1109/ISCA66397.2026.00023)；[正式日程](https://www.iscaconf.org/isca2026/program/)、[arXiv v3](https://arxiv.org/html/2509.09505v3)。2026-09-11 补核发表状态与非对称算术、阵列映射、原生 FlashAttention 等 R2 对照机制；模拟/RTL 不等于硅片实测。引用键保留 `plena2025`，出版年份为 2026。
+- **PLENA 图表复核（2026-09-15）**：本地保留作者稿的架构图为 p.4 Fig. 4，系统表为 p.13 Table XII，文件 SHA-256 见台账；PDF 内没有明确 arXiv revision，不能仅按文件名归为 v3。总览采用 90K/8K 明确行，同 batch 与最大 batch 分列；论文系统配置比较 16 个加速器与 4 个 GPU，不能概括为芯片数量相同。旧总览引用 Table VIII、最高 2.23×/4.70×/4.04× 的版本对应关系本次未确认，不与此稿数值混用，也不作为此次汇报依据。
 - **FlatAttention**：预印本；comment 标明 submitted to IEEE TC；[2604.02110](https://arxiv.org/abs/2604.02110)  
 - **核实**：2026-09-03；arXiv 全文 + ISCA 官方/机构存档
 
@@ -246,6 +238,45 @@ queries → inbox → 核实 venue/DOI → ledger.yaml → 改本手册表/卡�
 
 ---
 
+<a id="ruler"></a>
+
+### 3.16 RULER（长上下文评测协议）
+
+- **题名 / 作者**：*RULER: What's the Real Context Size of Your Long-Context Language Models?*；Cheng-Ping Hsieh、Simeng Sun 等，完整作者见台账与 BibTeX。
+- **来源 / 版本**：[COLM 2024 正文](https://openreview.net/pdf?id=kIoBbc76Sy)；[arXiv:2404.06654v3](https://arxiv.org/abs/2404.06654v3)，首发 2024-04-09、更新 2024-08-06；`hsieh2024ruler`。
+- **协议证据**：[作者实现](https://github.com/NVIDIA/RULER/tree/c3f5e3b4f87f97e048793bb510a3a6b19a46bf3a)的 `scripts/synthetic.yaml`、`data/synthetic/constants.py`、`data/prepare.py` 分别定义任务参数、输出预算和输入加生成的长度口径。R2 使用固定原版管线，任务与预算由[R2 共享配置](../research/r2_streaming_attention/experiments/configs/evaluation_protocol.json)维护。
+- **摘要定量范围**：17 个模型、13 项任务；声称支持至少 32K 的模型中仅约半数在 32K 保持其满意表现标准；另分析声称 200K 的 Yi-34B。此处是摘要历史范围记录，不用作本项目质量门槛或实测结果，本次不逐项复核旧成绩。
+- **关系 / 局限 / 核验**：用于检索、追踪和词频聚合的配对质量评测，不测硬件时延。2026-09-14 核对会刊正文、arXiv 元数据和固定提交的任务定义；新管线已出现，但不自动升级任务版本。未运行本项目复现。
+
+<a id="longbench"></a>
+
+### 3.17 LongBench（真实任务评测协议）
+
+- **题名 / 作者**：*LongBench: A Bilingual, Multitask Benchmark for Long Context Understanding*；Yushi Bai、Xin Lv 等，完整作者见台账与 BibTeX。
+- **来源 / 版本**：[ACL 2024 正式会刊](https://aclanthology.org/2024.acl-long.172/)，3119–3137 页，DOI `10.18653/v1/2024.acl-long.172`，arXiv `2308.14508`；`bai2024longbench`。
+- **协议证据**：[固定作者提交的原版目录](https://github.com/THUDM/LongBench/tree/2e00731f8d0bff23dc4325161044d0ed8af94c1e/LongBench)中，`config/dataset2prompt.json`、`dataset2maxlen.json`、`pred.py`、`eval.py` 定义模板、生成上限、代码任务的 chat 例外及评分入口。R2 四项与具体参数见[共享配置](../research/r2_streaming_attention/experiments/configs/evaluation_protocol.json)。
+- **摘要定量范围**：21 个数据集、6 类任务，英语平均 6,711 **词**、中文平均 13,386 **字符**，评估 8 个 LLM；不是 token 数、本项目窗口长度或新实测分数，本次不复核历史模型排名。
+- **关系 / 局限 / 核验**：用于问答、摘要和代码续写，不能填充样本制造长上下文能力。2026-09-14 核对 ACL 元数据和作者协议；当前仓库根目录为 v2，原版在 `LongBench/`，旧推理脚本没有直接支持 R2 两模型，需核验模型适配。未运行本项目复现。
+
+<a id="accelergy"></a>
+
+### 3.18 Accelergy（架构级按动作能耗方法）
+
+- **来源类型**：论文；CACTI 插件与 ISPASS 2020 教程为附属实现/讲义，不是会刊结果。
+- **题名（正式）**：*Accelergy: An Architecture-Level Energy Estimation Methodology for Accelerator Designs*
+- **作者**：Yannan Nellie Wu、Joel S. Emer、Vivienne Sze
+- **Venue / 状态**：IEEE/ACM ICCAD 2019；DOI [10.1109/ICCAD45719.2019.8942149](https://doi.org/10.1109/ICCAD45719.2019.8942149)；页码 1–8（Westminster, CO，2019-11-04 至 11-07）
+- **代码 / 讲义**：项目页 [accelergy.mit.edu](http://accelergy.mit.edu)；CACTI 插件提交 [`9cf48b12`](https://github.com/Accelergy-Project/accelergy-cacti-plug-in/blob/9cf48b12e8be8f3acd0b505fac4aa663e5c31273/cacti_wrapper.py)；[ISPASS 2020 教程 Part 2](https://accelergy.mit.edu/ispass2020/2020_08_23_timeloop_accelergy_tutorial_part2.pdf)
+- **引用键 / 版本**：`wu2019accelergy`（既有综述文献库）；插件按上述提交，不随 master 漂移
+- **平台**：架构级估计；Eyeriss 验证为 65 nm RTL 综合并 PnR 后的 post-layout
+- **方法要点**：用户定义复合/原语组件；第三方插件给出 energy-per-action；运行时动作计数乘 ERT
+- **摘要定量主张**：在 Eyeriss 上达到 95% accuracy，并能抓住不同粒度的能耗分解
+- **正文复核结果**：Sec. 5.1 用 65 nm Eyeriss post-layout 作参照，能量表来自小组件后仿真；Fig. 7 / Sec. 5.4.2 称 Accelergy 在 PE 阵列总能量上相对 Aladdin 与 fixed-cost 最准。摘要 95% 即该 Eyeriss 总精度主张，不是任意加速器保证。
+- **口径边界**：方法论文，不是 KV 压缩或本项目 ASIC PPA。HBM2 $3.9\,\mathrm{pJ/bit}$ 出自插件 `DRAM_estimate_energy`（`energy = 3.9 * width`），函数内未再引论文表。45 nm 16-bit MAC $5\,\mathrm{pJ}$ 出自 ISPASS 2020 教程示例表，不是 ICCAD 2019 的 Eyeriss 数字，也不是本仓库 1,024-MAC 阵列综合功耗。
+- **冲突或缺口**：插件 README 已指向后继 `hwcomponents-cacti`；本步仍固定历史提交中的 HBM2 常数。SRAM $0.05\,\mathrm{pJ/bit}$ 不是 Accelergy/CACTI 本步运行结果。
+- **对本课题**：可对齐“按动作计数 × 单位能量”的记账方式；不可把 95%、$3.9\,\mathrm{pJ/bit}$ 或 $5\,\mathrm{pJ}$ 写成硅片实测。
+- **核实**：2026-09-16；IEEE DOI / 作者 PDF / 插件提交 / ISPASS 教程 PDF。未写入 §2 主对照表。
+
 ## 4. 跨工作对比维度
 
 | 维度 | 算法常见 | GPU 系统常见 | ASIC/FPGA 常见 | 本课题应报告 |
@@ -268,6 +299,7 @@ queries → inbox → 核实 venue/DOI → ledger.yaml → 改本手册表/卡�
 | 公开 GPU 系统与内核 | BitDecoding、SAW-INT4、QServe、Flash-Decoding | 固定版本、模型、几何和指标；区分 KV-only 与全模型量化 |
 | 尺度处理与复用 | InnerQ、Multi-Scale Dequant | 区分微基准、数值仿真、分析模型与本项目实测 |
 | 专用架构 | PLENA | 核对资源、数值格式和模拟/RTL 层级 |
+| 架构级能耗方法 | Accelergy 及固定提交的 CACTI 插件 | 只借方法与插件/教程常数；Eyeriss 95% 与 HBM2 $3.9\,\mathrm{pJ/bit}$ 均非本 ASIC 测量 |
 | 项目功能与性能基线 | 同 codec 高精度参考、先展开再计算、优化 FP16、共享流式解码 | 具体对照、消融与否定条件在 R2 计划维护 |
 
 相关文献的机制、证据和限制由本手册卡片维护；R2 计划说明实验如何使用这些对照。
@@ -277,5 +309,5 @@ queries → inbox → 核实 venue/DOI → ledger.yaml → 改本手册表/卡�
 1. 全项目相关文献引用的强制登记要求以 [AGENTS.md](../AGENTS.md#literature-registration)为准；已收录条目按题名、DOI/arXiv ID 或规范 URL 查重后更新，不另建重复卡片。
 2. 缺项按[文献流程](lit_watch/README.md)进入 inbox，核实后补齐台账、总览与卡片；正式 BibTeX 引用同步已有[参考文献库](../survey/manuscript/references.bib)，同一来源保留既有键。未核实项明确留待审，不作为已验证比较依据。
 3. 来源类型与实验层级分别记录：会刊、预印本、作者技术说明和代码不混称；摘要数字追溯正文表图，保留版本、基线、平台、负向结果和不确定性。
-4. 每次更新记录本页修订和 [lit_watch/CHANGELOG](lit_watch/CHANGELOG.md)，Cutoff 同时写明检索范围；定向补录不冒充全量查新或全表复核。
+4. 每次更新写入 [lit_watch/CHANGELOG](lit_watch/CHANGELOG.md)，本手册不另设修订记录；Cutoff 同时写明检索范围，定向补录不冒充全量查新或全表复核。
 5. 研究计划、实验计划与报告链接本手册中的相关条目；结果与分析仍由所属实验唯一 REPORT.md 维护。

@@ -17,10 +17,12 @@ pip install -r requirements.txt
 # 有 ≥24GB GPU 的正式评测机：
 # pip install -r requirements.txt
 
-export HF_HOME=/mnt/f/hf-cache
+export HF_HOME=/mnt/f/hf-cache   # 集群改用 $HOME/hf-cache，见 activate.sh
 mkdir -p "$HF_HOME"
 hf auth whoami
 ```
+
+权重缓存约定见根规则 [AGENTS.md 模型权重缓存](../../AGENTS.md#model-weight-cache)：本机与集群各用该机 `HF_HOME`，不入库、不平行复制。R1 开发/冒烟必须加载 `Qwen/Qwen2.5-0.5B-Instruct`，不要改成 `Qwen/Qwen2.5-0.5B` base；后者仅供 R2 开发检查。清单见 `$HF_HOME/INVENTORY.json`。
 
 上面步骤基于 WSL2 路径；在无 conda/GPU 于登录节点的集群上改用
 [`activate.sh`](activate.sh)（`source research/r1_kv_baseline/activate.sh`）。
